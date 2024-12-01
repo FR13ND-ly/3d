@@ -18,20 +18,38 @@ public:
                 auto& object = scene.getObjects()[0];
 
                 switch (event.key.code) {
+                    case sf::Keyboard::W:
+                        object->rotate(0.05f, 'x');
+                    break;
+                    case sf::Keyboard::S:
+                        object->rotate(-0.05f, 'x');
+                    break;
+                    case sf::Keyboard::A:
+                        object->rotate(-0.05f, 'y');
+                    break;
+                    case sf::Keyboard::D:
+                        object->rotate(0.05f, 'y');
+                    break;
+                    case sf::Keyboard::Z:
+                        object->rotate(0.05f, 'z');
+                    break;
+                    case sf::Keyboard::X:
+                        object->rotate(-0.05f, 'z');
+                    break;
                     case sf::Keyboard::Left:
-                        object->setTransform(object->transform * Matrix4::translation(-0.1f, 0.0f, 0.0f));
+                        object->setTransform(object->transform * Matrix4::translation(-0.05f, 0.0f, 0.0f));
                     break;
                     case sf::Keyboard::Right:
-                        object->setTransform(object->transform * Matrix4::translation(0.1f, 0.0f, 0.0f));
+                        object->setTransform(object->transform * Matrix4::translation(0.05f, 0.0f, 0.0f));
                     break;
                     case sf::Keyboard::Up:
-                        object->setTransform(object->transform * Matrix4::translation(0.0f, -0.1f, 0.0f));
+                        object->setTransform(object->transform * Matrix4::translation(0.0f, -0.05f, 0.0f));
                     break;
                     case sf::Keyboard::Down:
-                        object->setTransform(object->transform * Matrix4::translation(0.0f, 0.1f, 0.0f));
+                        object->setTransform(object->transform * Matrix4::translation(0.0f, 0.05f, 0.0f));
                     break;
                     default:
-                        ;
+                        break;
                 }
             }
         }

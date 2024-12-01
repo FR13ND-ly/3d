@@ -33,8 +33,8 @@ public:
 
         for (const auto& edge : edges) {
             sf::Vertex line[] = {
-                sf::Vertex(projectedVertices[edge.first], sf::Color::Green),
-                sf::Vertex(projectedVertices[edge.second], sf::Color::Green)
+                sf::Vertex(projectedVertices[edge.first], sf::Color::White),
+                sf::Vertex(projectedVertices[edge.second], sf::Color::White)
             };
             window.draw(line, 2, sf::Lines);
         }
