@@ -1,42 +1,42 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include <vector>
-#include "../../utils/Object3D.hpp"
+#include "../objects/Object3d.hpp"
+#include "../objects/Ground.hpp"
 #include "Camera.hpp"
+#include <vector>
+#include <memory>
 
 class Scene {
 public:
-    Scene() {
-        camera = new Camera();
+    Scene() : camera(800, 600, 90.0f, 0.1f, 100.0f) {
+        Ground ground = Ground(500.f);
+        // addObject(std::shared_ptr<Object3d>(new Ground(100.f)));
     }
 
-    ~Scene() {
-        delete camera;
-        for (auto object : objects) {
-            delete object;
-        }
-    }
-
-    void addObject(Object3d* object) {
+    void addObject(std::shared_ptr<Object3d> object) {
         objects.push_back(object);
     }
 
-    std::vector<Object3d*> getObjects() const {
+    const std::vector<std::shared_ptr<Object3d>>& getObjects() const {
         return objects;
     }
 
-    Camera& getCamera() const {
-        return *camera;
+    void setCamera(const Camera& camera) {
+        this->camera = camera;
     }
 
-    void update() {
-        // Update objects or camera if needed
+    const Camera& getCamera() const {
+        return camera;
+    }
+
+    Camera& getCamera() {
+        return camera;
     }
 
 private:
-    std::vector<Object3d*> objects;
-    Camera* camera;
+    std::vector<std::shared_ptr<Object3d>> objects; // List of 3D objects in the scene
+    Camera camera;
 };
 
 #endif

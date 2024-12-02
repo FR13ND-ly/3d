@@ -1,7 +1,9 @@
 #ifndef OBJECT3D_HPP
 #define OBJECT3D_HPP
 
-#include "Matrix4.hpp"
+#include "../../utils/Matrix4.hpp"
+#include "../../utils/Vector3.hpp"
+#include <SFML/Graphics.hpp>
 
 class Object3d {
 public:
@@ -9,7 +11,7 @@ public:
 
     Object3d() : transform(Matrix4::identity()) {}
 
-    virtual void draw(sf::RenderWindow& window) = 0;
+    virtual void draw(sf::RenderWindow& window, const Matrix4& mvp) = 0;
 
     void setTransform(const Matrix4& newTransform) {
         transform = newTransform;
@@ -28,6 +30,8 @@ public:
             case 'z':
                 rotationMatrix = Matrix4::rotationZ(angle);
             break;
+            default:
+                break;
         }
 
         transform = transform * rotationMatrix;
