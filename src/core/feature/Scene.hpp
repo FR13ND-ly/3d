@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Object3d>> objects; // List of 3D objects in the scene
+    std::vector<std::shared_ptr<Object3d>> objects;
     Camera camera;
 };
 
