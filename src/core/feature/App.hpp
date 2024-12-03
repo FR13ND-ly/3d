@@ -7,7 +7,6 @@
     #include "InputHandler.hpp"
     #include "../objects/Cube.hpp"
     #include "../objects/Sphere.hpp"
-    #include "../objects/Frustum.hpp"
 
     class App {
     public:
