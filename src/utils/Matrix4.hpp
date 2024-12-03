@@ -122,7 +122,6 @@ public:
         if (std::abs(w) < epsilon) {
             result.x = result.y = result.z = 0.1f; // Set default value to avoid NaN
         } else {
-            // Normalize by w for perspective projection
             result.x /= w;
             result.y /= w;
             result.z /= w;

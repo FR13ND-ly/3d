@@ -13,7 +13,8 @@ public:
           windowHeight(windowHeight),
           fov(fov),
           near(near),
-          far(far) {}
+          far(far) {
+    }
 
     Matrix4 getViewMatrix() const {
         Matrix4 translation = Matrix4::translation(-position.x, -position.y, -position.z);
@@ -29,7 +30,7 @@ public:
         return Matrix4::perspective(fov, aspectRatio, near, far);
     }
 
-    void move(const Vector3& direction) {
+    void move(const Vector3 &direction) {
         position = position + direction;
     }
 

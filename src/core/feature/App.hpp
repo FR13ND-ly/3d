@@ -7,6 +7,7 @@
     #include "InputHandler.hpp"
     #include "../objects/Cube.hpp"
     #include "../objects/Sphere.hpp"
+    #include "../objects/Frustum.hpp"
 
     class App {
     public:
@@ -26,6 +27,9 @@
             InputHandler inputHandler(window, scene);
 
             scene.addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
+            // scene.addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
+            // std::shared_ptr<Object3d> frustum = std::make_shared<Frustum>(90.0f, 800.0f / 600.0f, 1.0f, 100.0f);
+            // scene.addObject(frustum);
             sf::Vector2u windowSize = window.getSize();
             while (window.isOpen()) {
                 sf::Event event;

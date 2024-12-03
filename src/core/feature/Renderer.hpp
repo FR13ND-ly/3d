@@ -3,27 +3,29 @@
 
 #include <SFML/Graphics.hpp>
 #include "Scene.hpp"
-#include "../objects/Ground.hpp"
+#include "Camera.hpp"
+#include "../objects/Object3D.hpp"
 #include <iostream>
 
 class Renderer {
 public:
     Renderer(sf::RenderWindow& window) : window(window) {}
 
+    // Render the scene, applying frustum culling to each object
     void render(const Scene& scene) {
-        Matrix4 viewMatrix = scene.getCamera().getViewMatrix();
-        Matrix4 projectionMatrix = scene.getCamera().getProjectionMatrix();
+        Camera camera = scene.getCamera();          // Get the camera
+        Matrix4 viewMatrix = camera.getViewMatrix();  // Get the view matrix from the camera
+        Matrix4 projectionMatrix = camera.getProjectionMatrix();  // Get the projection matrix from the camera
 
+        // Iterate over all objects in the scene
         for (const auto& object : scene.getObjects()) {
             Matrix4 modelMatrix = object->transform;
-            Matrix4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-            object->draw(window, mvp);
+            object->draw(window, modelMatrix, viewMatrix, projectionMatrix);
         }
     }
 
-
 private:
-    sf::RenderWindow& window;
+    sf::RenderWindow& window;  // SFML window used for rendering
 };
 
 #endif

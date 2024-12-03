@@ -2,17 +2,13 @@
 #define SCENE_HPP
 
 #include "../objects/Object3d.hpp"
-#include "../objects/Ground.hpp"
 #include "Camera.hpp"
 #include <vector>
 #include <memory>
 
 class Scene {
 public:
-    Scene() : camera(800, 600, 90.0f, 0.1f, 100.0f) {
-        Ground ground = Ground(500.f);
-        // addObject(std::shared_ptr<Object3d>(new Ground(100.f)));
-    }
+    Scene() : camera(800, 600, 90.0f, 0.1f, 1000.0f) {}
 
     void addObject(std::shared_ptr<Object3d> object) {
         objects.push_back(object);

@@ -34,7 +34,6 @@ public:
         return *this / length;
     }
 
-    // Cross product of two vectors
     Vector3 cross(const Vector3& other) const {
         return Vector3(
             y * other.z - z * other.y,
@@ -46,6 +45,10 @@ public:
     // Dot product of two vectors
     float dot(const Vector3& other) const {
         return x * other.x + y * other.y + z * other.z;
+    }
+
+    float magnitude() const {
+        return std::sqrt(x * x + y * y + z * z);
     }
 };
 
