@@ -89,52 +89,31 @@ private:
     }
 
     void handleMouseMoved() {
-    static bool isLeftMouseHeld = false;
-
+        static bool isLeftMouseHeld = false;
         auto& object = scene.getObjects()[0];
 
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
+            if (!isLeftMouseHeld) {
+                isLeftMouseHeld = true;
+                window.setMouseCursorVisible(false);
+            }
+            sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
+            sf::Vector2i currentMousePos = sf::Mouse::getPosition(window);
+            sf::Vector2i mouseDelta = currentMousePos - windowCenter;
+            if (mouseDelta != sf::Vector2i(0, 0)) {
+                float sensitivity = 0.1f;
+                scene.getCamera().rotate(sensitivity * static_cast<float>(mouseDelta.x),
+                                         sensitivity * static_cast<float>(mouseDelta.y));
+                sf::Mouse::setPosition(windowCenter, window);
+            }
+        } else {
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
-
-        if (!isLeftMouseHeld) {
-            isLeftMouseHeld = true;
-            window.setMouseCursorVisible(false);
-        }
-
-
-        sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
-
-
-        sf::Vector2i currentMousePos = sf::Mouse::getPosition(window);
-
-
-        sf::Vector2i mouseDelta = currentMousePos - windowCenter;
-
-
-        if (mouseDelta != sf::Vector2i(0, 0)) {
-
-            float sensitivity = 0.1f;
-            scene.getCamera().rotate(sensitivity * static_cast<float>(mouseDelta.x),
-                                     sensitivity * static_cast<float>(mouseDelta.y));
-
-
-            sf::Mouse::setPosition(windowCenter, window);
-        }
-    } else {
-
-        if (isLeftMouseHeld) {
-            isLeftMouseHeld = false;
-            window.setMouseCursorVisible(true);
+            if (isLeftMouseHeld) {
+                isLeftMouseHeld = false;
+                window.setMouseCursorVisible(true);
+            }
         }
     }
-    }
-
-
-
-
-
-
-
 };
 
 #endif
