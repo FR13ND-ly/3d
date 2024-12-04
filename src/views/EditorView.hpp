@@ -41,6 +41,11 @@ private:
             sf::Vector2f(200, 50),
             "Home"
         );
+        auto Reset = std::make_shared<Button>(
+            sf::Vector2f(100, 400),
+            sf::Vector2f(200, 50),
+            "Reset"
+        );
 
         auto sphereButton = std::make_shared<Button>(
             sf::Vector2f(100, 300),
@@ -66,8 +71,15 @@ private:
             createUI();
             switchToView("home");
         });
+        Reset->setOnClick([this]() {
+            this->clearComponents();
+            initializeScene();
+
+            createUI();
+        });
 
         this->addComponent(myButton);
+        this->addComponent(Reset);
         this->addComponent(sphereButton);
         this->addComponent(cubeButton);
     }
