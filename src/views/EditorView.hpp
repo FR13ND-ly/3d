@@ -11,26 +11,66 @@
 #include "../utils/WindowManager.hpp"
 #include "viewSwitcher.hpp"
 #include "../core/objects/Cube.hpp"
+#include "../core/objects/Sphere.hpp"
 
 class EditorView : public View {
 public:
     EditorView() {
-        sf::RenderWindow& window = const_cast<sf::RenderWindow&>(WindowManager::getInstance().getWindow());
-        auto scene = std::make_shared<Scene>(window);
-        scene->addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
+        initializeScene();
+        createUI();
+    }
+    void clearComponents() {
+        components.clear();
+    }
 
+
+private:
+    std::shared_ptr<Scene> scene;
+
+    // Function to initialize or reset the scene
+    void initializeScene() {
+        sf::RenderWindow& window = const_cast<sf::RenderWindow&>(WindowManager::getInstance().getWindow());
+        scene = std::make_shared<Scene>(window);
+
+        this->addComponent(scene);
+    }
+
+    // Function to set up UI components
+    void createUI() {
         auto myButton = std::make_shared<Button>(
             sf::Vector2f(100, 100),
             sf::Vector2f(200, 50),
             "Home"
         );
 
+        auto sphereButton = std::make_shared<Button>(
+            sf::Vector2f(100, 300),
+            sf::Vector2f(200, 50),
+            "Sphere"
+        );
+        auto cubeButton = std::make_shared<Button>(
+            sf::Vector2f(100, 200),
+            sf::Vector2f(200, 50),
+            "Cube"
+        );
+
+        sphereButton->setOnClick([this]() {
+            this->scene->addObject(std::shared_ptr<Object3d>(new Sphere(1.f, 16, 16)));
+        });
+        cubeButton->setOnClick([this]() {
+            this->scene->addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
+        });
+
         myButton->setOnClick([this]() {
+            this->clearComponents();  // Clear all components
+            initializeScene();        // Reinitialize the scene
+            createUI();               // Recreate the UI
             switchToView("home");
         });
 
-        this->addComponent(scene);
         this->addComponent(myButton);
+        this->addComponent(sphereButton);
+        this->addComponent(cubeButton);
     }
 };
 
