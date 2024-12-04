@@ -37,23 +37,23 @@ private:
     // Function to set up UI components
     void createUI() {
         auto myButton = std::make_shared<Button>(
-            sf::Vector2f(100, 100),
+            sf::Vector2f(50, 100),
             sf::Vector2f(200, 50),
             "Home"
         );
         auto Reset = std::make_shared<Button>(
-            sf::Vector2f(100, 400),
+            sf::Vector2f(50, 400),
             sf::Vector2f(200, 50),
             "Reset"
         );
 
         auto sphereButton = std::make_shared<Button>(
-            sf::Vector2f(100, 300),
+            sf::Vector2f(50, 300),
             sf::Vector2f(200, 50),
             "Sphere"
         );
         auto cubeButton = std::make_shared<Button>(
-            sf::Vector2f(100, 200),
+            sf::Vector2f(50, 200),
                sf::Vector2f(200, 50),
                 "Cube"
         );
