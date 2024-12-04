@@ -15,11 +15,27 @@
 
 class EditorView : public View {
 public:
-    EditorView(): scene(nullptr) {
+    EditorView() {
+        initializeScene();
+        createUI();
+    }
+    void clearComponents() {
+        components.clear();
+    }
+
+private:
+    std::shared_ptr<Scene> scene;
+
+    // Function to initialize or reset the scene
+    void initializeScene() {
         sf::RenderWindow& window = const_cast<sf::RenderWindow&>(WindowManager::getInstance().getWindow());
-        auto scene = std::make_shared<Scene>(window);
-        scene->addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
-        this->scene = scene;
+        scene = std::make_shared<Scene>(window);
+
+        this->addComponent(scene);
+    }
+
+    // Function to set up UI components
+    void createUI() {
         auto myButton = std::make_shared<Button>(
             sf::Vector2f(100, 100),
             sf::Vector2f(200, 50),
@@ -31,21 +47,30 @@ public:
             sf::Vector2f(200, 50),
             "Sphere"
         );
+        auto cubeButton = std::make_shared<Button>(
+            sf::Vector2f(100, 200),
+               sf::Vector2f(200, 50),
+                "Cube"
+        );
+        cubeButton->setOnClick([this]() {
+                   this->scene->addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
+               });
 
         sphereButton->setOnClick([this]() {
             this->scene->addObject(std::shared_ptr<Object3d>(new Sphere(1.f, 16, 16)));
         });
 
         myButton->setOnClick([this]() {
+            this->clearComponents();
+            initializeScene();
+            createUI();
             switchToView("home");
         });
 
-        this->addComponent(scene);
         this->addComponent(myButton);
         this->addComponent(sphereButton);
+        this->addComponent(cubeButton);
     }
-private:
-    std::shared_ptr<Scene> scene;
 };
 
 #endif
