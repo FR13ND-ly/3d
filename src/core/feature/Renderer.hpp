@@ -14,9 +14,8 @@ class Renderer {
 public:
     Renderer(sf::RenderWindow& window) : window(window) {}
 
-    void render(const Scene& scene) {
-        Camera camera = scene.getCamera();
-        for (const auto& object : scene.getObjects()) {
+    void render(std::vector<std::shared_ptr<Object3d>> objects, Camera& camera) {
+        for (const auto& object : objects) {
             renderObject(*object, camera);
         }
     }

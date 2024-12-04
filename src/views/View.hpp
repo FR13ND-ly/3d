@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <vector>
 #include "../core/ui/Component.hpp"
 
 class View {
@@ -19,13 +20,13 @@ public:
         components.push_back(component);
     }
 
-    void draw(sf::RenderWindow& window) {
+    virtual void draw(sf::RenderWindow& window) {
         for (const auto& component : components) {
             component->draw(window);
         }
-    };
+    }
 
-    void handleEvent(const sf::Event& event, const sf::RenderWindow &window) {
+    virtual void handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
         for (const auto& component : components) {
             component->handleEvent(event, window);
         }

@@ -13,7 +13,7 @@ FetchContent_Declare(SFML
         SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(3d src/main.cpp)
+add_executable(3d src/main.cpp src/views/viewSwitcher.cpp)
 target_link_libraries(3d PRIVATE sfml-graphics)
 target_compile_features(3d PRIVATE cxx_std_17)
 

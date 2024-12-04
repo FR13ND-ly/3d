@@ -28,16 +28,14 @@ public:
         buttonText.setCharacterSize(static_cast<unsigned int>(size.y * 0.5f));
         buttonText.setFillColor(sf::Color::Black);
 
+        this->color = color;
+
         sf::FloatRect textBounds = buttonText.getLocalBounds();
         buttonText.setOrigin(textBounds.width / 2, textBounds.height / 2);
         buttonText.setPosition(
             position.x + size.x / 2,
             position.y + size.y / 2 - textBounds.height / 2
         );
-    }
-
-    void setOnClick(const std::function<void()> &callback) {
-        onClick = callback;
     }
 
     void draw(sf::RenderWindow &window) {
@@ -50,7 +48,7 @@ public:
         bool isHovered = inBounds(mousePos);
 
         if (isHovered) {
-            buttonRect.setFillColor(hoverColor(color));
+            buttonRect.setFillColor(darkenColor(color, 40));
             if (onHover) {
                 onHover(true);
             }
@@ -62,6 +60,7 @@ public:
         }
 
         if (isHovered && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+            buttonRect.setFillColor(darkenColor(color, 60));
             if (onClick) {
                 onClick();
             }
@@ -71,17 +70,17 @@ public:
 protected:
     sf::RectangleShape buttonRect;
     sf::Text buttonText;
-    sf::Color color = sf::Color::White;
+    sf::Color color;
 
     bool inBounds(const sf::Vector2i &mousePos) const {
         return buttonRect.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
     }
 
-    sf::Color hoverColor(const sf::Color &color) {
+    sf::Color darkenColor(const sf::Color &color, int amount) {
         return sf::Color(
-            std::max(0, color.r - 40),
-            std::max(0, color.g - 40),
-            std::max(0, color.b - 40)
+            std::max(0, color.r - amount),
+            std::max(0, color.g - amount),
+            std::max(0, color.b - amount)
         );
     }
 };
