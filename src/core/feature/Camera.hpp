@@ -31,21 +31,56 @@ public:
     }
 
     void move(const Vector3 &direction) {
-        position = position + direction;
+        Vector3 forward = getForwardVector();  // Use the rotation to get the forward vector
+        Vector3 right = getRightVector();      // Get the right vector for lateral movement
+        position = position + forward * direction.z + right * direction.x;
     }
 
     void rotate(float deltaX, float deltaY) {
         rotation.x += deltaY * CAMERA_ROTATION_SENSITIVITY;
         rotation.y += deltaX * CAMERA_ROTATION_SENSITIVITY;
+
+        // Clamp pitch (x rotation) to avoid gimbal lock
+        if (rotation.x > 89.0f) rotation.x = 89.0f;
+        if (rotation.x < -89.0f) rotation.x = -89.0f;
     }
 
+    Vector3 getPosition() const {
+        return position;
+    }
+
+    Vector3 getRotation() const {
+        return rotation;
+    }
+
+    Vector3 getForwardVector() const {
+        return Vector3(
+            cos(rotation.y) * cos(rotation.x),
+            sin(rotation.x),
+            sin(rotation.y) * cos(rotation.x)
+        ).normalized();
+    }
+
+    Vector3 getRightVector() const {
+        return Vector3(
+            cos(rotation.y + 90.0f),
+            0.0f,
+            sin(rotation.y + 90.0f)
+        ).normalized();
+    }
+
+    void setPosition(const Vector3& newPosition) {
+        position = newPosition;
+    }
+
+private:
     Vector3 position;
     Vector3 rotation;
 
-private:
     float windowWidth, windowHeight;
     float fov, near, far;
-    static constexpr float CAMERA_ROTATION_SENSITIVITY = 0.005f;
+
+    static constexpr float CAMERA_ROTATION_SENSITIVITY = 0.05f;
 };
 
 #endif

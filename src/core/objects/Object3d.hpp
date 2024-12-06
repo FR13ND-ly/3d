@@ -10,12 +10,40 @@ public:
     Vector3 position;
     Vector3 rotation;
     Vector3 scale;
-
+    bool isSelected = false;
 
     Object3d()
         : transform(Matrix4::identity()), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
     virtual ~Object3d() = default;
+
+    virtual std::vector<std::array<int, 6>> getSortedFaces(const std::vector<Vector3>& transformedVertices) const {
+        std::vector<std::tuple<float, std::array<int, 6>>> faceDepths;
+
+        for (const auto& face : faces) {
+            // Calculate the average depth of the triangle
+            float zAvg = (
+                transformedVertices[face[0]].z +
+                transformedVertices[face[1]].z +
+                transformedVertices[face[2]].z
+            ) / 3.0f;
+
+            faceDepths.emplace_back(zAvg, face);
+        }
+
+        // Sort faces by depth (farther faces first)
+        std::sort(faceDepths.begin(), faceDepths.end(), [](const auto& a, const auto& b) {
+            return std::get<0>(a) > std::get<0>(b);
+        });
+
+        // Extract the sorted faces
+        std::vector<std::array<int, 6>> sortedFaces;
+        for (const auto& [_, face] : faceDepths) {
+            sortedFaces.push_back(face);
+        }
+
+        return sortedFaces;
+    }
 
     void setTransform(const Matrix4& newTransform) {
         transform = newTransform;
@@ -76,9 +104,14 @@ public:
     std::vector<std::pair<int, int> > getEdges() {
         return edges;
     }
+
+    std::vector<std::array<int, 6>> getFaces() {
+        return faces;
+    }
 protected:
     std::vector<Vector3> vertices;
     std::vector<std::pair<int, int>> edges;
+    std::vector<std::array<int, 6>> faces;
 };
 
 #endif

@@ -42,12 +42,15 @@ public:
         );
     }
 
-    // Dot product of two vectors
     float dot(const Vector3& other) const {
         return x * other.x + y * other.y + z * other.z;
     }
 
     float magnitude() const {
+        return std::sqrt(x * x + y * y + z * z);
+    }
+
+    float length() const {
         return std::sqrt(x * x + y * y + z * z);
     }
 };

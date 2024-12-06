@@ -58,8 +58,8 @@ private:
                 "Cube"
         );
         cubeButton->setOnClick([this]() {
-                   this->scene->addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
-               });
+           this->scene->addObject(std::shared_ptr<Object3d>(new Cube(1.f)));
+        });
 
         sphereButton->setOnClick([this]() {
             this->scene->addObject(std::shared_ptr<Object3d>(new Sphere(1.f, 16, 16)));

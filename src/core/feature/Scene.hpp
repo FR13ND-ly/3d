@@ -11,11 +11,12 @@
 class Scene: public Component {
 public:
     Scene(sf::RenderWindow& window)
-        : camera(800, 600, 90.0f, 0.1f, 1000.0f), renderer(window), window(window)  {
+        : camera(800, 600, 90.0f, 0.1f, 100.0f), renderer(window), window(window)  {
     }
 
     void addObject(std::shared_ptr<Object3d> object) {
         objects.push_back(object);
+        onChangeSelectedObjectIndex(objects.size() - 1);
     }
 
     const std::vector<std::shared_ptr<Object3d>>& getObjects() const {
@@ -48,11 +49,20 @@ public:
         renderer.render(objects, camera);
     }
 
+    void onChangeSelectedObjectIndex(int selectedObjectIndex) {
+        for (int i = 0; i < objects.size(); i++) {
+            objects[i]->isSelected = false;
+        }
+        this->selectedObjectIndex = selectedObjectIndex;
+        objects[selectedObjectIndex]->isSelected = true;
+    }
+
 private:
     std::vector<std::shared_ptr<Object3d>> objects;
     Camera camera;
     Renderer renderer;
     sf::RenderWindow& window;
+    int selectedObjectIndex = 0;
 
     void handleKeyPressed(sf::Keyboard::Key key) {
         Vector3 direction;
@@ -60,8 +70,15 @@ private:
             return;
         }
 
-        auto& object = getObjects()[0];
+        auto& object = getObjects()[selectedObjectIndex];
+        std::cout << selectedObjectIndex << std::endl;
         switch (key) {
+            case sf::Keyboard::Num1:
+                onChangeSelectedObjectIndex(0);
+            break;
+            case sf::Keyboard::Num2:
+                onChangeSelectedObjectIndex(1);
+            break;
             case sf::Keyboard::W:
                 direction = Vector3(0, 0, 0.1f);
                 break;
