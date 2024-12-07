@@ -24,94 +24,109 @@ public:
     Renderer(sf::RenderWindow& window) : window(window) {}
 
     void render(std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera) {
-        std::vector<FaceData> facesToRender;
+    std::vector<FaceData> facesToRender;
+    for (auto& object : objects) {
+        Matrix4 modelMatrix = object->getTransformation();
+        Matrix4 viewMatrix = camera.getViewMatrix();
+        Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
-        for (auto& object : objects) {
-            Matrix4 modelMatrix = object->getTransformation();
-            Matrix4 viewMatrix = camera.getViewMatrix();
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
+        // First, check if the object is behind the camera
+        Vector3 objectPosition = object->getPosition(); // Assuming you have a getPosition() method
+        Vector4 worldPosition = modelMatrix * Vector4(objectPosition, 1.0f);
+        Vector4 cameraPosition = viewMatrix * worldPosition;
 
-            std::vector<Vector3> cameraSpaceVertices;
-            for (const auto& vertex : object->getVertices()) {
-                Vector4 worldVertex = modelMatrix * Vector4(vertex, 1.0f);
-                Vector4 cameraVertex = viewMatrix * worldVertex;
-                cameraSpaceVertices.push_back(Vector3(cameraVertex.x, cameraVertex.y, cameraVertex.z));
-            }
-
-            std::vector<Vector3> projectedVertices;
-            for (const auto& vertex : cameraSpaceVertices) {
-                Vector4 projectedVertex = projectionMatrix * Vector4(vertex, 1.0f);
-
-                if (projectedVertex.w != 0.0f) {
-                    projectedVertex.x /= projectedVertex.w;
-                    projectedVertex.y /= projectedVertex.w;
-                    projectedVertex.z /= projectedVertex.w;
-                }
-
-                projectedVertices.push_back(Vector3(projectedVertex.x, projectedVertex.y, projectedVertex.z));
-            }
-
-            auto sortedFaces = object->getSortedFaces(cameraSpaceVertices);
-
-            for (size_t i = 0; i < sortedFaces.size(); i += 2) {
-                if (i + 1 >= sortedFaces.size()) break;
-
-                const auto& triangle1 = sortedFaces[i];
-                const auto& triangle2 = sortedFaces[i + 1];
-
-                float zAvg = (
-                    cameraSpaceVertices[triangle1[0]].z +
-                    cameraSpaceVertices[triangle1[1]].z +
-                    cameraSpaceVertices[triangle1[2]].z +
-                    cameraSpaceVertices[triangle2[0]].z +
-                    cameraSpaceVertices[triangle2[1]].z +
-                    cameraSpaceVertices[triangle2[2]].z
-                ) / 6.0f;
-
-                FaceData faceData1, faceData2;
-                faceData1.v1 = projectedVertices[triangle1[0]];
-                faceData1.v2 = projectedVertices[triangle1[1]];
-                faceData1.v3 = projectedVertices[triangle1[2]];
-                faceData1.color = sf::Color(triangle1[3], triangle1[4], triangle1[5]);
-                faceData1.depth = zAvg;
-                faceData1.object = object;
-                faceData1.groupID = static_cast<int>(i / 2);
-
-                faceData2.v1 = projectedVertices[triangle2[0]];
-                faceData2.v2 = projectedVertices[triangle2[1]];
-                faceData2.v3 = projectedVertices[triangle2[2]];
-                faceData2.color = sf::Color(triangle2[3], triangle2[4], triangle2[5]);
-                faceData2.depth = zAvg;
-                faceData2.object = object;
-                faceData2.groupID = static_cast<int>(i / 2);
-
-                facesToRender.push_back(faceData1);
-                facesToRender.push_back(faceData2);
-            }
+        if (cameraPosition.z < 0.0f) {
+            continue; // Skip object if it's behind the camera
         }
 
-        std::stable_sort(facesToRender.begin(), facesToRender.end(), [](const FaceData& a, const FaceData& b) {
-            if (a.depth != b.depth)
-                return a.depth > b.depth;
+        // Proceed with processing the object if it's not behind the camera
+        std::vector<Vector3> cameraSpaceVertices;
+        for (const auto& vertex : object->getVertices()) {
+            Vector4 worldVertex = modelMatrix * Vector4(vertex, 1.0f);
+            Vector4 cameraVertex = viewMatrix * worldVertex;
+            cameraSpaceVertices.push_back(Vector3(cameraVertex.x, cameraVertex.y, cameraVertex.z));
+        }
 
-            if (a.groupID == b.groupID)
-                return a.object < b.object;
+        std::vector<Vector3> projectedVertices;
+        for (const auto& vertex : cameraSpaceVertices) {
+            Vector4 projectedVertex = projectionMatrix * Vector4(vertex, 1.0f);
 
-            return a.groupID < b.groupID;
-        });
+            if (projectedVertex.w != 0.0f) {
+                projectedVertex.x /= projectedVertex.w;
+                projectedVertex.y /= projectedVertex.w;
+                projectedVertex.z /= projectedVertex.w;
+            }
 
-        renderFaces(facesToRender);
-        renderEdges(objects, camera);
+            projectedVertices.push_back(Vector3(projectedVertex.x, projectedVertex.y, projectedVertex.z));
+        }
+
+        auto sortedFaces = object->getSortedFaces(cameraSpaceVertices);
+
+        for (size_t i = 0; i < sortedFaces.size(); i += 2) {
+            if (i + 1 >= sortedFaces.size()) break;
+
+            const auto& triangle1 = sortedFaces[i];
+            const auto& triangle2 = sortedFaces[i + 1];
+
+            float zAvg = (
+                cameraSpaceVertices[triangle1[0]].z +
+                cameraSpaceVertices[triangle1[1]].z +
+                cameraSpaceVertices[triangle1[2]].z +
+                cameraSpaceVertices[triangle2[0]].z +
+                cameraSpaceVertices[triangle2[1]].z +
+                cameraSpaceVertices[triangle2[2]].z
+            ) / 6.0f;
+
+            FaceData faceData1, faceData2;
+            faceData1.v1 = projectedVertices[triangle1[0]];
+            faceData1.v2 = projectedVertices[triangle1[1]];
+            faceData1.v3 = projectedVertices[triangle1[2]];
+            faceData1.color = sf::Color(triangle1[3], triangle1[4], triangle1[5]);
+            faceData1.depth = zAvg;
+            faceData1.object = object;
+            faceData1.groupID = static_cast<int>(i / 2);
+
+            faceData2.v1 = projectedVertices[triangle2[0]];
+            faceData2.v2 = projectedVertices[triangle2[1]];
+            faceData2.v3 = projectedVertices[triangle2[2]];
+            faceData2.color = sf::Color(triangle2[3], triangle2[4], triangle2[5]);
+            faceData2.depth = zAvg;
+            faceData2.object = object;
+            faceData2.groupID = static_cast<int>(i / 2);
+
+            facesToRender.push_back(faceData1);
+            facesToRender.push_back(faceData2);
+        }
     }
+
+    std::stable_sort(facesToRender.begin(), facesToRender.end(), [](const FaceData& a, const FaceData& b) {
+        if (a.depth != b.depth)
+            return a.depth > b.depth;
+
+        if (a.groupID == b.groupID)
+            return a.object < b.object;
+
+        return a.groupID < b.groupID;
+    });
+
+    renderFaces(facesToRender);
+    renderEdges(objects, camera);
+}
+
 
 private:
     sf::RenderWindow& window;
 
     void renderFaces(const std::vector<FaceData>& facesToRender) {
         for (const auto& face : facesToRender) {
-            if (face.v1.z < -1.0f || face.v2.z < -1.0f || face.v3.z < -1.0f)
-                continue;
+            // Compute the average depth (center point) of the face
+            if (face.v1.z < 0.1f || face.v2.z < 0.1f || face.v3.z < 0.1f ||
+            face.v1.z > 100.0f || face.v2.z > 100.0f || face.v3.z > 100.0f) {
+                std::cout << "a" << std::endl;
+                continue; // Skip face if it’s out of bounds
+            }
 
+            // Convert 3D vertices to 2D screen space for rendering
             sf::Vector2f screenPos1 = {
                 (face.v1.x + 1.0f) * 0.5f * window.getSize().x,
                 (1.0f - face.v1.y) * 0.5f * window.getSize().y
@@ -125,6 +140,7 @@ private:
                 (1.0f - face.v3.y) * 0.5f * window.getSize().y
             };
 
+            // Draw the triangle representing the face
             sf::Vertex triangle[] = {
                 sf::Vertex(screenPos1, face.color),
                 sf::Vertex(screenPos2, face.color),
@@ -134,6 +150,7 @@ private:
             window.draw(triangle, 3, sf::Triangles);
         }
     }
+
 
     void renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera) {
     for (const auto& object : objects) {

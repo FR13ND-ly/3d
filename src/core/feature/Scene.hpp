@@ -11,7 +11,7 @@
 class Scene: public Component {
 public:
     Scene(sf::RenderWindow& window)
-        : camera(800, 600, 90.0f, 0.1f, 100.0f), renderer(window), window(window)  {
+        : camera(window.getSize().x, window.getSize().y, 90.0f, 0.1f, 100.0f), renderer(window), window(window)  {
     }
 
     void addObject(std::shared_ptr<Object3d> object) {
@@ -43,11 +43,17 @@ public:
         if (event.type == sf::Event::MouseMoved) {
             handleMouseMoved();
         }
+
+        if (event.type == sf::Event::MouseWheelScrolled) {
+            handleScroll(event.mouseWheelScroll);
+        }
     }
 
     void draw(sf::RenderWindow& window) override {
         renderer.render(objects, camera);
     }
+
+
 
     void onChangeSelectedObjectIndex(int selectedObjectIndex) {
         for (int i = 0; i < objects.size(); i++) {
@@ -64,6 +70,12 @@ private:
     sf::RenderWindow& window;
     int selectedObjectIndex = 0;
 
+    void handleScroll(sf::Event::MouseWheelScrollEvent event) {
+        Vector3 direction;
+        direction = Vector3(0, 0, 0.3f * event.delta);
+        getCamera().move(direction);
+    }
+
     void handleKeyPressed(sf::Keyboard::Key key) {
         Vector3 direction;
         if (getObjects().empty()) {
@@ -71,7 +83,6 @@ private:
         }
 
         auto& object = getObjects()[selectedObjectIndex];
-        std::cout << selectedObjectIndex << std::endl;
         switch (key) {
             case sf::Keyboard::Num1:
                 onChangeSelectedObjectIndex(0);
@@ -79,17 +90,18 @@ private:
             case sf::Keyboard::Num2:
                 onChangeSelectedObjectIndex(1);
             break;
-            case sf::Keyboard::W:
-                direction = Vector3(0, 0, 0.1f);
+            case sf::Keyboard::W:;
+                camera.orbitPitch(-10.0f);
                 break;
             case sf::Keyboard::S:
-                direction = Vector3(0, 0, -0.1f);
+                camera.orbitPitch(10.0f);
                 break;
             case sf::Keyboard::A:
-                direction = Vector3(-0.1f, 0, 0);
+                camera.orbitYaw(10.0f);
+                // direction = Vector3(-0.1f, 0, 0);
                 break;
             case sf::Keyboard::D:
-                direction = Vector3(0.1f, 0, 0);
+                camera.orbitYaw(-10.0f);
                 break;
             case sf::Keyboard::Q:
                 direction = Vector3(0, 0.1f, 0);
@@ -127,6 +139,9 @@ private:
             case sf::Keyboard::Down:
                 object->setTransform(object->transform * Matrix4::translation(0.0f, 0.05f, 0.0f));
                 break;
+            case sf::Keyboard::R:
+                // camera.lookAtCenter();
+            break;
             default:
                 break;
         }
@@ -135,31 +150,39 @@ private:
     }
 
     void handleMouseMoved() {
-        static bool isLeftMouseHeld = false;
-        auto& object = getObjects()[0];
+        static bool isMiddleMouseHeld = false;
+        static sf::Vector2i lastMousePos; // To store the last mouse position
 
+        // Check if the middle mouse button is held
         if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
-            if (!isLeftMouseHeld) {
-                isLeftMouseHeld = true;
+            if (!isMiddleMouseHeld) {
+                isMiddleMouseHeld = true;
                 window.setMouseCursorVisible(false);
+                lastMousePos = sf::Mouse::getPosition(window); // Initialize lastMousePos
             }
-            sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
+
             sf::Vector2i currentMousePos = sf::Mouse::getPosition(window);
-            sf::Vector2i mouseDelta = currentMousePos - windowCenter;
+            sf::Vector2i mouseDelta = currentMousePos - lastMousePos;
+
             if (mouseDelta != sf::Vector2i(0, 0)) {
-                float sensitivity = 0.1f;
-                getCamera().rotate(sensitivity * static_cast<float>(mouseDelta.x),
-                                         sensitivity * static_cast<float>(mouseDelta.y));
-                sf::Mouse::setPosition(windowCenter, window);
+                float sensitivity = 0.1f; // Adjust sensitivity as needed
+
+                getCamera().rotate(
+                    sensitivity * static_cast<float>(mouseDelta.x),
+                    sensitivity * static_cast<float>(mouseDelta.y));
+
+                lastMousePos = currentMousePos;
             }
         } else {
-
-            if (isLeftMouseHeld) {
-                isLeftMouseHeld = false;
+            // Reset when the middle mouse button is released
+            if (isMiddleMouseHeld) {
+                isMiddleMouseHeld = false;
                 window.setMouseCursorVisible(true);
             }
         }
     }
+
+
 };
 
 #endif

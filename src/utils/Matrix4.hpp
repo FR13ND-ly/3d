@@ -4,12 +4,12 @@
 #include "Vector3.hpp"
 #include <array>
 #include <cmath>
+#include <algorithm> // For std::clamp
 
 class Matrix4 {
 public:
     std::array<std::array<float, 4>, 4> data;
 
-    // Constructors
     Matrix4() {
         for (auto& row : data) row.fill(0.0f);
     }
@@ -83,32 +83,26 @@ public:
         });
     }
 
-    // Operators
     Matrix4 operator*(const Matrix4& other) const {
         Matrix4 result;
 
-        // Iterate over each element of the resulting matrix
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < 4; ++j) {
                 result.data[i][j] = 0.0f;
 
-                // Multiply corresponding elements of the two matrices and sum them
                 for (int k = 0; k < 4; ++k) {
                     result.data[i][j] += data[i][k] * other.data[k][j];
                 }
 
-                // Optional: Apply clamping to avoid extreme values
-                const float max_val = 1e6f;  // Adjust based on your scene
-                const float min_val = -1e6f; // Adjust based on your scene
+                const float max_val = 1e6f;
+                const float min_val = -1e6f;
 
-                // Clamp the result if it exceeds a certain range
                 result.data[i][j] = std::clamp(result.data[i][j], min_val, max_val);
             }
         }
 
         return result;
     }
-
 
     Vector3 operator*(const Vector3& vec) const {
         Vector3 result;
@@ -117,25 +111,21 @@ public:
         result.z = data[2][0] * vec.x + data[2][1] * vec.y + data[2][2] * vec.z + data[2][3];
         float w = data[3][0] * vec.x + data[3][1] * vec.y + data[3][2] * vec.z + data[3][3];
 
-        // Avoid division by too small or too large w
         const float epsilon = 1e-6f;
         if (std::abs(w) < epsilon) {
-            result.x = result.y = result.z = 0.1f; // Set default value to avoid NaN
+            result.x = result.y = result.z = 0.1f;
         } else {
             result.x /= w;
             result.y /= w;
             result.z /= w;
         }
 
-        // Optional: clamp values to avoid extreme distortions (e.g. too large or too small)
-        result.x = std::clamp(result.x, -100.0f, 100.0f); // Adjust based on your scene size
-        result.y = std::clamp(result.y, -100.0f, 100.0f); // Adjust based on your scene size
-        result.z = std::clamp(result.z, -100.0f, 100.0f); // Adjust based on your scene size
+        result.x = std::clamp(result.x, -100.0f, 100.0f);
+        result.y = std::clamp(result.y, -100.0f, 100.0f);
+        result.z = std::clamp(result.z, -100.0f, 100.0f);
 
         return result;
     }
-
-
 
     static Matrix4 orthographic(float left, float right, float bottom, float top, float near, float far) {
         return Matrix4({
@@ -144,6 +134,32 @@ public:
             0.0f, 0.0f, -2.0f / (far - near), 0.0f,
             -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0f
         });
+    }
+
+    static Matrix4 lookAt(const Vector3& eye, const Vector3& center, const Vector3& up) {
+        Vector3 forward = (eye - center).normalized(); // Corrected for RHS
+        Vector3 right = forward.cross(up).normalized();
+        Vector3 newUp = right.cross(forward);
+
+        // Construct the view matrix
+        Matrix4 viewMatrix = identity();
+
+        viewMatrix.data[0][0] = right.x;
+        viewMatrix.data[1][0] = right.y;
+        viewMatrix.data[2][0] = right.z;
+        viewMatrix.data[3][0] = -right.dot(eye);
+
+        viewMatrix.data[0][1] = newUp.x;
+        viewMatrix.data[1][1] = newUp.y;
+        viewMatrix.data[2][1] = newUp.z;
+        viewMatrix.data[3][1] = -newUp.dot(eye);
+
+        viewMatrix.data[0][2] = -forward.x;
+        viewMatrix.data[1][2] = -forward.y;
+        viewMatrix.data[2][2] = -forward.z;
+        viewMatrix.data[3][2] = forward.dot(eye);
+
+        return viewMatrix;
     }
 };
 

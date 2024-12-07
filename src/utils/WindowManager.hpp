@@ -18,9 +18,22 @@ public:
 private:
     sf::RenderWindow window;
 
+    enum State
+    {
+        Windowed,
+        Minimized,
+        Maximized,
+        Fullscreen
+    };
+
+
     WindowManager() {
-        // sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
-        window.create(sf::VideoMode(800, 600), "3D Editor");
+        sf::ContextSettings windowSettings;
+        windowSettings.antialiasingLevel = 8;
+        sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
+        window.create(desktopMode, "3D Editor", sf::Style::Close, sf::ContextSettings(windowSettings.antialiasingLevel));
+        window.setVerticalSyncEnabled(true);
+        window.setSize(sf::Vector2u(desktopMode.width - 50, desktopMode.height - 100));
     }
 
     WindowManager(const WindowManager&) = delete;
