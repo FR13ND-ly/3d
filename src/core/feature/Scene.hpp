@@ -90,19 +90,6 @@ private:
             case sf::Keyboard::Num2:
                 onChangeSelectedObjectIndex(1);
             break;
-            case sf::Keyboard::W:;
-                camera.orbitPitch(-10.0f);
-                break;
-            case sf::Keyboard::S:
-                camera.orbitPitch(10.0f);
-                break;
-            case sf::Keyboard::A:
-                camera.orbitYaw(10.0f);
-                // direction = Vector3(-0.1f, 0, 0);
-                break;
-            case sf::Keyboard::D:
-                camera.orbitYaw(-10.0f);
-                break;
             case sf::Keyboard::Q:
                 direction = Vector3(0, 0.1f, 0);
                 break;
@@ -139,9 +126,6 @@ private:
             case sf::Keyboard::Down:
                 object->setTransform(object->transform * Matrix4::translation(0.0f, 0.05f, 0.0f));
                 break;
-            case sf::Keyboard::R:
-                // camera.lookAtCenter();
-            break;
             default:
                 break;
         }
@@ -165,11 +149,22 @@ private:
             sf::Vector2i mouseDelta = currentMousePos - lastMousePos;
 
             if (mouseDelta != sf::Vector2i(0, 0)) {
-                float sensitivity = 0.1f; // Adjust sensitivity as needed
+                float sensitivity = 0.05f; // Adjust sensitivity as needed
 
-                getCamera().rotate(
-                    sensitivity * static_cast<float>(mouseDelta.x),
-                    sensitivity * static_cast<float>(mouseDelta.y));
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
+                    // Move the camera (pan)
+                    getCamera().move(Vector3(
+                        -sensitivity * static_cast<float>(mouseDelta.x), // Horizontal movement
+                        sensitivity * static_cast<float>(mouseDelta.y),  // Vertical movement
+                        0.0f                                             // No movement along z-axis
+                    ));
+                } else {
+                    // Rotate the camera
+                    getCamera().rotate(
+                        sensitivity * static_cast<float>(mouseDelta.x), // Yaw
+                        sensitivity * static_cast<float>(mouseDelta.y)  // Pitch
+                    );
+                }
 
                 lastMousePos = currentMousePos;
             }
@@ -181,6 +176,7 @@ private:
             }
         }
     }
+
 
 
 };

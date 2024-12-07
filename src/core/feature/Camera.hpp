@@ -12,8 +12,6 @@ public:
     Camera(float windowWidth, float windowHeight, float fov = 90.0f, float near = 1.0f, float far = 1000.0f)
         : position(0.0f, 0.0f, -10.0f),
           rotation(0.0f, 0.0f, 0.0f),
-          yaw(atan2(position.z, position.x)),
-          pitch(asin(position.y / position.length())),
           windowWidth(windowWidth),
           windowHeight(windowHeight),
           fov(fov),
@@ -86,90 +84,17 @@ public:
 
     void setPosition(const Vector3& newPosition) {
         position = newPosition;
-        updateYawPitchFromPosition();
     }
-
-    void updateAspectRatio(float windowWidth, float windowHeight) {
-        this->windowWidth = windowWidth;
-        this->windowHeight = windowHeight;
-    }
-
-    void orbitPitch(float pitchDelta) {
-        pitch += pitchDelta * DEG_TO_RAD;
-
-        const float maxPitch = 3.14159265359f / 2.0f - 0.01f;
-        const float minPitch = -3.14159265359f / 2.0f + 0.01f;
-        if (pitch > maxPitch) pitch = maxPitch;
-        if (pitch < minPitch) pitch = minPitch;
-
-        float radius = position.length();
-        position.x = radius * cos(pitch) * cos(yaw);
-        position.y = radius * sin(pitch);
-        position.z = radius * cos(pitch) * sin(yaw);
-
-    lookAtCenter();
-}
-
-// Orbit around the center (left-right rotation)
-    void orbitYaw(float yawDelta) {
-        // Get the current position relative to the center
-        Vector3 direction = position;
-
-        // Remove the y-component from the direction to ensure we stay on the horizontal plane
-        direction.y = 0.0f;
-
-        // Normalize the direction for a consistent radius
-        direction = direction.normalized();
-
-        // Apply the yawDelta to the direction's x and z components (around the y-axis)
-        float radius = position.length(); // The radius from the center (ignores height)
-        float angle = atan2(direction.z, direction.x); // Get the current angle in the xz-plane
-
-        // Update the angle with yawDelta
-        angle += yawDelta * DEG_TO_RAD;
-
-        // Calculate the new x and z position
-        position.x = radius * cos(angle);
-        position.z = radius * sin(angle);
-
-        // Keep the y position the same as the original (so it stays level with the target)
-        // and recalculate pitch and yaw to keep the camera upright
-        position.y = position.y; // No change in the y-coordinate
-
-        // Update the camera's rotation to always look at the target (usually (0, 0, 0))
-        lookAtCenter();
-    }
-
-
-
-    void lookAtCenter() {
-        Vector3 direction = (Vector3(0.0f, 0.0f, 0.0f) - position).normalized();
-
-        rotation.y = atan2(direction.x, direction.x); // Yaw
-        rotation.x = -asin(direction.y);              // Pitch
-        rotation.z = 0.0f;                            // Roll (keep at zero)
-
-        std::cout << rotation.x << " " << rotation.y << " " << rotation.z << std::endl;
-    }
-
 
 private:
     Vector3 position;
     Vector3 rotation;
-
-    float yaw, pitch; // Persistent yaw and pitch
 
     float windowWidth, windowHeight;
     float fov, near, far;
 
     static constexpr float CAMERA_ROTATION_SENSITIVITY = 0.05f;
     static constexpr float DEG_TO_RAD = 3.14159265359f / 180.0f;
-
-    void updateYawPitchFromPosition() {
-        float radius = position.length();
-        yaw = atan2(position.z, position.x);
-        pitch = asin(position.y / radius);
-    }
 };
 
 #endif
