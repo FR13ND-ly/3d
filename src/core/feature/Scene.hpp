@@ -2,6 +2,7 @@
 #define SCENE_HPP
 
 #include "../objects/Object3d.hpp"
+#include "../objects/GridPlane.hpp"
 #include "../ui/Component.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
@@ -12,6 +13,7 @@ class Scene: public Component {
 public:
     Scene(sf::RenderWindow& window)
         : camera(window.getSize().x, window.getSize().y, 90.0f, 0.1f, 100.0f), renderer(window), window(window)  {
+        addObject(std::shared_ptr<Object3d>(new GridPlane()));
     }
 
     void addObject(std::shared_ptr<Object3d> object) {
@@ -53,8 +55,6 @@ public:
         renderer.render(objects, camera);
     }
 
-
-
     void onChangeSelectedObjectIndex(int selectedObjectIndex) {
         for (int i = 0; i < objects.size(); i++) {
             objects[i]->isSelected = false;
@@ -89,6 +89,18 @@ private:
             break;
             case sf::Keyboard::Num2:
                 onChangeSelectedObjectIndex(1);
+            break;
+            case sf::Keyboard::W:
+                camera.rotateVertical(0.5f);
+            break;
+            case sf::Keyboard::S:
+                camera.rotateVertical(-0.5f);
+            break;
+            case sf::Keyboard::A:
+                camera.rotateHorizontal(0.5f);
+            break;
+            case sf::Keyboard::D:
+                camera.rotateHorizontal(-0.5f);
             break;
             case sf::Keyboard::Q:
                 direction = Vector3(0, 0.1f, 0);
@@ -149,21 +161,21 @@ private:
             sf::Vector2i mouseDelta = currentMousePos - lastMousePos;
 
             if (mouseDelta != sf::Vector2i(0, 0)) {
-                float sensitivity = 0.05f; // Adjust sensitivity as needed
 
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
-                    // Move the camera (pan)
+                    float sensitivity = 0.05f;
                     getCamera().move(Vector3(
-                        -sensitivity * static_cast<float>(mouseDelta.x), // Horizontal movement
-                        sensitivity * static_cast<float>(mouseDelta.y),  // Vertical movement
-                        0.0f                                             // No movement along z-axis
+                        sensitivity * static_cast<float>(mouseDelta.x),
+                        sensitivity * static_cast<float>(mouseDelta.y),
+                        0.0f
                     ));
                 } else {
-                    // Rotate the camera
-                    getCamera().rotate(
-                        sensitivity * static_cast<float>(mouseDelta.x), // Yaw
-                        sensitivity * static_cast<float>(mouseDelta.y)  // Pitch
-                    );
+                    float sensitivity = -3.f;
+                    camera.orbitYaw(sensitivity * static_cast<float>(mouseDelta.x));
+                    // getCamera().rotate(
+                    //     sensitivity * static_cast<float>(mouseDelta.x),
+                    //     sensitivity * static_cast<float>(mouseDelta.y)
+                    // );
                 }
 
                 lastMousePos = currentMousePos;

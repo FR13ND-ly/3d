@@ -122,7 +122,6 @@ private:
             // Compute the average depth (center point) of the face
             if (face.v1.z < 0.1f || face.v2.z < 0.1f || face.v3.z < 0.1f ||
             face.v1.z > 100.0f || face.v2.z > 100.0f || face.v3.z > 100.0f) {
-                std::cout << "a" << std::endl;
                 continue; // Skip face if it’s out of bounds
             }
 
