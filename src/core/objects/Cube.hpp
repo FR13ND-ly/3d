@@ -56,7 +56,6 @@ private:
             {half, half, -half}, {-half, half, -half},
             {-half, -half, half}, {half, -half, half},
             {half, half, half}, {-half, half, half},
-            // Additional vertices for more detail if needed
         };
     }
 
@@ -87,7 +86,6 @@ private:
         faces.push_back({0, 1, 5, 0, 255, 255});
         faces.push_back({0, 5, 4, 0, 255, 255});
 
-        // Additional faces can be added here for detail if needed
     }
 
     void calculateEdges() {

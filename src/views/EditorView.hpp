@@ -26,7 +26,6 @@ public:
 private:
     std::shared_ptr<Scene> scene;
 
-    // Function to initialize or reset the scene
     void initializeScene() {
         sf::RenderWindow& window = const_cast<sf::RenderWindow&>(WindowManager::getInstance().getWindow());
         scene = std::make_shared<Scene>(window);
@@ -34,7 +33,6 @@ private:
         this->addComponent(scene);
     }
 
-    // Function to set up UI components
     void createUI() {
         auto myButton = std::make_shared<Button>(
             sf::Vector2f(50, 100),

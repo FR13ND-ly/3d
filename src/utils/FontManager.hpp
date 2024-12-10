@@ -21,7 +21,7 @@ private:
     FontManager() {
         if (!font.loadFromFile("../src/assets/fonts/WorkSans.ttf")) {
             std::cerr << "Failed to load font!" << std::endl;
-            // std::exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         }
     }
 

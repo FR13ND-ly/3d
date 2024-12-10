@@ -21,7 +21,6 @@ public:
         std::vector<std::tuple<float, std::array<int, 6>>> faceDepths;
 
         for (const auto& face : faces) {
-            // Calculate the average depth of the triangle
             float zAvg = (
                 transformedVertices[face[0]].z +
                 transformedVertices[face[1]].z +
@@ -31,12 +30,10 @@ public:
             faceDepths.emplace_back(zAvg, face);
         }
 
-        // Sort faces by depth (farther faces first)
         std::sort(faceDepths.begin(), faceDepths.end(), [](const auto& a, const auto& b) {
             return std::get<0>(a) > std::get<0>(b);
         });
 
-        // Extract the sorted faces
         std::vector<std::array<int, 6>> sortedFaces;
         for (const auto& [_, face] : faceDepths) {
             sortedFaces.push_back(face);

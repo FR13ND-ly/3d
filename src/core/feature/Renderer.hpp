@@ -30,16 +30,14 @@ public:
         Matrix4 viewMatrix = camera.getViewMatrix();
         Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
-        // First, check if the object is behind the camera
-        Vector3 objectPosition = object->getPosition(); // Assuming you have a getPosition() method
+        Vector3 objectPosition = object->getPosition();
         Vector4 worldPosition = modelMatrix * Vector4(objectPosition, 1.0f);
         Vector4 cameraPosition = viewMatrix * worldPosition;
 
         if (cameraPosition.z < 0.0f) {
-            continue; // Skip object if it's behind the camera
+            continue;
         }
 
-        // Proceed with processing the object if it's not behind the camera
         std::vector<Vector3> cameraSpaceVertices;
         for (const auto& vertex : object->getVertices()) {
             Vector4 worldVertex = modelMatrix * Vector4(vertex, 1.0f);
@@ -119,13 +117,12 @@ private:
 
     void renderFaces(const std::vector<FaceData>& facesToRender) {
         for (const auto& face : facesToRender) {
-            // Compute the average depth (center point) of the face
+
             if (face.v1.z < 0.1f || face.v2.z < 0.1f || face.v3.z < 0.1f ||
             face.v1.z > 100.0f || face.v2.z > 100.0f || face.v3.z > 100.0f) {
-                continue; // Skip face if it’s out of bounds
+                continue;
             }
 
-            // Convert 3D vertices to 2D screen space for rendering
             sf::Vector2f screenPos1 = {
                 (face.v1.x + 1.0f) * 0.5f * window.getSize().x,
                 (1.0f - face.v1.y) * 0.5f * window.getSize().y
@@ -139,7 +136,6 @@ private:
                 (1.0f - face.v3.y) * 0.5f * window.getSize().y
             };
 
-            // Draw the triangle representing the face
             sf::Vertex triangle[] = {
                 sf::Vertex(screenPos1, face.color),
                 sf::Vertex(screenPos2, face.color),
@@ -159,7 +155,6 @@ private:
         Matrix4 viewMatrix = camera.getViewMatrix();
         Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
-        // Transform vertices into camera space
         std::vector<Vector3> transformedVertices;
         for (const auto& vertex : object->getVertices()) {
             Vector4 worldVertex = modelMatrix * Vector4(vertex, 1.0f);
@@ -167,7 +162,6 @@ private:
             transformedVertices.push_back(Vector3(cameraVertex.x, cameraVertex.y, cameraVertex.z));
         }
 
-        // Frustum culling: check if any vertex is within the near and far plane
         bool isInsideFrustum = false;
         for (const auto& v : transformedVertices) {
             if (v.z >= 0.1f && v.z < 100.0f) {
@@ -177,10 +171,9 @@ private:
         }
 
         if (!isInsideFrustum) {
-            continue;  // Skip rendering if object is not inside frustum
+            continue;
         }
 
-        // Project vertices to 2D screen space
         std::vector<Vector3> projectedVertices;
         for (auto& vertex : transformedVertices) {
             Vector4 projectedVertex = projectionMatrix * Vector4(vertex, 1.0f);
@@ -194,7 +187,6 @@ private:
             projectedVertices.push_back(Vector3(projectedVertex.x, projectedVertex.y, projectedVertex.z));
         }
 
-        // Render edges with frustum culling
         auto edges = object->getEdges();
         for (const auto& edge : edges) {
             int idx1 = edge.first;
@@ -210,7 +202,6 @@ private:
                 v2.x < -1.0f || v2.x > 1.0f || v2.y < -1.0f || v2.y > 1.0f)
                 continue;
 
-            // Convert to screen space
             sf::Vector2f screenPos1 = {
                 (v1.x + 1.0f) * 0.5f * window.getSize().x,
                 (1.0f - v1.y) * 0.5f * window.getSize().y

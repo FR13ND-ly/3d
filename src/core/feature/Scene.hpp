@@ -9,10 +9,11 @@
 #include <vector>
 #include <memory>
 
-class Scene: public Component {
+class Scene : public Component {
 public:
-    Scene(sf::RenderWindow& window)
-        : camera(window.getSize().x, window.getSize().y, 90.0f, 0.1f, 100.0f), renderer(window), window(window)  {
+    Scene(sf::RenderWindow &window)
+        : camera(window.getSize().x, window.getSize().y, 90.0f, 0.1f, 100.0f), renderer(window), window(window),
+          yawVelocity(0.0f), pitchVelocity(0.0f), dampingFactor(0.95f) {
         addObject(std::shared_ptr<Object3d>(new GridPlane()));
     }
 
@@ -21,19 +22,19 @@ public:
         onChangeSelectedObjectIndex(objects.size() - 1);
     }
 
-    const std::vector<std::shared_ptr<Object3d>>& getObjects() const {
+    const std::vector<std::shared_ptr<Object3d> > &getObjects() const {
         return objects;
     }
 
-    void setCamera(const Camera& camera) {
-        this->camera = camera;
+    void setCamera(const Camera &camera) {
+        // this->camera = camera;
     }
 
-    const Camera& getCamera() const {
+    const Camera &getCamera() const {
         return camera;
     }
 
-    Camera& getCamera() {
+    Camera &getCamera() {
         return camera;
     }
 
@@ -51,7 +52,13 @@ public:
         }
     }
 
-    void draw(sf::RenderWindow& window) override {
+    void draw(sf::RenderWindow &window) override {
+        if (inertiaEnabled) {
+            sf::Time dt = clock.restart();
+            float deltaTime = dt.asSeconds();
+
+            update(deltaTime);
+        }
         renderer.render(objects, camera);
     }
 
@@ -64,16 +71,24 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Object3d>> objects;
+    std::vector<std::shared_ptr<Object3d> > objects;
     Camera camera;
     Renderer renderer;
-    sf::RenderWindow& window;
+    sf::RenderWindow &window;
     int selectedObjectIndex = 0;
 
+    float yawVelocity;
+    float pitchVelocity;
+    float dampingFactor;
+    sf::Clock clock;
+    bool inertiaEnabled = true;
+
+    void setInertiaEnabled(bool enabled) {
+        inertiaEnabled = enabled;
+    }
+
     void handleScroll(sf::Event::MouseWheelScrollEvent event) {
-        Vector3 direction;
-        direction = Vector3(0, 0, 0.3f * event.delta);
-        getCamera().move(direction);
+        camera.zoom(0.5f * event.delta);
     }
 
     void handleKeyPressed(sf::Keyboard::Key key) {
@@ -82,26 +97,26 @@ private:
             return;
         }
 
-        auto& object = getObjects()[selectedObjectIndex];
+        auto &object = getObjects()[selectedObjectIndex];
         switch (key) {
             case sf::Keyboard::Num1:
                 onChangeSelectedObjectIndex(0);
-            break;
+                break;
             case sf::Keyboard::Num2:
                 onChangeSelectedObjectIndex(1);
-            break;
+                break;
             case sf::Keyboard::W:
-                camera.rotateVertical(0.5f);
-            break;
+                camera.rotatePitch(1.5f);
+                break;
             case sf::Keyboard::S:
-                camera.rotateVertical(-0.5f);
-            break;
+                camera.rotatePitch(-1.5f);
+                break;
             case sf::Keyboard::A:
-                camera.rotateHorizontal(0.5f);
-            break;
+                camera.rotateYaw(-1.5f);
+                break;
             case sf::Keyboard::D:
-                camera.rotateHorizontal(-0.5f);
-            break;
+                camera.rotateYaw(1.5f);
+                break;
             case sf::Keyboard::Q:
                 direction = Vector3(0, 0.1f, 0);
                 break;
@@ -147,35 +162,37 @@ private:
 
     void handleMouseMoved() {
         static bool isMiddleMouseHeld = false;
-        static sf::Vector2i lastMousePos; // To store the last mouse position
+        static sf::Vector2i lastMousePos;
 
-        // Check if the middle mouse button is held
         if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
             if (!isMiddleMouseHeld) {
                 isMiddleMouseHeld = true;
                 window.setMouseCursorVisible(false);
-                lastMousePos = sf::Mouse::getPosition(window); // Initialize lastMousePos
+                lastMousePos = sf::Mouse::getPosition(window);
             }
 
             sf::Vector2i currentMousePos = sf::Mouse::getPosition(window);
             sf::Vector2i mouseDelta = currentMousePos - lastMousePos;
 
             if (mouseDelta != sf::Vector2i(0, 0)) {
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
-                    float sensitivity = 0.05f;
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
+                    float sensitivity = 0.01f;
                     getCamera().move(Vector3(
                         sensitivity * static_cast<float>(mouseDelta.x),
-                        sensitivity * static_cast<float>(mouseDelta.y),
+                        sensitivity * static_cast<float>(mouseDelta.y / 2),
                         0.0f
                     ));
                 } else {
-                    float sensitivity = -3.f;
-                    camera.orbitYaw(sensitivity * static_cast<float>(mouseDelta.x));
-                    // getCamera().rotate(
-                    //     sensitivity * static_cast<float>(mouseDelta.x),
-                    //     sensitivity * static_cast<float>(mouseDelta.y)
-                    // );
+                    float sensitivity = 1.0f;
+                    if (inertiaEnabled) {
+                    yawVelocity += sensitivity * static_cast<float>(mouseDelta.x);
+                    pitchVelocity += sensitivity * static_cast<float>(mouseDelta.y);
+                    }
+                    else {
+                        camera.orbit(Vector3(0, 0, 0), sensitivity * static_cast<float>(mouseDelta.x), sensitivity * static_cast<float>(mouseDelta.y));
+                    }
+
                 }
 
                 lastMousePos = currentMousePos;
@@ -189,8 +206,15 @@ private:
         }
     }
 
+    void update(float deltaTime) {
+        // Apply damping to the velocities
+        yawVelocity *= dampingFactor;
+        pitchVelocity *= dampingFactor;
 
-
+        if (std::abs(yawVelocity) > 0.01f || std::abs(pitchVelocity) > 0.01f) {
+            camera.orbit(Vector3(0, 0, 0), yawVelocity * deltaTime, pitchVelocity * deltaTime);
+        }
+    }
 };
 
 #endif

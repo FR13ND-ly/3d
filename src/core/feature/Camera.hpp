@@ -2,8 +2,8 @@
 #define CAMERA_HPP
 
 #include "../../utils/Vector3.hpp"
-#include "../../utils/Vector3.hpp"
 #include "../../utils/Matrix4.hpp"
+#include "../../utils/Vector4.hpp"
 #include <cmath>
 #include <iostream>
 #include <array>
@@ -11,191 +11,253 @@
 class Camera {
 public:
     Camera(float windowWidth, float windowHeight, float fov = 90.0f, float near = 1.0f, float far = 1000.0f)
-        : position(0.0f, -1.0f, -10.0f),
-          rotation(0.0f, 0.0f, 0.0f),
+        : position(0.0f, 1.0f, -10.0f),
+          rotation(Vector4::eulerToQuaternion(0, 0, 0)),
           windowWidth(windowWidth),
           windowHeight(windowHeight),
           fov(fov),
           near(near),
-          far(far) {
+          far(far),
+          yaw(0.0f),
+          pitch(0.0f) {
     }
 
     Matrix4 getViewMatrix() const {
-        Matrix4 translation = Matrix4::translation(-position.x, -position.y, -position.z);
-        Matrix4 rotationX = Matrix4::rotationX(-rotation.x);
-        Matrix4 rotationY = Matrix4::rotationY(-rotation.y);
-        Matrix4 rotationZ = Matrix4::rotationZ(-rotation.z);
-        return rotationY * rotationZ * rotationX  * translation;
+        Matrix4 rotationMatrix = quatToMatrix(Vector4::quaternionConjugate(rotation));
+        Matrix4 translationMatrix = Matrix4::translation(-position.x, -position.y, -position.z);
+        Matrix4 flipZ = Matrix4::scale(1.0f, 1.0f, -1.0f);
+
+        return flipZ * rotationMatrix * translationMatrix;
     }
 
     Matrix4 getProjectionMatrix() const {
         float aspectRatio = windowWidth / windowHeight;
-        float fovRadians = fov * (3.14159265359f / 180.0f);
+        float fovRadians = fov * DEG_TO_RAD;
         return Matrix4::perspective(fovRadians, aspectRatio, near, far);
     }
 
-    void move(const Vector3 &direction) {
+    void zoom(float delta) {
+        Vector3 target(0, 0, 0);
+        Vector3 toTarget = (target - position).normalized();
+        Vector3 forward = getForwardVector();
+        float alignment = toTarget.dot(forward);
+        float zoomDirection = (alignment > 0) ? 1.0f : -1.0f;
+        position = position + (forward * delta * zoomDirection);
+    }
+
+
+    void move(const Vector3& direction) {
         Vector3 forward = getForwardVector();
         Vector3 right = getRightVector();
         Vector3 up = getUpVector();
 
-        position = position + (forward * direction.z + right * direction.x - up * direction.y);
+        // Normalize orientation vectors
+        forward = forward.normalized();
+        right = right.normalized();
+        up = up.normalized();
+
+        // Adjusted movement direction
+        Vector3 adjustedDirection = direction;
+
+        // Handle inversion of X based on direction.z and camera alignment
+        Vector3 target(0, 0, 0); // Assume target is the origin for reference
+        Vector3 toTarget = (target - position).normalized(); // Direction to target
+        float alignment = toTarget.dot(forward); // Alignment with forward vector
+
+        // Determine if x component should be inverted
+        if (alignment < 0) {
+            adjustedDirection.x = -adjustedDirection.z; // Inverse relation when alignment is negative
+        } else {
+            adjustedDirection.x = adjustedDirection.z; // Normal relation otherwise
+        }
+
+        // Combine movement along the orientation axes
+        position = position + (forward * adjustedDirection.z + right * adjustedDirection.x + up * adjustedDirection.y);
+
     }
 
 
-    Vector3 getCameraDirection() const {
-        return Vector3(
-            std::cos(rotation.x) * std::sin(rotation.y), // X component
-            -std::sin(rotation.x),                      // Y component
-            std::cos(rotation.x) * std::cos(rotation.y)  // Z component
-        ).normalized();
+    Vector3 getForwardVector() const {
+        // Forward vector is the negative Z-axis in local space
+        return Vector4::rotateVectorByQuaternion(rotation, Vector3(0, 0, -1)).toVector3().normalized();
     }
 
-
-    void rotateVertical(float deltaY) {
-        float smoothedDeltaY = deltaY * CAMERA_ROTATION_SENSITIVITY;
-
-        // Determine the primary axis of the camera's orientation
-        Vector3 forward = getForwardVector();
-        float xComponent = forward.x;
-        float zComponent = forward.z;
-        float total = std::abs(xComponent) + std::abs(zComponent);
-
-        // Calculate the blend factor between x and z
-        float blendFactor = std::abs(xComponent) / total;
-
-        // Determine the sign of the adjustment based on the direction the camera is facing
-        float pitchSign = (zComponent >= 0) ? 1.0f : -1.0f;
-        float rollSign = (xComponent >= 0) ? -1.0f : 1.0f;
-
-        // Calculate the new pitch and roll angles based on the blend factor and direction
-        float newPitch = rotation.x + smoothedDeltaY * (1.0f - blendFactor) * pitchSign;
-        float newRoll = rotation.z + smoothedDeltaY * blendFactor * rollSign;
-
-        // Clamp the pitch and roll to prevent gimbal lock
-        if (newPitch > 89.0f * DEG_TO_RAD) newPitch = 89.0f * DEG_TO_RAD;
-        if (newPitch < -89.0f * DEG_TO_RAD) newPitch = -89.0f * DEG_TO_RAD;
-
-        if (newRoll > 89.0f * DEG_TO_RAD) newRoll = 89.0f * DEG_TO_RAD;
-        if (newRoll < -89.0f * DEG_TO_RAD) newRoll = -89.0f * DEG_TO_RAD;
-
-        // Update the pitch and roll rotations
-        rotation.x = newPitch;
-        rotation.z = newRoll;
+    Vector3 getRightVector() const {
+        // Right vector is the positive X-axis in local space
+        return Vector4::rotateVectorByQuaternion(rotation, Vector3(1, 0, 0)).toVector3().normalized();
     }
 
-    void rotateHorizontal(float deltaX) {
-        float smoothedDeltaX = deltaX * CAMERA_ROTATION_SENSITIVITY;
-
-        rotation.y += smoothedDeltaX;
-        if (rotation.y > 360.0f * DEG_TO_RAD) rotation.y -= 360.0f * DEG_TO_RAD;
-        if (rotation.y < 0.0f) rotation.y += 360.0f * DEG_TO_RAD;
-
-        rotation.x = 0.0f;
-        rotation.z = 0.0f;
-    }
-
-
-    void orbitYaw(float yawDelta) {
-        // Project position onto the XZ plane
-        Vector3 positionXZ(position.x, 0.0f, position.z);
-        float radius = positionXZ.length();
-
-        // Determine the current angle of rotation in the XZ plane
-        float angle = std::atan2(position.z, position.x);
-
-        // Apply yaw delta
-        angle += yawDelta * DEG_TO_RAD;
-
-        // Calculate the new XZ plane position
-        float newX = radius * std::cos(angle);
-        float newZ = radius * std::sin(angle);
-
-        // Preserve the original Y height
-        position.x = newX;
-        position.z = newZ;
-
-        // Maintain camera orientation towards the center
-        lookAtHorizontalCenter();
+    Vector3 getUpVector() const {
+        // Up vector is the positive Y-axis in local space
+        return Vector4::rotateVectorByQuaternion(rotation, Vector3(0, 1, 0)).toVector3().normalized();
     }
 
     Vector3 getPosition() const {
         return position;
     }
 
-    Vector3 getRotation() const {
-        return rotation;
-    }
-
-    Vector3 getForwardVector() const {
-        return Vector3(
-            cos(rotation.x) * sin(rotation.y),
-            -sin(rotation.x),
-            cos(rotation.x) * cos(rotation.y)
-        ).normalized();
-    }
-
-    Vector3 getRightVector() const {
-        return Vector3(
-            sin(rotation.y - 3.14159265f / 2.0f),
-            0.0f,
-            cos(rotation.y - 3.14159265f / 2.0f)
-        ).normalized();
-    }
-
-    Vector3 getUpVector() const {
-        Vector3 forward = getForwardVector();
-        Vector3 right = getRightVector();
-        return right.cross(forward).normalized();
-    }
-
     void setPosition(const Vector3& newPosition) {
         position = newPosition;
     }
 
-    void lookAtHorizontalCenter() {
-        Vector3 center(0.0f, 0.0f, 0.0f);
-        Vector3 direction = center - position;
+    void rotateYaw(float deltaYaw) {
+        yaw += deltaYaw;
+        updateRotation();
+    }
 
-        // Calculate the new horizontal rotation (yaw)
-        float newHorizontalRotation = std::atan2(direction.x, direction.z);
+    void rotatePitch(float deltaPitch) {
+        pitch += deltaPitch;
+        pitch = std::clamp(pitch, -89.0f, 89.0f);
+        updateRotation();
+    }
 
-        // Preserve the magnitude of the current vertical rotation (pitch and roll)
-        float currentVerticalRotationMagnitude = std::sqrt(rotation.x * rotation.x + rotation.z * rotation.z);
+    void orbitYaw(const Vector3& center, float deltaYaw, float deltaPitch) {
+        // Calculate the current position in the XZ plane and the radius
+        Vector3 positionXZ(position.x, 0.0f, position.z);
+        float radius = positionXZ.length();
 
-        // Determine blending factors based on the camera's orientation
-        float forwardX = std::cos(newHorizontalRotation); // Contribution towards X-axis
-        float forwardZ = std::sin(newHorizontalRotation); // Contribution towards Z-axis
-        float total = std::abs(forwardX) + std::abs(forwardZ);
+        float currentAngle = std::atan2(position.z - center.z, position.x - center.x);
 
-        // Blend the vertical rotation magnitude between rotation.x and rotation.z
-        float blendFactorX = std::abs(forwardX) / total;
-        float blendFactorZ = std::abs(forwardZ) / total;
+        float newAngle = currentAngle + deltaYaw * DEG_TO_RAD;
 
-        rotation.x = currentVerticalRotationMagnitude * forwardZ * blendFactorX;
-        rotation.z = currentVerticalRotationMagnitude * forwardX * blendFactorZ;
+        float newX = center.x + radius * std::cos(newAngle);
+        float newZ = center.z + radius * std::sin(newAngle);
 
-        // Update horizontal rotation (yaw)
-        rotation.y = newHorizontalRotation;
+        position.x = newX;
+        position.z = newZ;
 
-        // Clamp vertical rotations to prevent gimbal lock
-        if (rotation.x > 89.0f * DEG_TO_RAD) rotation.x = 89.0f * DEG_TO_RAD;
-        if (rotation.x < -89.0f * DEG_TO_RAD) rotation.x = -89.0f * DEG_TO_RAD;
+        rotateYaw(deltaYaw);
+    }
 
-        if (rotation.z > 89.0f * DEG_TO_RAD) rotation.z = 89.0f * DEG_TO_RAD;
-        if (rotation.z < -89.0f * DEG_TO_RAD) rotation.z = -89.0f * DEG_TO_RAD;
+    void orbit(const Vector3& center, float deltaYaw, float deltaPitch) {
+        Vector3 positionXZ(position.x, 0.0f, position.z);
+        float radius = positionXZ.length();
+
+        float currentYaw = std::atan2(position.z - center.z, position.x - center.x);
+
+        float newYaw = currentYaw + deltaYaw * DEG_TO_RAD;
+
+        float newX = center.x + radius * std::cos(newYaw);
+        float newZ = center.z + radius * std::sin(newYaw);
+
+        float currentPitch = std::atan2(position.y - center.y, radius);
+
+        float newPitch = currentPitch + deltaPitch * DEG_TO_RAD;
+
+        float newY = center.y + radius * std::tan(newPitch);
+
+        position.x = newX;
+        position.z = newZ;
+
+
+        rotateYaw(deltaYaw);
+
+        if (newPitch > -.9 && newPitch < .9) {
+            position.y = newY;
+            rotatePitch(-deltaPitch);
+        }
     }
 
 
+
+
+
 private:
+    static Vector4 toQuaternion(const Matrix4& mat) {
+        float trace = mat.data[0][0] + mat.data[1][1] + mat.data[2][2];
+        float s;
+
+        if (trace > 0) {
+            s = 0.5f / std::sqrt(trace + 1.0f);
+            return Vector4(
+                (mat.data[2][1] - mat.data[1][2]) * s,
+                (mat.data[0][2] - mat.data[2][0]) * s,
+                (mat.data[1][0] - mat.data[0][1]) * s,
+                0.25f / s
+            );
+        } else {
+            if (mat.data[0][0] > mat.data[1][1] && mat.data[0][0] > mat.data[2][2]) {
+                s = 2.0f * std::sqrt(1.0f + mat.data[0][0] - mat.data[1][1] - mat.data[2][2]);
+                return Vector4(
+                    0.25f * s,
+                    (mat.data[0][1] + mat.data[1][0]) / s,
+                    (mat.data[0][2] + mat.data[2][0]) / s,
+                    (mat.data[2][1] - mat.data[1][2]) / s
+                );
+            } else if (mat.data[1][1] > mat.data[2][2]) {
+                s = 2.0f * std::sqrt(1.0f + mat.data[1][1] - mat.data[0][0] - mat.data[2][2]);
+                return Vector4(
+                    (mat.data[0][1] + mat.data[1][0]) / s,
+                    0.25f * s,
+                    (mat.data[1][2] + mat.data[2][1]) / s,
+                    (mat.data[0][2] - mat.data[2][0]) / s
+                );
+            } else {
+                s = 2.0f * std::sqrt(1.0f + mat.data[2][2] - mat.data[0][0] - mat.data[1][1]);
+                return Vector4(
+                    (mat.data[0][2] + mat.data[2][0]) / s,
+                    (mat.data[1][2] + mat.data[2][1]) / s,
+                    0.25f * s,
+                    (mat.data[1][0] - mat.data[0][1]) / s
+                );
+            }
+        }
+    }
+
+    Matrix4 quatToMatrix(const Vector4& q) const {
+        float x = q.x, y = q.y, z = q.z, w = q.w;
+        float x2 = x * x, y2 = y * y, z2 = z * z;
+        float xy = x * y, xz = x * z, yz = y * z;
+        float wx = w * x, wy = w * y, wz = w * z;
+
+        Matrix4 mat;
+        mat.data[0][0] = 1.0f - 2.0f * (y2 + z2);
+        mat.data[0][1] = 2.0f * (xy - wz);
+        mat.data[0][2] = 2.0f * (xz + wy);
+        mat.data[0][3] = 0.0f;
+
+        mat.data[1][0] = 2.0f * (xy + wz);
+        mat.data[1][1] = 1.0f - 2.0f * (x2 + z2);
+        mat.data[1][2] = 2.0f * (yz - wx);
+        mat.data[1][3] = 0.0f;
+
+        mat.data[2][0] = 2.0f * (xz - wy);
+        mat.data[2][1] = 2.0f * (yz + wx);
+        mat.data[2][2] = 1.0f - 2.0f * (x2 + y2);
+        mat.data[2][3] = 0.0f;
+
+        mat.data[3][0] = 0.0f;
+        mat.data[3][1] = 0.0f;
+        mat.data[3][2] = 0.0f;
+        mat.data[3][3] = 1.0f;
+
+        return mat;
+    }
+
+    void updateRotation() {
+        yaw = fmod(yaw, 360.0f);
+        if (yaw < 0) yaw += 360.0f;
+
+        pitch = std::clamp(pitch, -89.0f, 89.0f);
+
+        Vector4 yawQuat = Vector4::axisAngleToQuaternion(Vector3(0, 1, 0), yaw * DEG_TO_RAD);
+        Vector4 pitchQuat = Vector4::axisAngleToQuaternion(Vector3(1, 0, 0), pitch * DEG_TO_RAD);
+
+        rotation = Vector4::quaternionMultiply(pitchQuat, yawQuat);
+        rotation = rotation.normalized();
+    }
+
     Vector3 position;
-    Vector3 rotation;
+    Vector4 rotation;
 
     float windowWidth, windowHeight;
     float fov, near, far;
 
-    static constexpr float CAMERA_ROTATION_SENSITIVITY = 0.1f;
+    float yaw;   // Rotation around the Y-axis
+    float pitch; // Rotation around the X-axis
+
     static constexpr float DEG_TO_RAD = 3.14159265359f / 180.0f;
+    const float RAD_TO_DEG = 180.0f / 3.14159265359f;
 };
 
 #endif
