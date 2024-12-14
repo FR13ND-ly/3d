@@ -39,7 +39,7 @@ void MenuManager::createUI() {
         this->switchTo("objectsMenu");
     });
     auto homeButton = std::make_shared<Button>(
-        sf::Vector2f(1870, 1000),
+        sf::Vector2f(1875, 1000),
         sf::Vector2f(50, 50),
         "H"
     );
