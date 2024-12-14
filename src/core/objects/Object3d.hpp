@@ -1,8 +1,12 @@
 #ifndef OBJECT3D_HPP
 #define OBJECT3D_HPP
 
-#include "../../utils/Matrix4.hpp"
-#include "../../utils/Vector3.hpp"
+#include "../../utils/math/Matrix4.hpp"
+#include "../../utils/math/Vector3.hpp"
+#include <vector>
+#include <array>
+#include <tuple>
+#include <algorithm>
 
 class Object3d {
 public:
@@ -12,103 +16,31 @@ public:
     Vector3 scale;
     bool isSelected = false;
 
-    Object3d()
-        : transform(Matrix4::identity()), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
-
+    Object3d();
     virtual ~Object3d() = default;
 
-    virtual std::vector<std::array<int, 6>> getSortedFaces(const std::vector<Vector3>& transformedVertices) const {
-        std::vector<std::tuple<float, std::array<int, 6>>> faceDepths;
+    virtual std::vector<std::array<int, 7>> getSortedFaces(const std::vector<Vector3>& transformedVertices) const;
 
-        for (const auto& face : faces) {
-            float zAvg = (
-                transformedVertices[face[0]].z +
-                transformedVertices[face[1]].z +
-                transformedVertices[face[2]].z
-            ) / 3.0f;
+    void setTransform(const Matrix4& newTransform);
+    void rotate(float angle, char axis);
+    void translate(const Vector3& translation);
 
-            faceDepths.emplace_back(zAvg, face);
-        }
+    Vector3 getPosition() const;
+    Vector3 getRotation() const;
+    Vector3 getScale() const;
+    Matrix4 getTransformation() const;
 
-        std::sort(faceDepths.begin(), faceDepths.end(), [](const auto& a, const auto& b) {
-            return std::get<0>(a) > std::get<0>(b);
-        });
+    void setRotation(const Vector3& newRotation);
+    void setScale(const Vector3& newScale);
 
-        std::vector<std::array<int, 6>> sortedFaces;
-        for (const auto& [_, face] : faceDepths) {
-            sortedFaces.push_back(face);
-        }
+    std::vector<Vector3> getVertices();
+    std::vector<std::pair<int, int>> getEdges();
+    std::vector<std::array<int, 7>> getFaces();
 
-        return sortedFaces;
-    }
-
-    void setTransform(const Matrix4& newTransform) {
-        transform = newTransform;
-    }
-
-    void rotate(float angle, char axis) {
-        Matrix4 rotationMatrix;
-
-        switch (axis) {
-            case 'x':
-                rotationMatrix = Matrix4::rotationX(angle);
-                break;
-            case 'y':
-                rotationMatrix = Matrix4::rotationY(angle);
-                break;
-            case 'z':
-                rotationMatrix = Matrix4::rotationZ(angle);
-                break;
-            default:
-                break;
-        }
-
-        transform = transform * rotationMatrix;
-    }
-
-    // void scaleObject(float sx, float sy, float sz) {
-    //     Matrix4 scaleMatrix = Matrix4::scaling(sx, sy, sz);
-    //     transform = transform * scaleMatrix;
-    //     scale = Vector3(sx, sy, sz);
-    // }
-
-    void translate(const Vector3& translation) {
-        Matrix4 translationMatrix = Matrix4::translation(translation.x, translation.y, translation.z);
-        transform = transform * translationMatrix;
-        position = position + translation;
-    }
-
-    Vector3 getPosition() const {
-        return position;
-    }
-
-    Vector3 getRotation() const {
-        return rotation;
-    }
-
-    Vector3 getScale() const {
-        return scale;
-    }
-
-    Matrix4 getTransformation() const {
-        return transform;
-    }
-
-    std::vector<Vector3> getVertices() {
-        return vertices;
-    }
-
-    std::vector<std::pair<int, int> > getEdges() {
-        return edges;
-    }
-
-    std::vector<std::array<int, 6>> getFaces() {
-        return faces;
-    }
 protected:
     std::vector<Vector3> vertices;
     std::vector<std::pair<int, int>> edges;
-    std::vector<std::array<int, 6>> faces;
+    std::vector<std::array<int, 7>> faces;
 };
 
 #endif

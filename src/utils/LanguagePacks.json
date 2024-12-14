@@ -1,0 +1,30 @@
+[
+  {
+    "language": "en",
+    "showName": "English",
+    "words": {
+      "back": "back",
+      "projects": "Projects",
+      "settings": "Settings",
+      "projectsPath": "Projects Path",
+      "change": "Change",
+      "inertia": "Inertia",
+      "sensitivity": "Sensitivity",
+      "language": "Language"
+    }
+  },
+  {
+    "language": "ro",
+    "showName": "Romana",
+    "words": {
+      "back": "Inapoi",
+      "projects": "Proiecte",
+      "settings": "Setari",
+      "projectsPath": "Folder Proiecte",
+      "change": "Schimba",
+      "inertia": "Inertie",
+      "sensitivity": "Sensibilitate",
+      "language": "Limba"
+    }
+  }
+]

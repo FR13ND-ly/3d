@@ -1,4 +1,3 @@
-#include <SFML/Graphics.hpp>
 #include "./core/feature/App.hpp"
 
 int main() {

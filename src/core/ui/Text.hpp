@@ -2,35 +2,27 @@
 #define TEXT_HPP
 
 #include <SFML/Graphics.hpp>
-#include <functional>
+#include <string>
 #include "../../utils/FontManager.hpp"
 #include "Component.hpp"
 
-class Text: public Component {
+class Text : public Component {
 public:
-    Text(const sf::Vector2f &position, const int size, const std::string &text, const sf::Color &color = sf::Color::White) {
-        const sf::Font &font = FontManager::getInstance().getFont();
-        content.setFont(font);
-        content.setPosition(position);
-        content.setString(text);
-        content.setCharacterSize(size);
-        content.setFillColor(color);
-    }
+    // Constructor
+    Text(const sf::Vector2f &position, const int size, const std::string &text, const sf::Color &color = sf::Color::White);
 
-    void draw(sf::RenderWindow &window) {
-        window.draw(content);
-    }
+    // Draw function
+    void draw(sf::RenderWindow &window) override;
 
-    void handleEvent(const sf::Event &event, const sf::RenderWindow &window) {}
+    void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
+
+    void setText(const std::string &text);
 
 protected:
-    sf::RectangleShape rect;
-    sf::Text content;
-    sf::Color color = sf::Color::White;
+    sf::Text content;         // SFML Text object
+    sf::Color color;          // Color of the text
 
-    bool inBounds(const sf::Vector2i &mousePos) const {
-        return rect.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-    }
+    bool inBounds(const sf::Vector2i &mousePos) const override;
 };
 
-#endif
+#endif // TEXT_HPP

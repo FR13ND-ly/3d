@@ -2,33 +2,27 @@
 #define CUSTOMSHAPE_HPP
 
 #include "Object3D.hpp"
-#include "../../utils/Vector3.hpp"
+#include "../../utils/math/Vector3.hpp"
 #include <vector>
+#include <array>
+#include <set>
+#include <memory>
+#include <utility>
 
 class CustomShape : public Object3d {
 public:
     CustomShape() = default;
 
     CustomShape(const std::vector<Vector3>& vertices,
-                const std::vector<std::pair<int, int>>& edges,
-                const std::vector<std::array<int, 6>>& faces) {
-          setVertices(vertices);
-          setEdges(edges);
-          setFaces(faces);
-        }
+                const std::vector<std::array<int, 7>>& faces);
 
+    void setVertices(const std::vector<Vector3>& vertices);
+    void setFaces(const std::vector<std::array<int, 7>>& faces);
 
-    void setVertices(const std::vector<Vector3>& vertices) {
-        this->vertices = vertices;
-    }
+    const std::vector<std::pair<int, int>>& getEdges() const { return edges; }
 
-    void setEdges(const std::vector<std::pair<int, int>>& edges) {
-        this->edges = edges;
-    }
-
-    void setFaces(const std::vector<std::array<int, 6>>& faces) {
-        this->faces = faces;
-    }
+private:
+    void calculateEdges();
 };
 
 #endif

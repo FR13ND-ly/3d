@@ -8,47 +8,18 @@
 #include "HomeView.hpp"
 #include "ProjectsView.hpp"
 #include "EditorView.hpp"
+#include "SettingsView.hpp"
 
 class ViewsManager {
 public:
-    ViewsManager() {
-        this->addView("home", std::make_shared<HomeView>());
-        this->addView("projects", std::make_shared<ProjectsView>());
-        this->addView("editor", std::make_shared<EditorView>());
-        this->switchTo("home");
-    }
+    ViewsManager();
 
-    static ViewsManager& getInstance() {
-        static ViewsManager instance;
-        return instance;
-    }
+    static ViewsManager& getInstance();
 
-    void addView(const std::string& name, std::shared_ptr<View> view) {
-        views[name] = view;
-    }
-
-    void switchTo(const std::string& name) {
-        if (currentView) {
-            currentView->onDeactivate();
-        }
-
-        if (views.find(name) != views.end()) {
-            currentView = views[name];
-            currentView->onActivate();
-        }
-    }
-
-    void handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
-        if (currentView) {
-            currentView->handleEvent(event, window);
-        }
-    }
-
-    void draw(sf::RenderWindow& window) {
-        if (currentView) {
-            currentView->draw(window);
-        }
-    }
+    void addView(const std::string& name, std::shared_ptr<View> view);
+    void switchTo(const std::string& name);
+    void handleEvent(const sf::Event& event, sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window);
 
 private:
     std::map<std::string, std::shared_ptr<View>> views;

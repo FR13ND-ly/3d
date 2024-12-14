@@ -2,31 +2,25 @@
 #define FONT_MANAGER_HPP
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 class FontManager {
 public:
-    static FontManager& getInstance() {
-        static FontManager instance;
-        return instance;
-    }
+    // Singleton instance
+    static FontManager& getInstance();
 
-    const sf::Font& getFont() const {
-        return font;
-    }
+    // Method to get the loaded font
+    const sf::Font& getFont() const;
 
 private:
+    // The font object
     sf::Font font;
 
-    FontManager() {
-        if (!font.loadFromFile("../src/assets/fonts/WorkSans.ttf")) {
-            std::cerr << "Failed to load font!" << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-    }
+    // Private constructor for singleton pattern
+    FontManager();
 
+    // Delete copy constructor and assignment operator
     FontManager(const FontManager&) = delete;
     FontManager& operator=(const FontManager&) = delete;
 };
 
-#endif
+#endif // FONT_MANAGER_HPP
