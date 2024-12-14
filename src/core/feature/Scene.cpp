@@ -152,11 +152,16 @@ void Scene::handleMouseMoved() {
     static bool isMiddleMouseHeld = false;
     static sf::Vector2i lastMousePos;
 
+    // Get the center of the window
+    sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
+
     if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
         if (!isMiddleMouseHeld) {
             isMiddleMouseHeld = true;
             window.setMouseCursorVisible(false);
-            lastMousePos = sf::Mouse::getPosition(window);
+            // Set the mouse position to the center initially
+            sf::Mouse::setPosition(windowCenter, window);
+            lastMousePos = windowCenter;
         }
 
         sf::Vector2i currentMousePos = sf::Mouse::getPosition(window);
@@ -182,7 +187,9 @@ void Scene::handleMouseMoved() {
                 }
             }
 
-            lastMousePos = currentMousePos;
+            // Reset the mouse position to the center
+            sf::Mouse::setPosition(windowCenter, window);
+            lastMousePos = windowCenter;
         }
     } else {
         if (isMiddleMouseHeld) {
@@ -191,6 +198,7 @@ void Scene::handleMouseMoved() {
         }
     }
 }
+
 
 void Scene::update(float deltaTime) {
     yawVelocity *= dampingFactor;

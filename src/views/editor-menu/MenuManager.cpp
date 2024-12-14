@@ -5,6 +5,7 @@
 #include "AddObjectsMenu.hpp"
 #include "ObjectsMenu.hpp"
 #include "../../core/ui/Surface.hpp"
+#include "../ViewsManager.hpp"
 
 MenuManager::MenuManager() {
     this->addView("addObjectsMenu", std::make_shared<AddObjectsMenu>());
@@ -37,9 +38,19 @@ void MenuManager::createUI() {
     switchToObjectsMenu->setOnClick([this]() {
         this->switchTo("objectsMenu");
     });
+    auto homeButton = std::make_shared<Button>(
+        sf::Vector2f(1870, 1000),
+        sf::Vector2f(50, 50),
+        "H"
+    );
+
+    homeButton->setOnClick([this]() {
+        ViewsManager::getInstance().switchTo("home");
+    });
     components.emplace_back(background);
     components.emplace_back(switchToAddMenu);
     components.emplace_back(switchToObjectsMenu);
+    components.emplace_back(homeButton);
 }
 
 
