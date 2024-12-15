@@ -38,10 +38,11 @@ void MenuManager::createUI() {
     switchToObjectsMenu->setOnClick([this]() {
         this->switchTo("objectsMenu");
     });
+
     auto homeButton = std::make_shared<Button>(
-        sf::Vector2f(1875, 1000),
-        sf::Vector2f(50, 50),
-        "H"
+        sf::Vector2f(10, 10),
+        sf::Vector2f(120, 50),
+        "Home"
     );
 
     homeButton->setOnClick([this]() {
