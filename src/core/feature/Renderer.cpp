@@ -106,11 +106,8 @@ void Renderer::render(std::vector<std::shared_ptr<Object3d>>& objects, Camera& c
             return a.object < b.object;
         }
     );
-    sf::RenderWindow& window = WindowManager::getInstance().getWindow();
-    Scene& scene = Scene::getInstance(window);
-    if (!scene.getVerticesEditMode()) {
-        renderFaces(facesToRender);
-    }
+
+    renderFaces(facesToRender);
     renderEdges(objects, camera);
 }
 
@@ -134,11 +131,19 @@ void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
             (1.0f - face.v3.y) * 0.5f * window.getSize().y
         };
 
+        sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+        Scene& scene = Scene::getInstance(window);
+        sf::Color color = face.color;
+        if (scene.getVerticesEditMode()) {
+            color = sf::Color(255, 255, 255, 32);
+        }
+
         sf::Vertex triangle[] = {
-            sf::Vertex(screenPos1, face.color),
-            sf::Vertex(screenPos2, face.color),
-            sf::Vertex(screenPos3, face.color)
+            sf::Vertex(screenPos1, color),
+            sf::Vertex(screenPos2, color),
+            sf::Vertex(screenPos3, color)
         };
+
 
         window.draw(triangle, 3, sf::Triangles);
     }
