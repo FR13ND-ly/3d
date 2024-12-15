@@ -29,7 +29,6 @@ private:
     std::vector<std::shared_ptr<Component>> vertexPropertiesMenu;
 
     unsigned int selectedObjectIndex;
-    int selectedVertexIndex = -1;
     std::shared_ptr<Object3d> currentSelectedObject;
 
     void addObjectPropertiesMenu(std::shared_ptr<Object3d> object);

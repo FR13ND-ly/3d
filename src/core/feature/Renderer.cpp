@@ -145,7 +145,12 @@ void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
 }
 
 void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera) {
+    int i = 0;
     for (const auto& object : objects) {
+        if (!i) {
+            i++;
+            continue;
+        }
         sf::RenderWindow& window = WindowManager::getInstance().getWindow();
         Scene& scene = Scene::getInstance(window);
         if (!object->isSelected && !scene.getVerticesEditMode()) continue;
@@ -216,6 +221,25 @@ void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Came
             };
 
             window.draw(edgeVertices, 2, sf::Lines);
+        }
+        if (scene.getVerticesEditMode()) {
+            int j = 0;
+            for (const auto& vertex : projectedVertices) {
+                if (vertex.z < 0.1f || vertex.z > 100.0f) continue;
+
+                sf::Vector2f screenPos = {
+                    (vertex.x + 1.0f) * 0.5f * window.getSize().x,
+                    (1.0f - vertex.y) * 0.5f * window.getSize().y
+                };
+                sf::Color vertexColor = object->isVertexSelected(j) ? sf::Color::Yellow : sf::Color(150, 150, 150, 230);
+                sf::CircleShape vertexCircle(10.0f);
+                vertexCircle.setFillColor(vertexColor);
+                vertexCircle.setPosition(screenPos.x - vertexCircle.getRadius(),
+                                         screenPos.y - vertexCircle.getRadius());
+
+                window.draw(vertexCircle);
+                j++;
+            }
         }
     }
 }

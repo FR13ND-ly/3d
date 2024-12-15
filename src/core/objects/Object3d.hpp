@@ -39,10 +39,18 @@ public:
     std::array<Vector3, 3> getFaceVerticesForEditing(int faceIndex) const;
     void updateFaceVertex(int faceIndex, int vertexPosition, const Vector3& newVertexPosition);
 
+    void addVertex();
+    void updateVertex(int vertexIndex, const Vector3& newVertexPosition);
+    void deleteVertex(int vertexIndex);
+
+    bool isVertexSelected(unsigned int i) const;
+    void createFace();
+    void createEdge();
 
     std::vector<Vector3> getVertices();
     std::vector<std::pair<int, int>> getEdges();
     std::vector<std::array<int, 7>> getFaces();
+    std::vector<unsigned int> selectedVertices;
 protected:
     std::vector<Vector3> vertices;
     std::vector<std::pair<int, int>> edges;

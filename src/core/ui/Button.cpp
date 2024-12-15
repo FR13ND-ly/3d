@@ -69,6 +69,11 @@ float Button::getHeight() const {
     return buttonRect.getSize().y;
 }
 
+void Button::setColor(sf::Color color) {
+    buttonRect.setFillColor(color);
+    this->color = color;
+}
+
 
 sf::Color Button::darkenColor(const sf::Color &color, int amount) {
     return sf::Color(

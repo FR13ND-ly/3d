@@ -25,6 +25,8 @@ public:
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
 
+    void setColor(sf::Color color);
+
 protected:
     sf::RectangleShape buttonRect;
     sf::Text buttonText;

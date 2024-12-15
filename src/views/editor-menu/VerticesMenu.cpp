@@ -40,22 +40,34 @@ void VerticesMenu::createUI() {
             scene.onChangeSelectedObjectIndex(i);
             currentSelectedObject = scene.getObjects()[i];
             updatePropertiesMenu();
-            selectedVertexIndex = -1;
         });
 
         int j = 0;
         for (auto vertex : objects[i]->getVertices()) {
-            auto faceButton = std::make_shared<Button>(
+            sf::Color btnColor = sf::Color::White;
+            if (currentSelectedObject) {
+                if (currentSelectedObject->isVertexSelected(j)) btnColor = sf::Color(255, 255,100);
+            }
+            auto vertexButton = std::make_shared<Button>(
             sf::Vector2f(parentPosition.x + 40, 60 + 30 * (i - 1)),
             sf::Vector2f(180, 30),
-            "Vertex " + std::to_string(j + 1)
+            "Vertex " + std::to_string(j + 1),
+            btnColor
         );
 
-            faceButton->setOnClick([this, j]() {
-                selectedVertexIndex = j;
+            vertexButton->setOnClick([this, j, vertexButton]() {
+                auto& selectedVertices = currentSelectedObject->selectedVertices;
+                auto it = std::find(selectedVertices.begin(), selectedVertices.end(), j);
+                if (it != selectedVertices.end()) {
+                    selectedVertices.erase(it);
+                    vertexButton->setColor(sf::Color::White);
+                } else {
+                    selectedVertices.push_back(j);
+                    vertexButton->setColor(sf::Color(255, 255, 100));
+                }
                 addVertexPropertiesMenu();
             });
-            objButton->addContent(faceButton);
+            objButton->addContent(vertexButton);
             j++;
         }
 
@@ -67,7 +79,7 @@ void VerticesMenu::createUI() {
     int selectedIndex = scene.getSelectedObjectIndex();
     if (selectedIndex > 0 && selectedIndex < objects.size()) {
         currentSelectedObject = objects[selectedIndex];
-        if (selectedVertexIndex >= 0) {
+        if (currentSelectedObject->selectedVertices.size()) {
             addVertexPropertiesMenu();
         }
         else {
@@ -277,6 +289,19 @@ void VerticesMenu::updatePropertiesMenu() {
         currentSelectedObject->setRotation(Vector3(currentRotation.x, currentRotation.y, value - currentRotation.z));
     }));
     objectPropertiesMenu.push_back(rotationZ);
+
+    auto addVertexButton = std::make_shared<Button>(
+   sf::Vector2f(parentPosition.x + 20, marginTop + 350),
+           sf::Vector2f(120, 50),
+           "Add"
+       );
+
+    addVertexButton->setOnClick([this]() {
+        currentSelectedObject->addVertex();
+        createUI();
+    });
+
+    objectPropertiesMenu.push_back(addVertexButton);
 }
 
 
@@ -284,160 +309,116 @@ void VerticesMenu::addVertexPropertiesMenu() {
     objectPropertiesMenu.clear();
     int marginTop = 400;
 
-    auto title = std::make_shared<Text>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 10),
-        20,
-        "Vertex Properties"
-    );
-    vertexPropertiesMenu.push_back(title);
+    if (currentSelectedObject->selectedVertices.size() == 1) {
+        int selectedVertexIndex = currentSelectedObject->selectedVertices[0];
 
-///////////////////////////////////////////////////////////////////
+        auto title = std::make_shared<Text>(
+            sf::Vector2f(parentPosition.x + 20, marginTop + 10),
+            20,
+            "Vertex Properties"
+        );
+        vertexPropertiesMenu.push_back(title);
 
-    auto verticeOne = std::make_shared<Text>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 50),
-        20,
-        "Vertices 1"
-    );
-    objectPropertiesMenu.push_back(verticeOne);
+    ///////////////////////////////////////////////////////////////////
+
+        auto position = std::make_shared<Text>(
+            sf::Vector2f(parentPosition.x + 20, marginTop + 50),
+            20,
+            "Position"
+        );
+        objectPropertiesMenu.push_back(position);
 
 
-    auto verticeOneX = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 80),
-        sf::Vector2f(90, 50),
-        "X"
-    );
-    verticeOneX->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].x);
+        auto positionX = std::make_shared<NumberInput>(
+            sf::Vector2f(parentPosition.x + 20, marginTop + 80),
+            sf::Vector2f(90, 50),
+            "X"
+        );
+        positionX->setValue(currentSelectedObject->getVertices()[selectedVertexIndex].x);
 
-    verticeOneX->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 0, {value, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].y, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].z});
-    }));
-    objectPropertiesMenu.push_back(verticeOneX);
+        positionX->setOnClick(static_cast<std::function<void(float)>>([this, selectedVertexIndex](float value) {
+            currentSelectedObject->updateVertex(selectedVertexIndex,
+                {
+                    value,
+                    currentSelectedObject->getVertices()[selectedVertexIndex].y,
+                    currentSelectedObject->getVertices()[selectedVertexIndex].z
+                });
+        }));
+        objectPropertiesMenu.push_back(positionX);
 
-    auto verticeOneY = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 130, marginTop + 80),
-        sf::Vector2f(90, 50),
-        "Y"
-    );
-    verticeOneY->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].y);
+        auto positionY = std::make_shared<NumberInput>(
+            sf::Vector2f(parentPosition.x + 130, marginTop + 80),
+            sf::Vector2f(90, 50),
+            "Y"
+        );
+        positionY->setValue(currentSelectedObject->getVertices()[selectedVertexIndex].y);
 
-    verticeOneY->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 0, {currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].x, value, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].z});
-    }));
-    objectPropertiesMenu.push_back(verticeOneY);
+        positionY->setOnClick(static_cast<std::function<void(float)>>([this, selectedVertexIndex](float value) {
+            currentSelectedObject->updateVertex(selectedVertexIndex,
+                {
+                    currentSelectedObject->getVertices()[selectedVertexIndex].x,
+                    value,
+                    currentSelectedObject->getVertices()[selectedVertexIndex].z
+                });
+        }));
+        objectPropertiesMenu.push_back(positionY);
 
-    auto verticeOneZ = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 240, marginTop + 80),
-        sf::Vector2f(90, 50),
-        "Z"
-    );
-    verticeOneZ->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].z);
+        auto positionZ = std::make_shared<NumberInput>(
+            sf::Vector2f(parentPosition.x + 240, marginTop + 80),
+            sf::Vector2f(90, 50),
+            "Z"
+        );
+        positionZ->setValue(currentSelectedObject->getVertices()[selectedVertexIndex].z);
 
-    verticeOneZ->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 0, {currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].x, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[0].y, value});
-    }));
-    objectPropertiesMenu.push_back(verticeOneZ);
+        positionZ->setOnClick(static_cast<std::function<void(float)>>([this, selectedVertexIndex](float value) {
+            currentSelectedObject->updateVertex(selectedVertexIndex,
+                {
+                    currentSelectedObject->getVertices()[selectedVertexIndex].x,
+                    currentSelectedObject->getVertices()[selectedVertexIndex].y,
+                    value
+                });
+        }));
+        objectPropertiesMenu.push_back(positionZ);
 
-///////////////////////////////////////////////////////////////////
+        auto deleteVertexButton = std::make_shared<Button>(
+        sf::Vector2f(parentPosition.x + 210, marginTop + 150),
+                sf::Vector2f(120, 50),
+                "Delete"
+            );
 
-    auto verticeTwo = std::make_shared<Text>(
+        deleteVertexButton->setOnClick([this, selectedVertexIndex]() {
+            currentSelectedObject->deleteVertex(selectedVertexIndex);
+        });
+
+        objectPropertiesMenu.push_back(deleteVertexButton);
+    }
+    else if (currentSelectedObject->selectedVertices.size() == 2) {
+        auto createEdgeButton = std::make_shared<Button>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 150),
-        20,
-        "Vertices 2"
-    );
-    objectPropertiesMenu.push_back(verticeTwo);
+                sf::Vector2f(200, 50),
+                "Create Edge"
+            );
 
-    auto verticeTwoX = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 180),
-        sf::Vector2f(90, 50),
-        "X"
-    );
-    verticeTwoX->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].x);
+        createEdgeButton->setOnClick([this]() {
+            currentSelectedObject->createEdge();
+        });
 
-    verticeTwoX->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 1, {value, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].y, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].z});
-    }));
-    objectPropertiesMenu.push_back(verticeTwoX);
+        objectPropertiesMenu.push_back(createEdgeButton);
+    }
+    else if (currentSelectedObject->selectedVertices.size() == 3) {
+        auto createFaceButton = std::make_shared<Button>(
+        sf::Vector2f(parentPosition.x + 20, marginTop + 150),
+                sf::Vector2f(200, 50),
+                "Create Face"
+            );
 
-    auto verticeTwoY = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 130, marginTop + 180),
-        sf::Vector2f(90, 50),
-        "Y"
-    );
-    verticeTwoY->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].y);
+        createFaceButton->setOnClick([this]() {
+            currentSelectedObject->createFace();
+        });
 
-    verticeTwoY->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 1, {currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].x, value, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].z});
-    }));
-    objectPropertiesMenu.push_back(verticeTwoY);
+        objectPropertiesMenu.push_back(createFaceButton);
+    }
 
-    auto verticeTwoZ = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 240, marginTop + 180),
-        sf::Vector2f(90, 50),
-        "Z"
-    );
-    verticeTwoZ->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].z);
 
-    verticeTwoZ->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 1, {currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].x, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[1].y, value});
-    }));
-    objectPropertiesMenu.push_back(verticeTwoZ);
 
-///////////////////////////////////////////////////////////////////
-
-    auto verticeThree = std::make_shared<Text>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 250),
-        20,
-        "Vertices 3"
-    );
-    objectPropertiesMenu.push_back(verticeThree);
-
-    auto verticeThreeX = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 280),
-        sf::Vector2f(90, 50),
-        "X"
-    );
-    verticeThreeX->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].x);
-
-    verticeThreeX->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 2, {value, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].y, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].z});
-    }));
-    objectPropertiesMenu.push_back(verticeThreeX);
-
-    auto verticeThreeY = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 130, marginTop + 280),
-        sf::Vector2f(90, 50),
-        "Y"
-    );
-    verticeThreeY->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].y);
-
-    verticeThreeY->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 2, {currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].x, value, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].z});
-    }));
-    objectPropertiesMenu.push_back(verticeThreeY);
-
-    auto verticeThreeZ = std::make_shared<NumberInput>(
-        sf::Vector2f(parentPosition.x + 240, marginTop + 280),
-        sf::Vector2f(90, 50),
-        "Z"
-    );
-    verticeThreeZ->setValue(currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].z);
-
-    verticeThreeZ->setOnClick(static_cast<std::function<void(float)>>([this](float value) {
-        currentSelectedObject->updateFaceVertex(selectedVertexIndex, 2, {currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].x, currentSelectedObject->getFaceVerticesForEditing(selectedVertexIndex)[2].y, value});
-    }));
-    objectPropertiesMenu.push_back(verticeThreeZ);
-
-////////////////////////////////////////////////////////////////
-    auto color = std::make_shared<Input>(
-        sf::Vector2f(parentPosition.x + 20, marginTop + 400),
-        sf::Vector2f(200, 50),
-        "Color"
-    );
-
-    color->setValue(currentSelectedObject->getFaceColor(selectedVertexIndex));
-
-    color->setOnClick(std::function<void(std::string)>([this](std::string value) {
-        currentSelectedObject->setFaceColor(selectedVertexIndex, value);
-    }));
-    objectPropertiesMenu.push_back(color);
 }

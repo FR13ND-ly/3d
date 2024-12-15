@@ -201,3 +201,99 @@ void Object3d::updateFaceVertex(int faceIndex, int vertexPosition, const Vector3
     // Update the vertex in the main vertices array
     vertices[vertexIndex] = newVertexPosition;
 }
+
+void Object3d::addVertex() {
+    // Check if there are vertices to calculate the center
+    if (vertices.empty()) {
+        throw std::runtime_error("Cannot calculate the center of an empty object.");
+    }
+
+    // Calculate the center of the object
+    Vector3 center(0.0f, 0.0f, 0.0f);
+    for (const auto& vertex : vertices) {
+        center.x += vertex.x;
+        center.y += vertex.y;
+        center.z += vertex.z;
+    }
+
+    center.x /= vertices.size();
+    center.y /= vertices.size();
+    center.z /= vertices.size();
+
+    vertices.push_back(center);
+}
+
+void Object3d::updateVertex(int vertexIndex, const Vector3& newVertexPosition) {
+    if (vertexIndex < 0 || vertexIndex >= vertices.size()) {
+        throw std::out_of_range("Invalid vertex index");
+    }
+
+    vertices[vertexIndex] = newVertexPosition;
+}
+
+void Object3d::deleteVertex(int vertexIndex) {
+    if (vertexIndex < 0 || vertexIndex >= vertices.size()) {
+        throw std::out_of_range("Invalid vertex index");
+    }
+
+    // Erase the vertex from the vertices array
+    vertices.erase(vertices.begin() + vertexIndex);
+
+    // Adjust edges to remove references to the deleted vertex
+    edges.erase(std::remove_if(edges.begin(), edges.end(),
+        [vertexIndex](const std::pair<int, int>& edge) {
+            return edge.first == vertexIndex || edge.second == vertexIndex;
+        }),
+        edges.end());
+
+    // Update remaining edge references
+    for (auto& edge : edges) {
+        if (edge.first > vertexIndex) edge.first--;
+        if (edge.second > vertexIndex) edge.second--;
+    }
+
+    // Remove faces that reference the deleted vertex
+    faces.erase(std::remove_if(faces.begin(), faces.end(),
+        [vertexIndex](const std::array<int, 7>& face) {
+            return face[0] == vertexIndex || face[1] == vertexIndex || face[2] == vertexIndex;
+        }),
+        faces.end());
+
+    // Update remaining face vertex references
+    for (auto& face : faces) {
+        for (int i = 0; i < 3; ++i) {
+            if (face[i] > vertexIndex) face[i]--;
+        }
+    }
+}
+
+bool Object3d::isVertexSelected(unsigned int vertexIndex) const {
+    return std::find(selectedVertices.begin(), selectedVertices.end(), vertexIndex) != selectedVertices.end();
+}
+
+void Object3d::createFace() {
+    if (selectedVertices.size() < 3) {
+        // Not enough vertices to create a face
+        return;
+    }
+
+    int v1 = selectedVertices[0];
+    int v2 = selectedVertices[1];
+    int v3 = selectedVertices[2];
+
+    faces.push_back({v1, v2, v3, 255, 255, 255, 255});
+}
+
+// Create an edge from the selected vertices
+void Object3d::createEdge() {
+    if (selectedVertices.size() != 2) {
+        throw std::runtime_error("Exactly 2 vertices must be selected to create an edge.");
+    }
+
+    std::pair<unsigned int, unsigned int> edge = {
+        selectedVertices[0],
+        selectedVertices[1]
+    };
+
+    edges.push_back(edge);
+}
