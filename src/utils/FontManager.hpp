@@ -5,10 +5,8 @@
 
 class FontManager {
 public:
-    // Singleton instance
     static FontManager& getInstance();
 
-    // Method to get the loaded font
     const sf::Font& getFont() const;
 
 private:
