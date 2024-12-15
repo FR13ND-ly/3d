@@ -1,23 +1,26 @@
 #include "AddObjectsMenu.hpp"
 #include "../../core/feature/Scene.hpp"
 #include "../../utils/WindowManager.hpp"
+#include "../../utils/LanguageManager.hpp"
 
 AddObjectsMenu::AddObjectsMenu() {
 }
 
 void AddObjectsMenu::createUI() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
+
     components.clear();
 
     auto title = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 50, 50),
         20,
-        "Add objects"
+        languagePack["Add objects"]
     );
 
     auto addCubeButton = std::make_shared<Button>(
         sf::Vector2f(parentPosition.x + 50, 100),
         sf::Vector2f(200, 50),
-        "Cube"
+        languagePack["Cube"]
     );
 
     addCubeButton->setOnClick([]() {
@@ -29,7 +32,7 @@ void AddObjectsMenu::createUI() {
     auto addSphereButton = std::make_shared<Button>(
          sf::Vector2f(parentPosition.x + 50, 170),
          sf::Vector2f(200, 50),
-         "Sphere"
+         languagePack["Sphere"]
      );
 
     addSphereButton->setOnClick([]() {
@@ -41,7 +44,7 @@ void AddObjectsMenu::createUI() {
     auto addCylinderButton = std::make_shared<Button>(
          sf::Vector2f(parentPosition.x + 50, 240),
          sf::Vector2f(200, 50),
-         "Cylinder"
+         languagePack["Cylinder"]
      );
 
     addCylinderButton->setOnClick([]() {
@@ -53,7 +56,7 @@ void AddObjectsMenu::createUI() {
     auto addConeButton = std::make_shared<Button>(
          sf::Vector2f(parentPosition.x + 50, 310),
          sf::Vector2f(200, 50),
-         "Cone"
+          languagePack["Cone"]
      );
 
     addConeButton->setOnClick([]() {

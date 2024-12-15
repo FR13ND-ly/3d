@@ -5,17 +5,19 @@
 #include "../../core/ui/Input.hpp"
 #include "../../core/ui/ScrollView.hpp"
 #include "../../core/ui/Expandable.hpp"
+#include "../../utils/LanguageManager.hpp"
 
 VerticesMenu::VerticesMenu() : currentSelectedObject(nullptr) {}
 
 void VerticesMenu::createUI() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
     objectList.clear();
     components.clear();
 
     auto title = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, 20),
         20,
-        "Objects"
+        languagePack["Objects"]
     );
     objectList.push_back(title);
 
@@ -33,7 +35,7 @@ void VerticesMenu::createUI() {
         auto objButton = std::make_shared<Expandable>(
             sf::Vector2f(parentPosition.x + 20, 60 + 30 * (i - 1)),
             sf::Vector2f(200, 30),
-            "Object " + std::to_string(i)
+            languagePack["Object"].get<std::string>() + " " + std::to_string(i)
         );
 
         objButton->setOnClick([this, i, &scene]() {
@@ -51,7 +53,7 @@ void VerticesMenu::createUI() {
             auto vertexButton = std::make_shared<Button>(
             sf::Vector2f(parentPosition.x + 40, 60 + 30 * (i - 1)),
             sf::Vector2f(180, 30),
-            "Vertex " + std::to_string(j + 1),
+             languagePack["Vertex"].get<std::string>() + " " + std::to_string(j + 1),
             btnColor
         );
 
@@ -144,6 +146,7 @@ void VerticesMenu::addObjectPropertiesMenu(std::shared_ptr<Object3d> object) {
 }
 
 void VerticesMenu::updatePropertiesMenu() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
     objectPropertiesMenu.clear();
     vertexPropertiesMenu.clear();
     int marginTop = 400;
@@ -151,7 +154,7 @@ void VerticesMenu::updatePropertiesMenu() {
     auto title = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 10),
         20,
-        "Properties"
+        languagePack["Properties"]
     );
     objectPropertiesMenu.push_back(title);
 
@@ -160,7 +163,7 @@ void VerticesMenu::updatePropertiesMenu() {
     auto scale = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 50),
         20,
-        "Scale: "
+        languagePack["Scale"]
     );
     objectPropertiesMenu.push_back(scale);
 
@@ -204,7 +207,7 @@ void VerticesMenu::updatePropertiesMenu() {
     auto position = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 150),
         20,
-        "Position: "
+        languagePack["Position"]
     );
     objectPropertiesMenu.push_back(position);
 
@@ -247,7 +250,7 @@ void VerticesMenu::updatePropertiesMenu() {
     auto rotation = std::make_shared<Text>(
      sf::Vector2f(parentPosition.x + 20, marginTop + 250),
              20,
-             "Rotation: "
+             languagePack["Rotation"]
      );
     objectPropertiesMenu.push_back(rotation);
 
@@ -293,7 +296,7 @@ void VerticesMenu::updatePropertiesMenu() {
     auto addVertexButton = std::make_shared<Button>(
    sf::Vector2f(parentPosition.x + 20, marginTop + 350),
            sf::Vector2f(120, 50),
-           "Add"
+           languagePack["Add"]
        );
 
     addVertexButton->setOnClick([this]() {
@@ -306,6 +309,8 @@ void VerticesMenu::updatePropertiesMenu() {
 
 
 void VerticesMenu::addVertexPropertiesMenu() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
+
     objectPropertiesMenu.clear();
     int marginTop = 400;
 
@@ -315,7 +320,7 @@ void VerticesMenu::addVertexPropertiesMenu() {
         auto title = std::make_shared<Text>(
             sf::Vector2f(parentPosition.x + 20, marginTop + 10),
             20,
-            "Vertex Properties"
+            languagePack["Vertex Properties"]
         );
         vertexPropertiesMenu.push_back(title);
 
@@ -324,7 +329,7 @@ void VerticesMenu::addVertexPropertiesMenu() {
         auto position = std::make_shared<Text>(
             sf::Vector2f(parentPosition.x + 20, marginTop + 50),
             20,
-            "Position"
+            languagePack["Position"]
         );
         objectPropertiesMenu.push_back(position);
 
@@ -383,7 +388,7 @@ void VerticesMenu::addVertexPropertiesMenu() {
         auto deleteVertexButton = std::make_shared<Button>(
         sf::Vector2f(parentPosition.x + 210, marginTop + 150),
                 sf::Vector2f(120, 50),
-                "Delete"
+                languagePack["Delete"]
             );
 
         deleteVertexButton->setOnClick([this, selectedVertexIndex]() {
@@ -396,7 +401,7 @@ void VerticesMenu::addVertexPropertiesMenu() {
         auto createEdgeButton = std::make_shared<Button>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 150),
                 sf::Vector2f(200, 50),
-                "Create Edge"
+                languagePack["Create Edge"]
             );
 
         createEdgeButton->setOnClick([this]() {
@@ -409,7 +414,7 @@ void VerticesMenu::addVertexPropertiesMenu() {
         auto createFaceButton = std::make_shared<Button>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 150),
                 sf::Vector2f(200, 50),
-                "Create Face"
+                languagePack["Create Face"]
             );
 
         createFaceButton->setOnClick([this]() {

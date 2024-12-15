@@ -5,17 +5,18 @@
 #include "../../core/ui/Input.hpp"
 #include "../../core/ui/ScrollView.hpp"
 #include "../../core/ui/Expandable.hpp"
-
+#include "../../utils/LanguageManager.hpp"
 ObjectsMenu::ObjectsMenu() : currentSelectedObject(nullptr) {}
 
 void ObjectsMenu::createUI() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
     objectList.clear();
     components.clear();
 
     auto title = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, 20),
         20,
-        "Objects"
+        languagePack["Objects"]
     );
     objectList.push_back(title);
 
@@ -33,7 +34,7 @@ void ObjectsMenu::createUI() {
         auto objButton = std::make_shared<Expandable>(
             sf::Vector2f(parentPosition.x + 20, 60 + 30 * (i - 1)),
             sf::Vector2f(200, 30),
-            "Object " + std::to_string(i)
+            languagePack["Object"].get<std::string>() + " " + std::to_string(i)
         );
 
         objButton->setOnClick([this, i, &scene]() {
@@ -48,7 +49,7 @@ void ObjectsMenu::createUI() {
             auto faceButton = std::make_shared<Button>(
             sf::Vector2f(parentPosition.x + 40, 60 + 30 * (i - 1)),
             sf::Vector2f(180, 30),
-            "Face " + std::to_string(j + 1)
+             languagePack["Face"].get<std::string>() + " " + std::to_string(j + 1)
         );
 
             faceButton->setOnClick([this, j]() {
@@ -77,6 +78,7 @@ void ObjectsMenu::createUI() {
 }
 
 void ObjectsMenu::draw(sf::RenderWindow &window) {
+
     if (objectList.empty()) {
         createUI();
     }
@@ -126,6 +128,7 @@ void ObjectsMenu::addObjectPropertiesMenu(std::shared_ptr<Object3d> object) {
 }
 
 void ObjectsMenu::updatePropertiesMenu() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
     objectPropertiesMenu.clear();
     facePropertiesMenu.clear();
     int marginTop = 400;
@@ -133,7 +136,7 @@ void ObjectsMenu::updatePropertiesMenu() {
     auto title = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 10),
         20,
-        "Properties"
+        languagePack["Properties"]
     );
     objectPropertiesMenu.push_back(title);
 
@@ -142,7 +145,7 @@ void ObjectsMenu::updatePropertiesMenu() {
     auto scale = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 50),
         20,
-        "Scale: "
+        languagePack["Scale"]
     );
     objectPropertiesMenu.push_back(scale);
 
@@ -186,7 +189,7 @@ void ObjectsMenu::updatePropertiesMenu() {
     auto position = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 150),
         20,
-        "Position: "
+        languagePack["Position"]
     );
     objectPropertiesMenu.push_back(position);
 
@@ -229,7 +232,7 @@ void ObjectsMenu::updatePropertiesMenu() {
     auto rotation = std::make_shared<Text>(
      sf::Vector2f(parentPosition.x + 20, marginTop + 250),
              20,
-             "Rotation: "
+             languagePack["Rotation"]
      );
     objectPropertiesMenu.push_back(rotation);
 
@@ -275,13 +278,14 @@ void ObjectsMenu::updatePropertiesMenu() {
 
 
 void ObjectsMenu::addFacePropertiesMenu() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
     objectPropertiesMenu.clear();
     int marginTop = 400;
 
     auto title = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 10),
         20,
-        "Face Properties"
+        languagePack["Face properties"]
     );
     facePropertiesMenu.push_back(title);
 
@@ -290,7 +294,7 @@ void ObjectsMenu::addFacePropertiesMenu() {
     auto verticeOne = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 50),
         20,
-        "Vertices 1"
+        languagePack["Vertices 1"]
     );
     objectPropertiesMenu.push_back(verticeOne);
 
@@ -336,7 +340,7 @@ void ObjectsMenu::addFacePropertiesMenu() {
     auto verticeTwo = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 150),
         20,
-        "Vertices 2"
+        languagePack["Vertices 2"]
     );
     objectPropertiesMenu.push_back(verticeTwo);
 
@@ -381,7 +385,7 @@ void ObjectsMenu::addFacePropertiesMenu() {
     auto verticeThree = std::make_shared<Text>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 250),
         20,
-        "Vertices 3"
+        languagePack["Vertices 3"]
     );
     objectPropertiesMenu.push_back(verticeThree);
 
@@ -425,7 +429,7 @@ void ObjectsMenu::addFacePropertiesMenu() {
     auto color = std::make_shared<Input>(
         sf::Vector2f(parentPosition.x + 20, marginTop + 400),
         sf::Vector2f(200, 50),
-        "Color"
+        languagePack["Color"]
     );
 
     color->setValue(currentSelectedObject->getFaceColor(selectedFaceIndex));

@@ -5,8 +5,10 @@
 #include "../../core/ui/Surface.hpp"
 #include "../ViewsManager.hpp"
 #include "VerticesMenu.hpp"
+#include "../../utils/LanguageManager.hpp"
 
 MenuManager::MenuManager() {
+
     this->addView("addObjectsMenu", std::make_shared<AddObjectsMenu>());
     this->addView("objectsMenu", std::make_shared<ObjectsMenu>());
     this->addView("verticesMenu", std::make_shared<VerticesMenu>());
@@ -15,6 +17,7 @@ MenuManager::MenuManager() {
 }
 
 void MenuManager::createUI() {
+    auto languagePack = LanguageManager::getInstance().getSelectedPack();
     auto background = std::make_shared<Surface>(
         parentPosition, parentSize, sf::Color(100, 100, 100)
     );
@@ -52,7 +55,7 @@ sf::Vector2f(parentPosition.x - 60, 130),
     auto homeButton = std::make_shared<Button>(
         sf::Vector2f(10, 10),
         sf::Vector2f(120, 50),
-        "Home"
+        languagePack["Home"]
     );
 
     homeButton->setOnClick([this]() {
