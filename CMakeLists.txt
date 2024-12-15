@@ -64,6 +64,7 @@ set(SOURCE_FILES
         src/views/editor-menu/MenuManager.cpp
         src/views/editor-menu/Menu.cpp
         src/views/editor-menu/ObjectsMenu.cpp
+        src/views/editor-menu/VerticesMenu.cpp
 )
 
 # Create the executable with all the source files

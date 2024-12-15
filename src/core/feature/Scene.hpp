@@ -35,6 +35,9 @@ public:
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
 
+    bool getVerticesEditMode();
+    void setVerticesEditMode(bool value);
+
 private:
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
@@ -44,6 +47,7 @@ private:
     Renderer renderer;
     sf::RenderWindow &window;
     int selectedObjectIndex = 0;
+    bool verticesEditMode = false;
 
     float yawVelocity;
     float pitchVelocity;

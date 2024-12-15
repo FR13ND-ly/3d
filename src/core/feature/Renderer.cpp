@@ -1,12 +1,12 @@
 #include "Renderer.hpp"
 #include <algorithm>
+#include "Scene.hpp"
 #include "../objects/Object3D.hpp"
-#include "../objects/Cube.hpp"
 #include "../../utils/math/Matrix4.hpp"
 #include "../../utils/math/Vector3.hpp"
 #include "../../utils/math/Vector4.hpp"
 #include <memory>
-#include <cmath>
+#include "../../utils/WindowManager.hpp"
 
 Renderer::Renderer(sf::RenderWindow& window) : window(window) {}
 
@@ -106,8 +106,11 @@ void Renderer::render(std::vector<std::shared_ptr<Object3d>>& objects, Camera& c
             return a.object < b.object;
         }
     );
-
-    renderFaces(facesToRender);
+    sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+    Scene& scene = Scene::getInstance(window);
+    if (!scene.getVerticesEditMode()) {
+        renderFaces(facesToRender);
+    }
     renderEdges(objects, camera);
 }
 
@@ -143,14 +146,14 @@ void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
 
 void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera) {
     for (const auto& object : objects) {
-        // Only render edges for selected objects
-        if (!object->isSelected) continue;
+        sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+        Scene& scene = Scene::getInstance(window);
+        if (!object->isSelected && !scene.getVerticesEditMode()) continue;
 
         Matrix4 modelMatrix = object->getTransformation();
         Matrix4 viewMatrix = camera.getViewMatrix();
         Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
-        // Transform vertices to camera space
         std::vector<Vector3> transformedVertices;
         for (const auto& vertex : object->getVertices()) {
             Vector4 worldVertex = modelMatrix * Vector4(vertex, 1.0f);
@@ -158,12 +161,10 @@ void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Came
             transformedVertices.push_back(Vector3(cameraVertex.x, cameraVertex.y, cameraVertex.z));
         }
 
-        // Skip rendering if object is completely outside frustum
         if (!isObjectInFrustum(transformedVertices)) {
             continue;
         }
 
-        // Project vertices
         std::vector<Vector3> projectedVertices;
         for (auto& vertex : transformedVertices) {
             Vector4 projectedVertex = projectionMatrix * Vector4(vertex, 1.0f);
@@ -177,7 +178,6 @@ void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Came
             projectedVertices.push_back(Vector3(projectedVertex.x, projectedVertex.y, projectedVertex.z));
         }
 
-        // Render edges
         auto edges = object->getEdges();
         for (const auto& edge : edges) {
             int idx1 = edge.first;
@@ -186,16 +186,13 @@ void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Came
             const Vector3& v1 = projectedVertices[idx1];
             const Vector3& v2 = projectedVertices[idx2];
 
-            // Skip edges outside frustum or clipping planes
             if (v1.z < 0.1f || v2.z < 0.1f || v1.z > 100.0f || v2.z > 100.0f)
                 continue;
 
-            // Skip edges outside screen
             if (v1.x < -1.0f || v1.x > 1.0f || v1.y < -1.0f || v1.y > 1.0f ||
                 v2.x < -1.0f || v2.x > 1.0f || v2.y < -1.0f || v2.y > 1.0f)
                 continue;
 
-            // Convert to screen coordinates
             sf::Vector2f screenPos1 = {
                 (v1.x + 1.0f) * 0.5f * window.getSize().x,
                 (1.0f - v1.y) * 0.5f * window.getSize().y
@@ -205,12 +202,17 @@ void Renderer::renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Came
                 (1.0f - v2.y) * 0.5f * window.getSize().y
             };
 
-            // Slightly transparent white for edge color
-            sf::Color transparentWhite(255, 255, 255, 64);
+            sf::Color color = sf::Color(255, 255, 255, 64);
+            if (scene.getVerticesEditMode()) {
+                color = sf::Color::White;
+                if (object->isSelected) {
+                    color = sf::Color::Yellow;
+                }
+            }
 
             sf::Vertex edgeVertices[] = {
-                sf::Vertex(screenPos1, transparentWhite),
-                sf::Vertex(screenPos2, transparentWhite)
+                sf::Vertex(screenPos1, color),
+                sf::Vertex(screenPos2, color)
             };
 
             window.draw(edgeVertices, 2, sf::Lines);

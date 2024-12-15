@@ -1,15 +1,15 @@
 #include "MenuManager.hpp"
 
-#include <iostream>
-
 #include "AddObjectsMenu.hpp"
 #include "ObjectsMenu.hpp"
 #include "../../core/ui/Surface.hpp"
 #include "../ViewsManager.hpp"
+#include "VerticesMenu.hpp"
 
 MenuManager::MenuManager() {
     this->addView("addObjectsMenu", std::make_shared<AddObjectsMenu>());
     this->addView("objectsMenu", std::make_shared<ObjectsMenu>());
+    this->addView("verticesMenu", std::make_shared<VerticesMenu>());
     this->switchTo("addObjectsMenu");
     createUI();
 }
@@ -39,6 +39,16 @@ void MenuManager::createUI() {
         this->switchTo("objectsMenu");
     });
 
+    auto switchToVerticesMenu = std::make_shared<Button>(
+sf::Vector2f(parentPosition.x - 60, 130),
+    sf::Vector2f(50, 50),
+    "V"
+    );
+
+    switchToVerticesMenu->setOnClick([this]() {
+        this->switchTo("verticesMenu");
+    });
+
     auto homeButton = std::make_shared<Button>(
         sf::Vector2f(10, 10),
         sf::Vector2f(120, 50),
@@ -51,6 +61,7 @@ void MenuManager::createUI() {
     components.emplace_back(background);
     components.emplace_back(switchToAddMenu);
     components.emplace_back(switchToObjectsMenu);
+    components.emplace_back(switchToVerticesMenu);
     components.emplace_back(homeButton);
 }
 

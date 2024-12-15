@@ -226,3 +226,11 @@ sf::Vector2f Scene::getPosition() const {
 }
 
 void Scene::setPosition(const sf::Vector2f& position) {}
+
+bool Scene::getVerticesEditMode() {
+    return verticesEditMode;
+}
+
+void Scene::setVerticesEditMode(bool value) {
+    verticesEditMode = value;
+}
