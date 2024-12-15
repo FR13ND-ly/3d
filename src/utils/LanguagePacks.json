@@ -27,7 +27,15 @@
       "Vertex": "Vertex",
       "Object": "Object",
       "Face": "Face",
-      "Add": "Add"
+      "Add": "Add",
+      "Vertex Properties": "Vertex Properties",
+      "Delete": "Delete",
+      "Create Edge": "Create Edge",
+      "Create Face": "Create Face",
+      "Face properties": "Face Properties",
+      "Vertices 1": "Vertice 1",
+      "Vertices 2": "Vertice 2",
+      "Vertices 3": "Vertice 3"
 
     }
   },
