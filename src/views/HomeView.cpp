@@ -5,7 +5,9 @@
 #include "../core/ui/NumberInput.hpp"
 #include "../core/ui/Expandable.hpp"
 
-HomeView::HomeView() {
+HomeView::HomeView() {}
+
+void HomeView::onActivate() {
     createUI();
 }
 

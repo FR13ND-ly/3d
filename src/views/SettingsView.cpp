@@ -91,17 +91,9 @@ void SettingsView::createUI() {
         languages, selectedLanguageIndex
     );
 
-   languageSelect->setOnClick(std::function<void(float)>([this](float index) {
-    try {
-        LanguageManager::getInstance().setLanguageByIndex(static_cast<int>(index));
-        components.clear();
-        createUI();
-    } catch (const std::exception& e) {
-        std::cerr << "Error while changing language: " << e.what() << std::endl;
-    }
-}));
-
-
+    languageSelect->setOnClick(static_cast<std::function<void(float)>>([](float index) -> void {
+        LanguageManager::getInstance().setLanguageByIndex(index);
+    }));
 
     auto backButton = std::make_shared<Button>(
         sf::Vector2f(100, 400),

@@ -12,7 +12,7 @@
 class HomeView : public View {
 public:
     HomeView(); // Constructor
-
+    void onActivate() override;
 private:
     void createUI(); // Function to create UI components
 };
