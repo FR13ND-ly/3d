@@ -16,7 +16,8 @@ class EditorView : public View {
 public:
     EditorView();
     void clearComponents();
-
+    void onActivate() override;
+    void onDeactivate() override;
 private:
     std::shared_ptr<Scene> scene;
 

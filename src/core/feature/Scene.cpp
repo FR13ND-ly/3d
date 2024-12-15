@@ -107,11 +107,11 @@ void Scene::handleKeyPressed(sf::Keyboard::Key key) {
             camera.rotateYaw(Config::getInstance().getSensitivity() * 1.5f);
             break;
         case sf::Keyboard::Q:
-            direction = Vector3(0, Config::getInstance().getSensitivity() * 0.1f, 0);
-            break;
+            getCamera().move(Vector3(0.0f, Config::getInstance().getSensitivity() * 0.1f, 0.0f));
+        break;
         case sf::Keyboard::E:
-            direction = Vector3(0, Config::getInstance().getSensitivity() * -0.1f, 0);
-            break;
+            getCamera().move(Vector3(0.0f, -Config::getInstance().getSensitivity() * 0.1f, 0.0f));
+        break;
         case sf::Keyboard::I:
             object->rotate(0.05f, 'x');
             break;

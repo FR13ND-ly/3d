@@ -5,11 +5,17 @@
 
 EditorView::EditorView() {
     initializeScene();
-    createUI();
 }
 
 void EditorView::clearComponents() {
     components.clear();
+}
+void EditorView::onActivate() {
+
+    createUI();
+}
+void EditorView::onDeactivate() {
+
 }
 
 void EditorView::initializeScene() {
