@@ -1,109 +1,62 @@
-#ifndef SCROLLVIEW_HPP
-#define SCROLLVIEW_HPP
+#ifndef SCROLL_VIEW_HPP
+#define SCROLL_VIEW_HPP
 
 #include <SFML/Graphics.hpp>
-#include "Component.hpp"
 #include <vector>
 #include <memory>
+#include "Component.hpp"
 
 class ScrollView : public Component {
 public:
-    ScrollView(const sf::Vector2f& position, const sf::Vector2f& size, const sf::Color& backgroundColor = sf::Color::White, const sf::Color& scrollbarColor = sf::Color::Black)
-        : size(size), backgroundColor(backgroundColor), scrollbarColor(scrollbarColor), offset(0.0f) {
+    // Constructor
+    ScrollView(const sf::Vector2f& position, const sf::Vector2f& size, float maxHeight);
 
-        background.setSize(size);
-        background.setPosition(position);
-        background.setFillColor(backgroundColor);
+    // Inherited from Component
+    void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
+    void draw(sf::RenderWindow& window) override;
 
-        scrollbar.setSize({ 10.0f, size.y });
-        scrollbar.setPosition(position.x + size.x - 10.0f, position.y);
-        scrollbar.setFillColor(scrollbarColor);
-    }
+    // Add a component to the scroll view
+    void addComponent(std::shared_ptr<Component> component);
 
-    void addComponent(const std::shared_ptr<Component>& component) {
-        components.push_back(component);
-    }
+    // Clear all components
+    void clearComponents();
 
-    void draw(sf::RenderWindow& window) override {
-        sf::View originalView = window.getView();
+    // Scroll-specific methods
+    void scrollUp();
+    void scrollDown();
 
-        // Clip the ScrollView area
-        sf::View scrollView;
-        scrollView.setViewport({
-            background.getPosition().x / window.getSize().x,
-            background.getPosition().y / window.getSize().y,
-            size.x / window.getSize().x,
-            size.y / window.getSize().y
-        });
-        scrollView.setCenter(background.getPosition() + size / 2.0f);
-        scrollView.setSize(size);
+    // Getters and Setters
+    float getScrollOffset() const;
+    void setScrollOffset(float offset);
 
-        window.setView(scrollView);
+    float getHeight() const override;
 
-        // Draw components
-        for (auto& component : components) {
-            component->draw(window);
-        }
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
 
-        window.setView(originalView);
-
-        // Draw background and scrollbar
-        window.draw(background);
-        if (needsScrollbar()) {
-            window.draw(scrollbar);
-        }
-    }
-
-    void handleEvent(const sf::Event& event, const sf::RenderWindow& window) override {
-        if (event.type == sf::Event::MouseWheelScrolled && needsScrollbar()) {
-            offset -= event.mouseWheelScroll.delta * 10.0f;
-            offset = std::max(0.0f, std::min(offset, getMaxScrollOffset()));
-            updateComponentPositions();
-        }
-
-        for (auto& component : components) {
-            component->handleEvent(event, window);
-        }
-    }
+protected:
+    // Override inBounds to check if point is within scroll view
+    bool inBounds(const sf::Vector2i &mousePos) const override;
 
 private:
-    sf::RectangleShape background;
-    sf::RectangleShape scrollbar;
-    std::vector<std::shared_ptr<Component>> components;
+    sf::Vector2f position;
     sf::Vector2f size;
-    sf::Color backgroundColor;
-    sf::Color scrollbarColor;
-    float offset;
+    float maxHeight;
 
-    bool needsScrollbar() const {
-        float totalHeight = 0.0f;
-        for (const auto& component : components) {
-            totalHeight += component->getGlobalBounds().height;
-        }
-        return totalHeight > size.y;
-    }
+    std::vector<std::shared_ptr<Component>> components;
 
-    float getMaxScrollOffset() const {
-        float totalHeight = 0.0f;
-        for (const auto& component : components) {
-            totalHeight += component->getGlobalBounds().height;
-        }
-        return std::max(0.0f, totalHeight - size.y);
-    }
+    float scrollOffset;
+    sf::RectangleShape background;
+    sf::RectangleShape scrollBar;
+    sf::RectangleShape scrollHandle;
+    bool isScrolling;
 
-    void updateComponentPositions() {
-        float yOffset = -offset;
-        for (auto& component : components) {
-            sf::Vector2f position = component->getPosition();
-            position.y = yOffset;
-            component->setPosition(position);
-            yOffset += component->getGlobalBounds().height;
-        }
-
-        float scrollbarHeightRatio = size.y / (size.y + getMaxScrollOffset());
-        scrollbar.setSize({ scrollbar.getSize().x, size.y * scrollbarHeightRatio });
-        scrollbar.setPosition(scrollbar.getPosition().x, background.getPosition().y + (offset / getMaxScrollOffset()) * (size.y - scrollbar.getSize().y));
-    }
+    // Calculation methods
+    void updateScrollBar();
+    void updateComponentPositions();
+    float getTotalContentHeight() const;
+    void handleScrolling(const sf::Event &event, const sf::RenderWindow &window);
+    void setBackgroundColor(const sf::Color& color);
 };
 
-#endif
+#endif // SCROLL_VIEW_HPP

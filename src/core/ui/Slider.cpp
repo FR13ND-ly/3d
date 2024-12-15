@@ -62,3 +62,21 @@ void Slider::setValue(float value) {
     float newPos = track.getPosition().x + ((currentValue - minValue) / (maxValue - minValue)) * track.getSize().x;
     handle.setPosition(newPos, position.y + (size.y / 2));
 }
+
+float Slider::getHeight() const {
+    return size.y;
+}
+
+sf::Vector2f Slider::getPosition() const {
+    return position;
+}
+
+void Slider::setPosition(const sf::Vector2f& newPosition) {
+    position = newPosition;
+
+    // Set the position of the track (the background of the slider)
+    track.setPosition(position);
+
+    // Set the position of the handle (the draggable part)
+    handle.setPosition(position.x + ((currentValue - minValue) / (maxValue - minValue)) * track.getSize().x, position.y + (size.y / 2));
+}

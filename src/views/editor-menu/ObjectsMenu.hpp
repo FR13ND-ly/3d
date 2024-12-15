@@ -24,15 +24,17 @@ private:
     void createUI();
     void updatePropertiesMenu();
 
-    std::vector<std::shared_ptr<Component>> objectListComponents;
-    std::vector<std::shared_ptr<Component>> propertiesMenuComponents;
+    std::vector<std::shared_ptr<Component>> objectList;
+    std::vector<std::shared_ptr<Component>> objectPropertiesMenu;
+    std::vector<std::shared_ptr<Component>> facePropertiesMenu;
 
     unsigned int selectedObjectIndex;
-    unsigned int selectedFaceIndex;
-    unsigned int selectedVerticeIndex;
+    int selectedFaceIndex = -1;
     std::shared_ptr<Object3d> currentSelectedObject;
 
-    void addObjectPropertiesMenu(std::shared_ptr<Object3d> object, int marginTop);
+
+    void addObjectPropertiesMenu(std::shared_ptr<Object3d> object);
+    void addFacePropertiesMenu();
 };
 
 #endif

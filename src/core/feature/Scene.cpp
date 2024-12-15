@@ -208,3 +208,13 @@ int Scene::getSelectedObjectIndex() const {
 bool Scene::inBounds(const sf::Vector2i &mousePos) const {
     return mousePos.x >= 0 && mousePos.x < window.getSize().x - 350 && mousePos.y >= 0 && mousePos.y < window.getSize().y;
 }
+
+float Scene::getHeight() const {
+    return window.getSize().y;
+}
+
+sf::Vector2f Scene::getPosition() const {
+    return sf::Vector2f({0.f, 0.f});
+}
+
+void Scene::setPosition(const sf::Vector2f& position) {}

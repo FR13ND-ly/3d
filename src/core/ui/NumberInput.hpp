@@ -29,6 +29,11 @@ public:
     void setMinValue(float min);
     void setMaxValue(float max);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     sf::RectangleShape inputBox;
     sf::Text inputText;

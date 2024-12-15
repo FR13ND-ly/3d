@@ -3,6 +3,7 @@
 #include "../utils/LanguageManager.hpp"
 #include "../core/ui/Input.hpp"
 #include "../core/ui/NumberInput.hpp"
+#include "../core/ui/Expandable.hpp"
 
 HomeView::HomeView() {
     createUI();
@@ -29,26 +30,42 @@ void HomeView::createUI() {
     settings->setOnClick([this]() {
         ViewsManager::getInstance().switchTo("settings");
     });
-    auto numberInput = std::make_shared<NumberInput>(
-        sf::Vector2f(300, 200),
-        sf::Vector2f(200, 50),
-        "Position X"
-    );
-    numberInput->setValue(2);
-
-    numberInput->setOnClick(std::function<void(float)>([this](float value) {
-        std::cout << value << std::endl;
-    }));
-
 
     auto myText = std::make_shared<Text>(
         sf::Vector2f(400, 100),
         20,
         "Home Page"
     );
+    auto expandable = std::make_shared<Expandable>(
+        sf::Vector2f(1000, 100),
+        sf::Vector2f(200, 50),
+        "Expandable"
+    );
+
+    expandable->addContent(std::make_shared<Button>(
+        sf::Vector2f(1000, 200),
+        sf::Vector2f(200, 50),
+        languagePack["settings"]
+    ));
+    expandable->addContent(std::make_shared<Button>(
+    sf::Vector2f(1000, 200),
+    sf::Vector2f(200, 50),
+    languagePack["settings"]
+));
+    expandable->addContent(std::make_shared<Button>(
+    sf::Vector2f(1000, 200),
+    sf::Vector2f(200, 50),
+    languagePack["settings"]
+));
+
+
+    // expandable.setOnClick([](bool isExpanded) {
+    //     std::cout << "Expanded state: " << (isExpanded ? "Opened" : "Closed") << std::endl;
+    // });
+
 
     this->addComponent(myText);
     this->addComponent(myButton);
     this->addComponent(settings);
-    this->addComponent(numberInput);
+    // this->addComponent(expandable);
 }

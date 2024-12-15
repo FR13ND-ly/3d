@@ -78,3 +78,27 @@ int Select::getSelectedIndex() const {
 void Select::setOnSelect(const std::function<void(float)>& callback) {
     onClickWithFloat = callback;
 }
+
+float Select::getHeight() const {
+    if (isOpen) return box.getGlobalBounds().top + box.getGlobalBounds().height;
+    return selectedText.getGlobalBounds().height;
+}
+
+sf::Vector2f Select::getPosition() const {
+    return position;
+}
+
+void Select::setPosition(const sf::Vector2f &newPosition) {
+    position = newPosition;
+
+    // Update the position of the main box
+    box.setPosition(position);
+
+    // Update the position of the selected text (the currently selected option)
+    selectedText.setPosition(position.x + 10, position.y + 5);
+
+    // Update the positions of each option's text
+    for (size_t i = 0; i < options.size(); ++i) {
+        optionTexts[i].setPosition({position.x, position.y + (i + 1) * 30 + 10});
+    }
+}

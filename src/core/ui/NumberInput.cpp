@@ -194,6 +194,27 @@ void NumberInput::setMaxValue(float max) {
 }
 
 bool NumberInput::inBounds(const sf::Vector2i& mousePos) const {
-    std::cout << inputBox.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)) << std::endl;
     return inputBox.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 }
+
+float NumberInput::getHeight() const {
+    return inputBox.getSize().y;
+}
+
+sf::Vector2f NumberInput::getPosition() const {
+    return inputBox.getPosition();
+}
+
+void NumberInput::setPosition(const sf::Vector2f &position) {
+    inputBox.setPosition(position);
+
+    // Reposition the input text inside the box, considering padding
+    inputText.setPosition(position.x + 5, position.y + (inputBox.getSize().y * 0.25f));
+
+    // Reposition the title above the input box
+    title.setPosition(position.x + 5, position.y - title.getCharacterSize() * 0.5f);
+
+    // Reposition the placeholder text within the box
+    placeholderTextDisplay.setPosition(position.x + 5, position.y + (inputBox.getSize().y * 0.2f));
+}
+

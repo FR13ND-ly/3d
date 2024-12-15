@@ -24,6 +24,11 @@ public:
     void setParentPosition(const sf::Vector2f& position);
     void setParentSize(const sf::Vector2f& size);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     sf::Vector2f parentSize = {350.f, 1180.f};
     sf::Vector2f parentPosition = {1920.f - parentSize.x, 0.f};

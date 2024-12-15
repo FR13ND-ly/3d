@@ -26,6 +26,11 @@ public:
 
     void onSelect(int index);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     sf::Vector2f position;
     sf::Vector2f size;

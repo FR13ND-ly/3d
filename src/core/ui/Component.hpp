@@ -16,7 +16,10 @@ public:
     void setOnClick(const std::function<void(bool)>& callback);
     void setOnClick(const std::function<void(float)>& callback);
     void setOnClick(const std::function<void(std::string)>& callback);
+    virtual float getHeight() const = 0;
 
+    virtual sf::Vector2f getPosition() const = 0;
+    virtual void setPosition(const sf::Vector2f& position) = 0;;
 protected:
     std::function<void()> onClick;
     std::function<void(bool)> onClickWithBool;

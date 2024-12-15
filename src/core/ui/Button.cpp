@@ -1,5 +1,7 @@
 #include "Button.hpp"
 
+#include <iostream>
+
 Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const std::string &text, const sf::Color &color, const sf::Color &textColor) {
     buttonRect.setSize(size);
     buttonRect.setPosition(position);
@@ -29,7 +31,14 @@ void Button::draw(sf::RenderWindow &window) {
 }
 
 void Button::handleEvent(const sf::Event &event, const sf::RenderWindow &window) {
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+    sf::Vector2i mousePos;
+    if (event.type == sf::Event::MouseMoved) {
+        mousePos = {event.mouseMove.x, event.mouseMove.y};
+    } else if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased) {
+        mousePos = {event.mouseButton.x, event.mouseButton.y};
+    } else {
+        return;
+    }
     bool isHovered = inBounds(mousePos);
 
     if (isHovered) {
@@ -56,10 +65,30 @@ bool Button::inBounds(const sf::Vector2i &mousePos) const {
     return buttonRect.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 }
 
+float Button::getHeight() const {
+    return buttonRect.getSize().y;
+}
+
+
 sf::Color Button::darkenColor(const sf::Color &color, int amount) {
     return sf::Color(
         std::max(0, color.r - amount),
         std::max(0, color.g - amount),
         std::max(0, color.b - amount)
+    );
+}
+
+sf::Vector2f Button::getPosition() const {
+    return buttonRect.getPosition();
+}
+
+void Button::setPosition(const sf::Vector2f &position)   {
+    buttonRect.setPosition(position);
+
+    // Adjust the text position to keep it centered on the button
+    sf::FloatRect textBounds = buttonText.getLocalBounds();
+    buttonText.setPosition(
+        position.x + buttonRect.getSize().x / 2,
+        position.y + buttonRect.getSize().y / 2 - textBounds.height / 2
     );
 }

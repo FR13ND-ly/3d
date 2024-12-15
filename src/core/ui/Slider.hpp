@@ -17,6 +17,11 @@ public:
     float getValue() const;
     void setValue(float value);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     // Member variables
     sf::RectangleShape track;

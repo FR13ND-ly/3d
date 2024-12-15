@@ -28,3 +28,15 @@ void Text::setText(const std::string &text) {
 bool Text::inBounds(const sf::Vector2i &mousePos) const {
     return content.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 }
+
+float Text::getHeight() const {
+    return content.getGlobalBounds().height;
+}
+
+sf::Vector2f Text::getPosition() const {
+    return content.getPosition();
+}
+
+void Text::setPosition(const sf::Vector2f& newPosition) {
+    content.setPosition(newPosition);
+}

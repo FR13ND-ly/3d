@@ -31,11 +31,19 @@ void Surface::setSize(const sf::Vector2f& size) {
     rectangle.setSize(size);
 }
 
-void Surface::setPosition(const sf::Vector2f& position) {
-    rectangle.setPosition(position);
-}
-
 // InBounds function definition
 bool Surface::inBounds(const sf::Vector2i& mousePos) const {
     return rectangle.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+}
+
+float Surface::getHeight() const {
+    return rectangle.getSize().y;
+}
+
+sf::Vector2f Surface::getPosition() const {
+    return rectangle.getPosition();
+}
+
+void Surface::setPosition(const sf::Vector2f& newPosition) {
+    rectangle.setPosition(newPosition);
 }

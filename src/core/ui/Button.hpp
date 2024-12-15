@@ -20,6 +20,11 @@ public:
     void draw(sf::RenderWindow &window);
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     sf::RectangleShape buttonRect;
     sf::Text buttonText;

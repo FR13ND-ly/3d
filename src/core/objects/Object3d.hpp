@@ -33,10 +33,16 @@ public:
     void setRotation(const Vector3& newRotation);
     void setScale(const Vector3& newScale);
 
+    std::string getFaceColor(int faceIndex) const;
+    void setFaceColor(int faceIndex, const std::string& hexColor);
+
+    std::array<Vector3, 3> getFaceVerticesForEditing(int faceIndex) const;
+    void updateFaceVertex(int faceIndex, int vertexPosition, const Vector3& newVertexPosition);
+
+
     std::vector<Vector3> getVertices();
     std::vector<std::pair<int, int>> getEdges();
     std::vector<std::array<int, 7>> getFaces();
-
 protected:
     std::vector<Vector3> vertices;
     std::vector<std::pair<int, int>> edges;

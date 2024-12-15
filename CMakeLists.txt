@@ -20,7 +20,6 @@ FetchContent_MakeAvailable(SFML)
 include_directories(${CMAKE_SOURCE_DIR}/modules/nlohmann_json/include)
 include_directories(${CMAKE_SOURCE_DIR}/modules/cpptoml/include)
 
-# List all source files (add the new source files here)
 set(SOURCE_FILES
         src/main.cpp
         src/core/feature/App.cpp
@@ -36,10 +35,12 @@ set(SOURCE_FILES
         src/core/ui/Button.cpp
         src/core/ui/Checkbox.cpp
         src/core/ui/Component.cpp
+        src/core/ui/Expandable.cpp
         src/core/ui/Input.cpp
         src/core/ui/NumberInput.cpp
         src/core/ui/Select.cpp
         src/core/ui/Slider.cpp
+        src/core/ui/ScrollView.cpp
         src/core/ui/Surface.cpp
         src/core/ui/Text.cpp
         src/utils/FontManager.cpp

@@ -29,6 +29,12 @@ public:
     void onChangeSelectedObjectIndex(int selectedObjectIndex);
     int getSelectedObjectIndex() const;
     explicit Scene(sf::RenderWindow &window);
+
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 private:
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;

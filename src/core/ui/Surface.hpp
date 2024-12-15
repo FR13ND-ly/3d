@@ -14,7 +14,11 @@ public:
 
     void setColor(const sf::Color& color);
     void setSize(const sf::Vector2f& size);
-    void setPosition(const sf::Vector2f& position);
+
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
 
 protected:
     sf::RectangleShape rectangle;

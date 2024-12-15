@@ -90,3 +90,18 @@ void MenuManager::setParentPosition(const sf::Vector2f &position) {
 void MenuManager::setParentSize(const sf::Vector2f &size) {
     parentSize = size;
 }
+
+float MenuManager::getHeight() const {
+    return parentSize.y;
+}
+
+sf::Vector2f MenuManager::getPosition() const {
+    return parentPosition;
+}
+
+void MenuManager::setPosition(const sf::Vector2f& position) {
+    parentPosition = position;
+    if (currentMenu) {
+        currentMenu->setParentPosition(position);
+    }
+}

@@ -17,6 +17,11 @@ public:
     bool getChecked() const;
     void setChecked(bool checked);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     sf::RectangleShape box;
     sf::RectangleShape check;

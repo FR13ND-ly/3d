@@ -1,4 +1,7 @@
 #include "Object3d.hpp"
+#include "sstream"
+#include <algorithm>
+#include <iomanip>
 
 Object3d::Object3d()
     : transform(Matrix4::identity()), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
@@ -56,21 +59,16 @@ void Object3d::rotate(float angle, char axis) {
 }
 
 void Object3d::setRotation(const Vector3& newRotation) {
-    // Update the internal rotation vector
     rotation = newRotation;
 
-    // Construct the new rotation matrices for each axis
     Matrix4 rotationX = Matrix4::rotationX(newRotation.x);
     Matrix4 rotationY = Matrix4::rotationY(newRotation.y);
     Matrix4 rotationZ = Matrix4::rotationZ(newRotation.z);
 
-    // Combine the rotation matrices (order matters, e.g., ZYX or XYZ)
     Matrix4 rotationMatrix = rotationZ * rotationY * rotationX; // Assuming ZYX rotation order
 
-    // Preserve the current position and scale
     Matrix4 translationMatrix = Matrix4::translation(position.x, position.y, position.z);
     Matrix4 scaleMatrix = Matrix4::scale(scale.x, scale.y, scale.z);
-    // Rebuild the transform matrix with the new rotation
     transform = translationMatrix * rotationMatrix * scaleMatrix;
 }
 
@@ -124,4 +122,82 @@ std::vector<std::pair<int, int>> Object3d::getEdges() {
 
 std::vector<std::array<int, 7>> Object3d::getFaces() {
     return faces;
+}
+
+void Object3d::setFaceColor(int faceIndex, const std::string& hexColor) {
+    if (faceIndex < 0 || faceIndex >= faces.size()) {
+        // throw std::out_of_range("Invalid face index");
+        return;
+    }
+
+    if (hexColor.length() != 7 && hexColor.length() != 9 || hexColor[0] != '#') {
+        return;
+        // throw std::invalid_argument("Invalid hex color string");
+    }
+
+    int r, g, b, a = 255;
+
+    std::stringstream ss;
+    ss << std::hex << hexColor.substr(1, 2); ss >> r;
+    ss.clear();
+    ss << std::hex << hexColor.substr(3, 2); ss >> g;
+    ss.clear();
+    ss << std::hex << hexColor.substr(5, 2); ss >> b;
+
+    // If the hex string has an alpha value (8 characters), extract it
+    if (hexColor.length() == 9) {
+        ss.clear();
+        ss << std::hex << hexColor.substr(7, 2); ss >> a;
+    }
+
+    // Store the color and alpha values in the face array
+    faces[faceIndex][3] = r;  // Red
+    faces[faceIndex][4] = g;  // Green
+    faces[faceIndex][5] = b;  // Blue
+    faces[faceIndex][6] = a;  // Alpha
+}
+
+std::string Object3d::getFaceColor(int faceIndex) const {
+    if (faceIndex < 0 || faceIndex >= faces.size()) {
+        throw std::out_of_range("Invalid face index");
+    }
+
+    int r = faces[faceIndex][3];
+    int g = faces[faceIndex][4];
+    int b = faces[faceIndex][5];
+    int a = faces[faceIndex][6];
+
+    std::stringstream ss;
+    ss << "#";
+    ss << std::hex << std::setw(2) << std::setfill('0') << r;
+    ss << std::hex << std::setw(2) << std::setfill('0') << g;
+    ss << std::hex << std::setw(2) << std::setfill('0') << b;
+    ss << std::hex << std::setw(2) << std::setfill('0') << a;
+
+    return ss.str();
+}
+
+std::array<Vector3, 3> Object3d::getFaceVerticesForEditing(int faceIndex) const {
+    if (faceIndex < 0 || faceIndex >= faces.size()) {
+        throw std::out_of_range("Invalid face index");
+    }
+
+    const auto& face = faces[faceIndex];
+
+    return {vertices[face[0]], vertices[face[1]], vertices[face[2]]};
+}
+
+void Object3d::updateFaceVertex(int faceIndex, int vertexPosition, const Vector3& newVertexPosition) {
+    if (faceIndex < 0 || faceIndex >= faces.size()) {
+        throw std::out_of_range("Invalid face index");
+    }
+    if (vertexPosition < 0 || vertexPosition > 2) {
+        throw std::out_of_range("Invalid vertex position (must be 0, 1, or 2)");
+    }
+
+    const auto& face = faces[faceIndex];
+    int vertexIndex = face[vertexPosition];
+
+    // Update the vertex in the main vertices array
+    vertices[vertexIndex] = newVertexPosition;
 }

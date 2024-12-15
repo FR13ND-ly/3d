@@ -18,6 +18,11 @@ public:
 
     void setText(const std::string &text);
 
+    float getHeight() const override;
+
+    sf::Vector2f getPosition() const override;
+    void setPosition(const sf::Vector2f& position) override;
+
 protected:
     sf::Text content;         // SFML Text object
     sf::Color color;          // Color of the text
