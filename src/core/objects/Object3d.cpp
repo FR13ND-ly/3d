@@ -273,7 +273,6 @@ bool Object3d::isVertexSelected(unsigned int vertexIndex) const {
 
 void Object3d::createFace() {
     if (selectedVertices.size() < 3) {
-        // Not enough vertices to create a face
         return;
     }
 

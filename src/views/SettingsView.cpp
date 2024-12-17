@@ -13,11 +13,15 @@
 #include "../core/ui/Checkbox.hpp"
 #include "../core/ui/Select.hpp"
 
-SettingsView::SettingsView() {
+SettingsView::SettingsView() {}
+
+void SettingsView::onActivate() {
     createUI();
 }
 
+
 void SettingsView::createUI() {
+    components.clear();
     Config &config = Config::getInstance();
     auto languagePack = LanguageManager::getInstance().getSelectedPack();
     auto projectsPathText = std::make_shared<Text>(
@@ -92,13 +96,7 @@ void SettingsView::createUI() {
     );
 
    languageSelect->setOnClick(std::function<void(float)>([this](float index) {
-    try {
         LanguageManager::getInstance().setLanguageByIndex(static_cast<int>(index));
-        components.clear();
-        createUI();
-    } catch (const std::exception& e) {
-        std::cerr << "Error while changing language: " << e.what() << std::endl;
-    }
 }));
 
 
@@ -122,8 +120,4 @@ void SettingsView::createUI() {
     this->addComponent(sensitivitySlider);
     this->addComponent(languageText);
     this->addComponent(languageSelect);
-
-    // Back button to switch to the projects view
-
-
 }

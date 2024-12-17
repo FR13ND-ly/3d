@@ -7,13 +7,12 @@
 #include <functional>
 #include "Component.hpp"
 #include "Button.hpp"
+#include <memory>
 
 class Select : public Component {
 public:
     // Constructor
     Select(const sf::Vector2f& position, const sf::Vector2f& size, const std::vector<std::string>& options, int defaultIndex = 0);
-
-    // Event handling and drawing functions
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
     void draw(sf::RenderWindow& window) override;
 
@@ -35,7 +34,7 @@ protected:
     sf::Vector2f position;
     sf::Vector2f size;
     std::vector<std::string> options;
-    std::vector<Button> optionTexts;
+    std::vector<std::shared_ptr<Button>> optionTexts;
     int selectedIndex;
     bool isOpen;
 

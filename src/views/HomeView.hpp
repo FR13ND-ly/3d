@@ -11,10 +11,11 @@
 
 class HomeView : public View {
 public:
-    HomeView(); // Constructor
+    HomeView();
 
+    void onActivate() override;
 private:
-    void createUI(); // Function to create UI components
+    void createUI();
 };
 
 #endif

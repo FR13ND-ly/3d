@@ -16,20 +16,20 @@ Select::Select(const sf::Vector2f& position, const sf::Vector2f& size, const std
     selectedText.setFillColor(sf::Color::White);
     selectedText.setString(options[selectedIndex]);
     selectedText.setPosition(position.x + 10, position.y + 5);
-
     for (size_t i = 0; i < options.size(); ++i) {
-        Button text = Button(
-            {position.x, position.y + (i + 1) * 30 + 10},
-            {size.x, 30},
+        auto text = std::make_shared<Button>(
+            sf::Vector2f(position.x, position.y + (i + 1) * 30 + 10),
+            sf::Vector2f(size.x, 30),
             options[i],
             sf::Color(50, 50, 50),
             sf::Color::White
         );
-        text.setOnClick([this, i]()-> void {
+        text->setOnClick([this, i]()-> void {
             if (isOpen) {
                 selectedIndex = i;
                 selectedText.setString(this->options[selectedIndex]);
                 isOpen = false;
+                std::cout << static_cast<float>(selectedIndex) << std::endl;
                 if (onClickWithFloat) {
                     onClickWithFloat(static_cast<float>(selectedIndex));
                 }
@@ -48,7 +48,9 @@ void Select::handleEvent(const sf::Event &event, const sf::RenderWindow &window)
             isOpen = false;
         }
         for (size_t i = 0; i < options.size(); ++i) {
-            optionTexts[i].handleEvent(event, window);
+            if (optionTexts[i]) {
+                optionTexts[i]->handleEvent(event, window);
+            }
         }
 
     }
@@ -59,7 +61,7 @@ void Select::draw(sf::RenderWindow& window) {
         window.draw(box);
         window.draw(selectedText);
         for (size_t i = 0; i < options.size(); ++i) {
-            optionTexts[i].draw(window);
+            optionTexts[i]->draw(window);
         }
     }
     else {
@@ -91,14 +93,11 @@ sf::Vector2f Select::getPosition() const {
 void Select::setPosition(const sf::Vector2f &newPosition) {
     position = newPosition;
 
-    // Update the position of the main box
     box.setPosition(position);
 
-    // Update the position of the selected text (the currently selected option)
     selectedText.setPosition(position.x + 10, position.y + 5);
 
-    // Update the positions of each option's text
     for (size_t i = 0; i < options.size(); ++i) {
-        optionTexts[i].setPosition({position.x, position.y + (i + 1) * 30 + 10});
+        optionTexts[i]->setPosition({position.x, position.y + (i + 1) * 30 + 10});
     }
 }

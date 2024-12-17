@@ -6,7 +6,7 @@
 class SettingsView : public View {
 public:
     SettingsView();
-
+    void onActivate() override;
 private:
     void createUI();
 };

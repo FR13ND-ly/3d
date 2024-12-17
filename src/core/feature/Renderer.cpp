@@ -144,7 +144,6 @@ void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
             sf::Vertex(screenPos3, color)
         };
 
-
         window.draw(triangle, 3, sf::Triangles);
     }
 }
