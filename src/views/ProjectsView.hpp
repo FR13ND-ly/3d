@@ -13,8 +13,8 @@ class ProjectsView: public View {
 public:
     ProjectsView();
 
-    virtual void onActivate();
-    virtual void onDeactivate();
+     void onActivate() override;
+     void onDeactivate() override;
 
 private:
     void createUI();

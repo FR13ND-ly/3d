@@ -33,10 +33,11 @@
       "Create Edge": "Create Edge",
       "Create Face": "Create Face",
       "Face properties": "Face Properties",
-      "Vertices 1": "Vertice 1",
-      "Vertices 2": "Vertice 2",
-      "Vertices 3": "Vertice 3"
-
+      "Vertices 1": "Vertices 1",
+      "Vertices 2": "Vertices 2",
+      "Vertices 3": "Vertices 3",
+      "Click Me": "Click Me",
+      "Projects Page": "Projects Page"
     }
   },
   {
@@ -75,7 +76,9 @@
       "Face properties": "Proprietatile fetei",
       "Vertices 1": "Nod 1",
       "Vertices 2": "Nod 2",
-      "Vertices 3": "Nod 3"
+      "Vertices 3": "Nod 3",
+      "Click Me": "Apasa-ma",
+      "Projects Page": "Pagina de proiecte"
     }
   }
 ]

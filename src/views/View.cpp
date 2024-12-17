@@ -13,7 +13,7 @@ void View::addComponent(std::shared_ptr<Component> component) {
 }
 
 void View::draw(sf::RenderWindow& window) {
-    for (const auto& component : components) {
+    for (auto& component : components) {
         component->draw(window);
     }
 }
