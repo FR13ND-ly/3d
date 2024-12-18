@@ -1,5 +1,5 @@
-#ifndef OBJECTS_MENU_HPP
-#define OBJECTS_MENU_HPP
+#ifndef FACES_MENU_HPP
+#define FACES_MENU_HPP
 
 #include <SFML/Graphics.hpp>
 #include <memory>
@@ -10,9 +10,9 @@
 #include "Menu.hpp"
 #include "../../core/objects/Object3d.hpp"
 
-class ObjectsMenu: public Menu {
+class FacesMenu: public Menu {
 public:
-    ObjectsMenu();
+    FacesMenu();
 
     virtual void onActivate();
     virtual void onDeactivate();
@@ -22,12 +22,10 @@ public:
 
 private:
     void createUI();
-    void updatePropertiesMenu();
 
     std::vector<std::shared_ptr<Component>> objectList;
-    std::vector<std::shared_ptr<Component>> objectPropertiesMenu;
+    std::vector<std::shared_ptr<Component>> facePropertiesMenu;
 
-    unsigned int selectedObjectIndex;
     std::shared_ptr<Object3d> currentSelectedObject;
 
 

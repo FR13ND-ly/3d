@@ -22,10 +22,8 @@ public:
 
 private:
     void createUI();
-    void updatePropertiesMenu();
 
     std::vector<std::shared_ptr<Component>> objectList;
-    std::vector<std::shared_ptr<Component>> objectPropertiesMenu;
     std::vector<std::shared_ptr<Component>> vertexPropertiesMenu;
 
     unsigned int selectedObjectIndex;

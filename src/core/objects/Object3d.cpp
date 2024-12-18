@@ -2,6 +2,7 @@
 #include "sstream"
 #include <algorithm>
 #include <iomanip>
+#include <unordered_set>
 
 Object3d::Object3d()
     : transform(Matrix4::identity()), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
@@ -266,6 +267,9 @@ void Object3d::deleteVertex(int vertexIndex) {
         }
     }
 }
+bool Object3d::isFaceSelected(unsigned int faceIndex) const {
+    return std::find(selectedFaces.begin(), selectedFaces.end(), faceIndex) != selectedFaces.end();
+}
 
 bool Object3d::isVertexSelected(unsigned int vertexIndex) const {
     return std::find(selectedVertices.begin(), selectedVertices.end(), vertexIndex) != selectedVertices.end();
@@ -296,3 +300,142 @@ void Object3d::createEdge() {
 
     edges.push_back(edge);
 }
+
+void Object3d::moveFaces(const Vector3& translation) {
+    std::unordered_set<int> updatedVertices; // Track updated vertices by their indices
+
+    for (unsigned int faceIndex : selectedFaces) {
+        if (faceIndex >= faces.size()) {
+            throw std::out_of_range("Invalid face index in selectedFaces");
+        }
+
+        const auto& face = faces[faceIndex];
+
+        // Translate each vertex in the face if it hasn't been updated yet
+        for (int i = 0; i < 3; ++i) {
+            int vertexIndex = face[i];
+            if (updatedVertices.find(vertexIndex) == updatedVertices.end()) {
+                vertices[vertexIndex] = vertices[vertexIndex] + translation;
+                updatedVertices.insert(vertexIndex); // Mark the vertex as updated
+            }
+        }
+    }
+}
+
+void Object3d::rotateFaces(float angle, char axis) {
+    if (selectedFaces.empty()) return;
+
+    // Step 1: Calculate the centroid of the selected faces
+    Vector3 centroid(0.0f, 0.0f, 0.0f);
+    int totalVertices = 0;
+
+    for (unsigned int faceIndex : selectedFaces) {
+        if (faceIndex >= faces.size()) {
+            throw std::out_of_range("Invalid face index in selectedFaces");
+        }
+
+        const auto& face = faces[faceIndex];
+        for (int i = 0; i < 3; ++i) {
+            centroid = centroid + vertices[face[i]];
+        }
+        totalVertices += 3;
+    }
+
+    centroid = centroid / static_cast<float>(totalVertices);
+
+    // Step 2: Determine the rotation matrix
+    Matrix4 rotationMatrix;
+    switch (axis) {
+        case 'x':
+            rotationMatrix = Matrix4::rotationX(angle);
+        break;
+        case 'y':
+            rotationMatrix = Matrix4::rotationY(angle);
+        break;
+        case 'z':
+            rotationMatrix = Matrix4::rotationZ(angle);
+        break;
+        default:
+            throw std::invalid_argument("Invalid rotation axis");
+    }
+
+    // Step 3: Rotate all unique vertices around the centroid
+    std::unordered_set<int> updatedVertices; // Track updated vertices
+
+    for (unsigned int faceIndex : selectedFaces) {
+        const auto& face = faces[faceIndex];
+
+        for (int i = 0; i < 3; ++i) {
+            int vertexIndex = face[i];
+
+            if (updatedVertices.find(vertexIndex) == updatedVertices.end()) {
+                // Translate vertex to origin relative to centroid
+                Vector3 relativePosition = vertices[vertexIndex] - centroid;
+
+                // Apply rotation
+                Vector3 rotatedPosition = rotationMatrix * relativePosition;
+
+                // Translate back to original position
+                vertices[vertexIndex] = rotatedPosition + centroid;
+
+                updatedVertices.insert(vertexIndex); // Mark as updated
+            }
+        }
+    }
+}
+
+void Object3d::scaleFaces(float delta) {
+    if (selectedFaces.empty()) return;
+
+    // Ensure the delta is within a reasonable range
+    // Delta can be any real number, positive or negative
+    if (delta < -1.0f || delta > 1.0f) {
+        throw std::invalid_argument("Delta must be between -1 and 1");
+    }
+
+    // Step 1: Calculate the centroid of the selected faces
+    Vector3 centroid(0.0f, 0.0f, 0.0f);
+    int totalVertices = 0;
+
+    for (unsigned int faceIndex : selectedFaces) {
+        if (faceIndex >= faces.size()) {
+            throw std::out_of_range("Invalid face index in selectedFaces");
+        }
+
+        const auto& face = faces[faceIndex];
+        for (int i = 0; i < 3; ++i) {
+            centroid = centroid + vertices[face[i]];
+        }
+        totalVertices += 3;
+    }
+
+    centroid = centroid / static_cast<float>(totalVertices);
+
+    // Step 2: Scale all unique vertices relative to the centroid by the delta factor
+    std::unordered_set<int> updatedVertices; // Track updated vertices
+
+    for (unsigned int faceIndex : selectedFaces) {
+        const auto& face = faces[faceIndex];
+
+        for (int i = 0; i < 3; ++i) {
+            int vertexIndex = face[i];
+
+            if (updatedVertices.find(vertexIndex) == updatedVertices.end()) {
+                // Translate vertex to origin relative to centroid
+                Vector3 relativePosition = vertices[vertexIndex] - centroid;
+
+                // Apply scaling delta: New scale factor = 1 + delta
+                float scaleFactor = 1.0f + delta;
+
+                // Apply the scale transformation to the vertex
+                Vector3 scaledPosition = relativePosition * scaleFactor;
+
+                // Translate back to the original position
+                vertices[vertexIndex] = scaledPosition + centroid;
+
+                updatedVertices.insert(vertexIndex); // Mark as updated
+            }
+        }
+    }
+}
+

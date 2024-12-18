@@ -4,11 +4,11 @@
 #include <SFML/Graphics.hpp>
 #include "Camera.hpp"
 #include "../objects/Object3D.hpp"
-#include "../objects/Cube.hpp"
 #include "../../utils/math/Matrix4.hpp"
 #include "../../utils/math/Vector3.hpp"
 #include "../../utils/math/Vector4.hpp"
 #include <memory>
+#include <vector>
 
 struct FaceData {
     Vector3 v1, v2, v3;
@@ -19,16 +19,25 @@ struct FaceData {
 
 class Renderer {
 public:
-    Renderer(sf::RenderWindow& window);
+    explicit Renderer(sf::RenderWindow& window);
 
-    virtual void render(std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera);
-    void renderFaces(const std::vector<FaceData>& facesToRender);
-    void renderEdges(std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera);
+    void render(const std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera);
     void renderGrid(float size, float spacing, Camera& camera);
+
 protected:
     sf::RenderWindow& window;
-    bool isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3& v3);
-    bool isObjectInFrustum(const std::vector<Vector3>& vertices);
+
+private:
+    void renderFaces(const std::vector<FaceData>& facesToRender);
+    void renderEdges(const std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera);
+
+    bool isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3& v3) const;
+    bool isObjectInFrustum(const std::vector<Vector3>& vertices) const;
+    std::vector<Vector3> transformVertices(const std::vector<Vector3>& vertices, const Matrix4& modelMatrix, const Matrix4& viewMatrix) const;
+    std::vector<Vector3> projectVertices(const std::vector<Vector3>& vertices, const Matrix4& projectionMatrix) const;
+    sf::Vector2f screenPosition(const Vector3& vertex) const;
+
+    void processObject(const std::shared_ptr<Object3d>& object, Camera& camera, std::vector<FaceData>& facesToRender);
 };
 
 #endif

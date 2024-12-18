@@ -26,12 +26,10 @@ set(SOURCE_FILES
         src/core/feature/Camera.cpp
         src/core/feature/Renderer.cpp
         src/core/feature/Scene.cpp
-        src/core/objects/Cube.cpp
         src/core/objects/CustomShape.cpp
         src/core/objects/GridPlane.cpp
         src/core/objects/Object3d.cpp
         src/core/objects/ObjectsFactory.cpp
-        src/core/objects/Sphere.cpp
         src/core/ui/Button.cpp
         src/core/ui/Checkbox.cpp
         src/core/ui/Component.cpp
@@ -61,6 +59,7 @@ set(SOURCE_FILES
         src/views/View.cpp
         src/views/ViewsManager.cpp
         src/views/editor-menu/AddObjectsMenu.cpp
+        src/views/editor-menu/FacesMenu.cpp
         src/views/editor-menu/MenuManager.cpp
         src/views/editor-menu/Menu.cpp
         src/views/editor-menu/ObjectsMenu.cpp

@@ -5,14 +5,17 @@
 
 Camera::Camera(float windowWidth, float windowHeight, float fov, float nearClip, float farClip)
     : position(-1.5f, 2.0f, -15.0f),
-      rotation(Vector4::eulerToQuaternion(-.05f, -.1f, 0)),
+      rotation(Vector4::eulerToQuaternion(0, 0, 0)),
       windowWidth(windowWidth),
       windowHeight(windowHeight),
       fov(fov),
       nearClip(nearClip),
       farClip(farClip),
       yaw(0.0f),
-      pitch(0.0f) {}
+      pitch(0.0f) {
+    rotatePitch(-5.f);
+    rotateYaw(-2.f);
+}
 
 Matrix4 Camera::getViewMatrix() const {
     Matrix4 rotationMatrix = quatToMatrix(Vector4::quaternionConjugate(rotation));

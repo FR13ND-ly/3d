@@ -20,7 +20,6 @@ public:
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
     void draw(sf::RenderWindow& window) override;
 
-
     void setParentPosition(const sf::Vector2f& position);
     void setParentSize(const sf::Vector2f& size);
 

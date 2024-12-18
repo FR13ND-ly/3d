@@ -37,8 +37,8 @@ NumberInput::NumberInput(const sf::Vector2f& position, const sf::Vector2f& size,
 
 void NumberInput::draw(sf::RenderWindow& window) {
     window.draw(inputBox);
-    if (isFocused) inputText.setColor(sf::Color::Black);
-    else inputText.setColor(sf::Color(150, 150, 150));
+    if (isFocused) inputText.setFillColor(sf::Color::Black);
+    else inputText.setFillColor(sf::Color(150, 150, 150));
     window.draw(title);
     if (displayValue.empty() && !isFocused) {
         window.draw(placeholderTextDisplay);
@@ -56,6 +56,7 @@ void NumberInput::handleEvent(const sf::Event& event, const sf::RenderWindow& wi
         if (wasAlreadyFocused && !isFocused) {
             validateAndUpdateValue();
         }
+
     }
 
     if (event.type == sf::Event::MouseWheelScrolled && inBounds(sf::Mouse::getPosition(window))) {

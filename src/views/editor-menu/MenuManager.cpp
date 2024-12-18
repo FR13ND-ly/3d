@@ -2,15 +2,17 @@
 
 #include "AddObjectsMenu.hpp"
 #include "ObjectsMenu.hpp"
+#include "FacesMenu.hpp"
+#include "VerticesMenu.hpp"
 #include "../../core/ui/Surface.hpp"
 #include "../ViewsManager.hpp"
-#include "VerticesMenu.hpp"
 #include "../../utils/LanguageManager.hpp"
 
 MenuManager::MenuManager() {
 
     this->addView("addObjectsMenu", std::make_shared<AddObjectsMenu>());
     this->addView("objectsMenu", std::make_shared<ObjectsMenu>());
+    this->addView("facesMenu", std::make_shared<FacesMenu>());
     this->addView("verticesMenu", std::make_shared<VerticesMenu>());
     this->switchTo("addObjectsMenu");
     createUI();
@@ -42,8 +44,18 @@ void MenuManager::createUI() {
         this->switchTo("objectsMenu");
     });
 
-    auto switchToVerticesMenu = std::make_shared<Button>(
+    auto switchToFacesMenu = std::make_shared<Button>(
 sf::Vector2f(parentPosition.x - 60, 130),
+    sf::Vector2f(50, 50),
+    "F"
+    );
+
+    switchToFacesMenu->setOnClick([this]() {
+        this->switchTo("facesMenu");
+    });
+
+    auto switchToVerticesMenu = std::make_shared<Button>(
+sf::Vector2f(parentPosition.x - 60, 190),
     sf::Vector2f(50, 50),
     "V"
     );
@@ -64,6 +76,7 @@ sf::Vector2f(parentPosition.x - 60, 130),
     components.emplace_back(background);
     components.emplace_back(switchToAddMenu);
     components.emplace_back(switchToObjectsMenu);
+    components.emplace_back(switchToFacesMenu);
     components.emplace_back(switchToVerticesMenu);
     components.emplace_back(homeButton);
 }

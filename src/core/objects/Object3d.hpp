@@ -43,13 +43,19 @@ public:
     void updateVertex(int vertexIndex, const Vector3& newVertexPosition);
     void deleteVertex(int vertexIndex);
 
+    bool isFaceSelected(unsigned int i) const;
     bool isVertexSelected(unsigned int i) const;
     void createFace();
     void createEdge();
 
+    void scaleFaces(float scaleFactor);
+    void moveFaces(const Vector3& translation);
+    void rotateFaces(float angle, char axis);
+
     std::vector<Vector3> getVertices();
     std::vector<std::pair<int, int>> getEdges();
     std::vector<std::array<int, 7>> getFaces();
+    std::vector<unsigned int> selectedFaces;
     std::vector<unsigned int> selectedVertices;
 protected:
     std::vector<Vector3> vertices;

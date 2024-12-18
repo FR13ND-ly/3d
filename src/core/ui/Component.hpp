@@ -27,6 +27,10 @@ protected:
     std::function<void(std::string)> onClickWithString;
     std::function<void(bool)> onHover;
 
+    std::function<void(float)> onInputWthFloat;
+    std::function<void(std::string)> onInputWithString;
+    std::function<void(float)> onScroll;
+
     virtual bool inBounds(const sf::Vector2i &mousePos) const;
 };
 

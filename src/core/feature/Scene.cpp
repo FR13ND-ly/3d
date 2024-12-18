@@ -234,3 +234,11 @@ bool Scene::getVerticesEditMode() {
 void Scene::setVerticesEditMode(bool value) {
     verticesEditMode = value;
 }
+
+bool Scene::getFacesEditMode() {
+    return facesEditMode;
+}
+
+void Scene::setFacesEditMode(bool value) {
+    facesEditMode = value;
+}

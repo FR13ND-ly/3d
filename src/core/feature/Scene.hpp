@@ -37,6 +37,8 @@ public:
 
     bool getVerticesEditMode();
     void setVerticesEditMode(bool value);
+    bool getFacesEditMode();
+    void setFacesEditMode(bool value);
 
 private:
     Scene(const Scene&) = delete;
@@ -48,6 +50,7 @@ private:
     sf::RenderWindow &window;
     int selectedObjectIndex = 0;
     bool verticesEditMode = false;
+    bool facesEditMode = false;
 
     float yawVelocity;
     float pitchVelocity;
