@@ -45,25 +45,34 @@ void Camera::move(const Vector3& direction) {
     Vector3 right = getRightVector();
     Vector3 up = getUpVector();
 
-    Vector3 adjustedDirection = direction;
-
-    if (position.y < 0) {
-        adjustedDirection.z = -adjustedDirection.z;
-    }
-
-    position = position + (forward * adjustedDirection.z + right * adjustedDirection.x + up * adjustedDirection.y);
+    position = position + (forward * direction.z) + (right * direction.x) + (up * direction.y);
 }
 
 Vector3 Camera::getForwardVector() const {
-    return Vector4::rotateVectorByQuaternion(rotation, Vector3(0, 0, -1)).toVector3().normalized();
+    float radYaw = yaw * DEG_TO_RAD;
+    float radPitch = pitch * DEG_TO_RAD;
+
+    float x = std::cos(radPitch) * std::sin(radYaw);
+    float y = -std::sin(radPitch);
+    float z = -std::cos(radPitch) * std::cos(radYaw);
+
+    return Vector3(x, y, z).normalized();
 }
 
 Vector3 Camera::getRightVector() const {
-    return Vector4::rotateVectorByQuaternion(rotation, Vector3(1, 0, 0)).toVector3().normalized();
+    Vector3 forward = getForwardVector();
+    Vector3 worldUp(0.0f, 1.0f, 0.0f);
+
+    Vector3 right = forward.cross(worldUp).normalized();
+    return right;
 }
 
 Vector3 Camera::getUpVector() const {
-    return Vector4::rotateVectorByQuaternion(rotation, Vector3(0, 1, 0)).toVector3().normalized();
+    Vector3 forward = getForwardVector();
+    Vector3 right = getRightVector();
+
+    Vector3 up = right.cross(forward).normalized();
+    return up;
 }
 
 Vector3 Camera::getPosition() const {

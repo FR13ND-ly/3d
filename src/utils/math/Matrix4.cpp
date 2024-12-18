@@ -153,3 +153,7 @@ Vector3 Matrix4::operator*(const Vector3& vec) const {
 
     return result;
 }
+
+float Matrix4::operator()(int row, int col) const {
+    return this->data[row][col];
+}

@@ -6,17 +6,40 @@
 constexpr float NEAR_PLANE = 0.1f;
 constexpr float FAR_PLANE = 100.0f;
 
-Renderer::Renderer(sf::RenderWindow& window) : window(window) {}
+Renderer::Renderer(sf::RenderWindow& window)
+    : window(window), frustum() {}
 
-bool Renderer::isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3& v3) const {
-    return (v1.z < NEAR_PLANE || v1.z > FAR_PLANE) &&
-           (v2.z < NEAR_PLANE || v2.z > FAR_PLANE) &&
-           (v3.z < NEAR_PLANE || v3.z > FAR_PLANE);
+void Renderer::setupFrustum(const Matrix4& projectionMatrix, const Matrix4& viewMatrix) {
+    frustum = Frustum(projectionMatrix, viewMatrix);
 }
 
+bool Renderer::isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3& v3, const Matrix4& viewMatrix) const {
+    Vector3 edge1 = v2 - v1;
+    Vector3 edge2 = v3 - v1;
+
+    // Calculate the face normal
+    Vector3 normal = edge1.cross(edge2);
+    if (normal.length() < 1e-6f) {
+        // Degenerate face, don't cull
+        return false;
+    }
+    normal.normalized();
+
+    // Get the camera position from the view matrix
+    Vector3 cameraPosition(-viewMatrix(0, 3), -viewMatrix(1, 3), -viewMatrix(2, 3));
+    Vector3 viewDirection = (v1 - cameraPosition).normalized();
+
+    // Check the dot product
+    float dotProduct = normal.dot(viewDirection);
+
+    // Cull if the face is facing away from the camera
+    return dotProduct > 0.0f; // Invert the condition
+}
+
+
 bool Renderer::isObjectInFrustum(const std::vector<Vector3>& vertices) const {
-    return std::any_of(vertices.begin(), vertices.end(), [](const Vector3& v) {
-        return v.z >= NEAR_PLANE && v.z <= FAR_PLANE;
+    return std::any_of(vertices.begin(), vertices.end(), [this](const Vector3& v) {
+        return frustum.isPointInside(v);
     });
 }
 
@@ -101,7 +124,8 @@ void Renderer::processObject(const std::shared_ptr<Object3d>& object, Camera& ca
 
         if (isFaceCulled(projectedVertices[triangle[0]],
                          projectedVertices[triangle[1]],
-                         projectedVertices[triangle[2]])) {
+                         projectedVertices[triangle[2]],
+                         viewMatrix)) {
             continue;
         }
 
@@ -175,31 +199,29 @@ void Renderer::renderEdges(const std::vector<std::shared_ptr<Object3d>>& objects
             sf::Vector2f screenPos2 = screenPosition(v2);
 
             sf::Color color = scene.getVerticesEditMode() ? (object->isSelected ? sf::Color::Yellow : sf::Color::White) : sf::Color(255, 255, 255, 64);
-
+            if (scene.getVerticesEditMode()) {
+                int j = 0;
+                for (const auto& vertex : projectedVertices) {
+                    if (vertex.z < 0.1f || vertex.z > 100.0f) continue;
+                    sf::Vector2f screenPos = {
+                        (vertex.x + 1.0f) * 0.5f * window.getSize().x,
+                        (1.0f - vertex.y) * 0.5f * window.getSize().y
+                    };
+                    sf::Color vertexColor = object->isVertexSelected(j) ? sf::Color::Yellow : sf::Color(150, 150, 150, 230);
+                    sf::CircleShape vertexCircle(10.0f);
+                    vertexCircle.setFillColor(vertexColor);
+                    vertexCircle.setPosition(screenPos.x - vertexCircle.getRadius(),
+                                             screenPos.y - vertexCircle.getRadius());
+                    window.draw(vertexCircle);
+                    j++;
+                }
+            }
             sf::Vertex edgeVertices[] = {
                 sf::Vertex(screenPos1, color),
                 sf::Vertex(screenPos2, color)
             };
 
             window.draw(edgeVertices, 2, sf::Lines);
-        }
-
-        if (scene.getVerticesEditMode()) {
-            int j = 0;
-            for (const auto& vertex : projectedVertices) {
-                if (vertex.z < NEAR_PLANE || vertex.z > FAR_PLANE) continue;
-
-                sf::Vector2f screenPos = screenPosition(vertex);
-                sf::Color vertexColor = object->isVertexSelected(j) ? sf::Color::Yellow : sf::Color(150, 150, 150, 230);
-
-                sf::CircleShape vertexCircle(10.0f);
-                vertexCircle.setFillColor(vertexColor);
-                vertexCircle.setPosition(screenPos.x - vertexCircle.getRadius(),
-                                          screenPos.y - vertexCircle.getRadius());
-
-                window.draw(vertexCircle);
-                j++;
-            }
         }
     }
 }

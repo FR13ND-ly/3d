@@ -6,7 +6,7 @@
 #include "../objects/Object3D.hpp"
 #include "../../utils/math/Matrix4.hpp"
 #include "../../utils/math/Vector3.hpp"
-#include "../../utils/math/Vector4.hpp"
+#include "../../utils/Frustum.hpp"
 #include <memory>
 #include <vector>
 
@@ -24,14 +24,17 @@ public:
     void render(const std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera);
     void renderGrid(float size, float spacing, Camera& camera);
 
+    void setupFrustum(const Matrix4& projectionMatrix, const Matrix4& viewMatrix);
+
 protected:
     sf::RenderWindow& window;
+    Frustum frustum;
 
 private:
     void renderFaces(const std::vector<FaceData>& facesToRender);
     void renderEdges(const std::vector<std::shared_ptr<Object3d>>& objects, Camera& camera);
 
-    bool isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3& v3) const;
+    bool isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3& v3, const Matrix4& viewMatrix) const;
     bool isObjectInFrustum(const std::vector<Vector3>& vertices) const;
     std::vector<Vector3> transformVertices(const std::vector<Vector3>& vertices, const Matrix4& modelMatrix, const Matrix4& viewMatrix) const;
     std::vector<Vector3> projectVertices(const std::vector<Vector3>& vertices, const Matrix4& projectionMatrix) const;

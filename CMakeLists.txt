@@ -42,6 +42,7 @@ set(SOURCE_FILES
         src/core/ui/Surface.cpp
         src/core/ui/Text.cpp
         src/utils/FontManager.cpp
+        src/utils/Frustum.cpp
         src/utils/LanguageManager.cpp
         src/utils/WindowManager.cpp
         src/utils/files/Config.cpp

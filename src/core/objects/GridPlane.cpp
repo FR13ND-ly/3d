@@ -65,9 +65,9 @@ void GridPlane::addLineFace(int startIndex, int endIndex, char axis) {
     Vector3 offset;
 
     if (axis == 'x') {
-        offset = Vector3(0.0f, 0.0f, lineThickness / 2.0f);
+        offset = Vector3(0.0f, lineThickness / 2.0f, 0.0f); // Y-axis offset for vertical lines
     } else if (axis == 'z') {
-        offset = Vector3(lineThickness / 2.0f, 0.0f, 0.0f);
+        offset = Vector3(lineThickness / 2.0f, 0.0f, 0.0f); // X-axis offset for horizontal lines
     }
 
     int v0 = vertices.size();
@@ -76,6 +76,10 @@ void GridPlane::addLineFace(int startIndex, int endIndex, char axis) {
     vertices.push_back(end - offset);
     vertices.push_back(end + offset);
 
-    faces.push_back({v0, v0 + 1, v0 + 2, 128, 128, 128, 255});
-    faces.push_back({v0 + 1, v0 + 3, v0 + 2, 128, 128, 128, 255});
+    faces.push_back({v0, v0 + 2, v0 + 1, 128, 128, 128, 155}); // Front face
+    faces.push_back({v0 + 1, v0 + 2, v0 + 3, 128, 128, 128, 155}); // Front face
+
+    faces.push_back({v0 + 1, v0 + 2, v0, 128, 128, 128, 155}); // Back face
+    faces.push_back({v0 + 3, v0 + 2, v0 + 1, 128, 128, 128, 155}); // Back face
 }
+

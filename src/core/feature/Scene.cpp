@@ -172,7 +172,7 @@ void Scene::handleMouseMoved() {
                 sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)) {
                 float sensitivity = Config::getInstance().getSensitivity() * 0.01f;
                 getCamera().move(Vector3(
-                    sensitivity * static_cast<float>(-mouseDelta.x),
+                    sensitivity * static_cast<float>(mouseDelta.x),
                     sensitivity * static_cast<float>(mouseDelta.y / 2),
                     0.0f
                 ));
@@ -187,7 +187,6 @@ void Scene::handleMouseMoved() {
                 }
             }
 
-            // Reset the mouse position to the center
             sf::Mouse::setPosition(windowCenter, window);
             lastMousePos = windowCenter;
         }
