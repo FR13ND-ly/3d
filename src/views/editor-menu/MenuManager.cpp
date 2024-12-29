@@ -26,7 +26,6 @@ void MenuManager::onDeactivate() {
     for (auto& menu: menus) {
         menu.second->onDeactivate();
     }
-    std::cout << "a" << std::endl;
 }
 
 void MenuManager::createUI() {
