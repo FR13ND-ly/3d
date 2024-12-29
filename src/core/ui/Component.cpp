@@ -17,6 +17,17 @@ void Component::setOnClick(const std::function<void(std::string)>& callback) {
     onClickWithString = callback;
 }
 
+void Component::setOnHover(const std::function<void()> &callback) {
+    onHover = callback;
+}
+
+void Component::setOnHoverOut(const std::function<void()> &callback) {
+    onHoverOut = callback;
+}
+
+
+
+
 bool Component::inBounds(const sf::Vector2i &mousePos) const {
     return false;
 }

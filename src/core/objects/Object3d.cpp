@@ -145,17 +145,15 @@ void Object3d::setFaceColor(int faceIndex, const std::string& hexColor) {
     ss.clear();
     ss << std::hex << hexColor.substr(5, 2); ss >> b;
 
-    // If the hex string has an alpha value (8 characters), extract it
     if (hexColor.length() == 9) {
         ss.clear();
         ss << std::hex << hexColor.substr(7, 2); ss >> a;
     }
 
-    // Store the color and alpha values in the face array
-    faces[faceIndex][3] = r;  // Red
-    faces[faceIndex][4] = g;  // Green
-    faces[faceIndex][5] = b;  // Blue
-    faces[faceIndex][6] = a;  // Alpha
+    faces[faceIndex][3] = r;
+    faces[faceIndex][4] = g;
+    faces[faceIndex][5] = b;
+    faces[faceIndex][6] = a;
 }
 
 std::string Object3d::getFaceColor(int faceIndex) const {
@@ -176,6 +174,33 @@ std::string Object3d::getFaceColor(int faceIndex) const {
     ss << std::hex << std::setw(2) << std::setfill('0') << a;
 
     return ss.str();
+}
+
+void Object3d::setFacesColor(const std::string& hexColor) {
+    if (hexColor.length() != 7 && hexColor.length() != 9 || hexColor[0] != '#') {
+        return;
+    }
+
+    int r, g, b, a = 255;
+
+    std::stringstream ss;
+    ss << std::hex << hexColor.substr(1, 2); ss >> r;
+    ss.clear();
+    ss << std::hex << hexColor.substr(3, 2); ss >> g;
+    ss.clear();
+    ss << std::hex << hexColor.substr(5, 2); ss >> b;
+
+    if (hexColor.length() == 9) {
+        ss.clear();
+        ss << std::hex << hexColor.substr(7, 2); ss >> a;
+    }
+
+    for (auto& face : faces) {
+        face[3] = r;  // Red
+        face[4] = g;  // Green
+        face[5] = b;  // Blue
+        face[6] = a;  // Alpha
+    }
 }
 
 std::array<Vector3, 3> Object3d::getFaceVerticesForEditing(int faceIndex) const {
@@ -204,12 +229,10 @@ void Object3d::updateFaceVertex(int faceIndex, int vertexPosition, const Vector3
 }
 
 void Object3d::addVertex() {
-    // Check if there are vertices to calculate the center
     if (vertices.empty()) {
         throw std::runtime_error("Cannot calculate the center of an empty object.");
     }
 
-    // Calculate the center of the object
     Vector3 center(0.0f, 0.0f, 0.0f);
     for (const auto& vertex : vertices) {
         center.x += vertex.x;
@@ -237,42 +260,94 @@ void Object3d::deleteVertex(int vertexIndex) {
         throw std::out_of_range("Invalid vertex index");
     }
 
-    // Erase the vertex from the vertices array
     vertices.erase(vertices.begin() + vertexIndex);
 
-    // Adjust edges to remove references to the deleted vertex
     edges.erase(std::remove_if(edges.begin(), edges.end(),
         [vertexIndex](const std::pair<int, int>& edge) {
             return edge.first == vertexIndex || edge.second == vertexIndex;
         }),
         edges.end());
 
-    // Update remaining edge references
     for (auto& edge : edges) {
         if (edge.first > vertexIndex) edge.first--;
         if (edge.second > vertexIndex) edge.second--;
     }
 
-    // Remove faces that reference the deleted vertex
     faces.erase(std::remove_if(faces.begin(), faces.end(),
         [vertexIndex](const std::array<int, 7>& face) {
             return face[0] == vertexIndex || face[1] == vertexIndex || face[2] == vertexIndex;
         }),
         faces.end());
 
-    // Update remaining face vertex references
     for (auto& face : faces) {
         for (int i = 0; i < 3; ++i) {
             if (face[i] > vertexIndex) face[i]--;
         }
     }
 }
+
+void Object3d::setVertices(const std::vector<Vector3> &vector) {
+    vertices = vector;
+}
+
+BoundingBox Object3d::getBoundingBox() const {
+    if (vertices.empty()) {
+        // Return an invalid bounding box if there are no vertices
+        return BoundingBox{
+            Vector3(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()),
+            Vector3(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest())
+        };
+    }
+
+    // Initialize the bounding box with the first transformed vertex
+    Vector3 firstTransformedVertex = transform * vertices[0];
+    BoundingBox bbox;
+    bbox.min = firstTransformedVertex;
+    bbox.max = firstTransformedVertex;
+
+    // Loop through all vertices and find the min/max points
+    for (const Vector3& vertex : vertices) {
+        // Transform each vertex by the object's transform matrix
+        Vector3 transformedVertex = transform * vertex;
+
+        // Update the bounding box min and max coordinates
+        bbox.min.x = std::min(bbox.min.x, transformedVertex.x);
+        bbox.min.y = std::min(bbox.min.y, transformedVertex.y);
+        bbox.min.z = std::min(bbox.min.z, transformedVertex.z);
+
+        bbox.max.x = std::max(bbox.max.x, transformedVertex.x);
+        bbox.max.y = std::max(bbox.max.y, transformedVertex.y);
+        bbox.max.z = std::max(bbox.max.z, transformedVertex.z);
+    }
+
+    return bbox;
+}
+
+
+void Object3d::setPosition(Vector3& newPos) {
+    position = newPos;
+    Matrix4 rotationMatrix = Matrix4::rotationZ(rotation.z) *
+                             Matrix4::rotationY(rotation.y) *
+                             Matrix4::rotationX(rotation.x);
+    Matrix4 scaleMatrix = Matrix4::scale(scale.x, scale.y, scale.z);
+    Matrix4 translationMatrix = Matrix4::translation(position.x, position.y, position.z);
+    transform = translationMatrix * rotationMatrix * scaleMatrix;
+}
+
 bool Object3d::isFaceSelected(unsigned int faceIndex) const {
     return std::find(selectedFaces.begin(), selectedFaces.end(), faceIndex) != selectedFaces.end();
 }
 
+bool Object3d::isFaceHovered(unsigned int faceIndex) const {
+    return std::find(hoveredFaces.begin(), hoveredFaces.end(), faceIndex) != hoveredFaces.end();
+}
+
 bool Object3d::isVertexSelected(unsigned int vertexIndex) const {
     return std::find(selectedVertices.begin(), selectedVertices.end(), vertexIndex) != selectedVertices.end();
+}
+
+bool Object3d::isVertexHovered(unsigned int vertexIndex) const {
+    return std::find(hoveredVertices.begin(), hoveredVertices.end(), vertexIndex) != hoveredVertices.end();
 }
 
 void Object3d::createFace() {
@@ -287,7 +362,6 @@ void Object3d::createFace() {
     faces.push_back({v1, v2, v3, 255, 255, 255, 255});
 }
 
-// Create an edge from the selected vertices
 void Object3d::createEdge() {
     if (selectedVertices.size() != 2) {
         throw std::runtime_error("Exactly 2 vertices must be selected to create an edge.");
@@ -311,7 +385,6 @@ void Object3d::moveFaces(const Vector3& translation) {
 
         const auto& face = faces[faceIndex];
 
-        // Translate each vertex in the face if it hasn't been updated yet
         for (int i = 0; i < 3; ++i) {
             int vertexIndex = face[i];
             if (updatedVertices.find(vertexIndex) == updatedVertices.end()) {
@@ -325,7 +398,6 @@ void Object3d::moveFaces(const Vector3& translation) {
 void Object3d::rotateFaces(float angle, char axis) {
     if (selectedFaces.empty()) return;
 
-    // Step 1: Calculate the centroid of the selected faces
     Vector3 centroid(0.0f, 0.0f, 0.0f);
     int totalVertices = 0;
 
@@ -343,7 +415,6 @@ void Object3d::rotateFaces(float angle, char axis) {
 
     centroid = centroid / static_cast<float>(totalVertices);
 
-    // Step 2: Determine the rotation matrix
     Matrix4 rotationMatrix;
     switch (axis) {
         case 'x':
@@ -359,7 +430,6 @@ void Object3d::rotateFaces(float angle, char axis) {
             throw std::invalid_argument("Invalid rotation axis");
     }
 
-    // Step 3: Rotate all unique vertices around the centroid
     std::unordered_set<int> updatedVertices; // Track updated vertices
 
     for (unsigned int faceIndex : selectedFaces) {
@@ -387,13 +457,10 @@ void Object3d::rotateFaces(float angle, char axis) {
 void Object3d::scaleFaces(float delta) {
     if (selectedFaces.empty()) return;
 
-    // Ensure the delta is within a reasonable range
-    // Delta can be any real number, positive or negative
     if (delta < -1.0f || delta > 1.0f) {
         throw std::invalid_argument("Delta must be between -1 and 1");
     }
 
-    // Step 1: Calculate the centroid of the selected faces
     Vector3 centroid(0.0f, 0.0f, 0.0f);
     int totalVertices = 0;
 
@@ -411,7 +478,6 @@ void Object3d::scaleFaces(float delta) {
 
     centroid = centroid / static_cast<float>(totalVertices);
 
-    // Step 2: Scale all unique vertices relative to the centroid by the delta factor
     std::unordered_set<int> updatedVertices; // Track updated vertices
 
     for (unsigned int faceIndex : selectedFaces) {
@@ -421,21 +487,91 @@ void Object3d::scaleFaces(float delta) {
             int vertexIndex = face[i];
 
             if (updatedVertices.find(vertexIndex) == updatedVertices.end()) {
-                // Translate vertex to origin relative to centroid
                 Vector3 relativePosition = vertices[vertexIndex] - centroid;
 
-                // Apply scaling delta: New scale factor = 1 + delta
                 float scaleFactor = 1.0f + delta;
 
-                // Apply the scale transformation to the vertex
                 Vector3 scaledPosition = relativePosition * scaleFactor;
 
-                // Translate back to the original position
                 vertices[vertexIndex] = scaledPosition + centroid;
 
-                updatedVertices.insert(vertexIndex); // Mark as updated
+                updatedVertices.insert(vertexIndex);
             }
         }
     }
 }
 
+std::vector<std::array<float, 3>> Object3d::getVerticesForJson() {
+    std::vector<std::array<float, 3>> arrayVertices;
+    for (Vector3 vertex : vertices) {
+        arrayVertices.push_back({ vertex.x, vertex.y, vertex.z });
+    }
+    return arrayVertices;
+}
+
+void Object3d::inverseFaceNormals() {
+    for (unsigned int faceIndex : selectedFaces) {
+        if (faceIndex < faces.size()) {
+            std::swap(faces[faceIndex][0], faces[faceIndex][2]);
+        }
+    }
+}
+
+bool Object3d::hasEdgeFromSelection() const {
+    for (const auto& edge : edges) {
+        bool firstFound = std::find(selectedVertices.begin(), selectedVertices.end(), edge.first) != selectedVertices.end();
+        bool secondFound = std::find(selectedVertices.begin(), selectedVertices.end(), edge.second) != selectedVertices.end();
+
+        if (firstFound && secondFound) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Object3d::hasFaceFromSelection() const {
+    for (const auto& face : faces) {
+        bool allVerticesFound = true;
+
+        for (int i = 0; i < 3; ++i) {
+            if (std::find(selectedVertices.begin(), selectedVertices.end(), face[i]) == selectedVertices.end()) {
+                allVerticesFound = false;
+                break;
+            }
+        }
+
+        if (allVerticesFound) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Object3d::deleteFaceByIndex(int faceIndex) {
+    if (faceIndex < 0 || faceIndex >= faces.size()) {
+        throw std::out_of_range("Invalid face index");
+    }
+
+    faces.erase(faces.begin() + faceIndex);
+
+    // Update face selections to reflect the removal
+    auto updateIndex = [faceIndex](unsigned int& index) {
+        if (index > faceIndex) {
+            index--;
+        }
+    };
+
+    selectedFaces.erase(
+        std::remove_if(selectedFaces.begin(), selectedFaces.end(),
+                       [faceIndex](unsigned int index) { return index == faceIndex; }),
+        selectedFaces.end()
+    );
+    hoveredFaces.erase(
+        std::remove_if(hoveredFaces.begin(), hoveredFaces.end(),
+                       [faceIndex](unsigned int index) { return index == faceIndex; }),
+        hoveredFaces.end()
+    );
+
+    std::for_each(selectedFaces.begin(), selectedFaces.end(), updateIndex);
+    std::for_each(hoveredFaces.begin(), hoveredFaces.end(), updateIndex);
+}

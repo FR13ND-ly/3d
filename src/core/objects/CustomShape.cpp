@@ -24,9 +24,25 @@ void CustomShape::setFaces(const std::vector<std::array<int, 7>>& faces) {
 
 
 Vector3 calculateNormal(const std::vector<Vector3>& vertices, const std::array<int, 7>& face) {
-    Vector3 v1 = vertices[face[1]] - vertices[face[0]];
-    Vector3 v2 = vertices[face[2]] - vertices[face[0]];
-    return v1.cross(v2).normalized();
+    if (face.size() < 3) {
+        return Vector3(0, 0, 0);
+    }
+
+    Vector3 v0 = vertices[face[0]];
+    Vector3 v1 = vertices[face[1]];
+    Vector3 v2 = vertices[face[2]];
+
+    Vector3 edge1 = v1 - v0;
+    Vector3 edge2 = v2 - v0;
+
+    Vector3 normal = edge1.cross(edge2);
+
+    if (normal.length() == 0) {
+        // Handle the case where the normal is zero-length
+        return Vector3(0, 0, 0); // or some default normal
+    }
+
+    return normal.normalized();
 }
 
 bool areNormalsParallel(const Vector3& n1, const Vector3& n2) {
@@ -57,11 +73,19 @@ void CustomShape::calculateEdges() {
         faceVisited[i] = true;
 
         Vector3 normalI = calculateNormal(vertices, faces[i]);
+        if (normalI.length() == 0) {
+            // Handle the case where the normal is zero-length
+            continue;
+        }
 
         for (size_t j = 0; j < faces.size(); ++j) {
             if (i == j || faceVisited[j]) continue;
 
             Vector3 normalJ = calculateNormal(vertices, faces[j]);
+            if (normalJ.length() == 0) {
+                continue;
+            }
+
             if (areNormalsParallel(normalI, normalJ) && areFacesConnected(faces[i], faces[j])) {
                 compoundFaces.push_back(j);
                 faceVisited[j] = true;
@@ -90,4 +114,5 @@ void CustomShape::calculateEdges() {
         }
     }
 }
+
 

@@ -1,16 +1,10 @@
 #ifndef EDITOR_VIEW_HPP
 #define EDITOR_VIEW_HPP
 
-#include <SFML/Graphics.hpp>
 #include <memory>
 #include "View.hpp"
-#include "../core/ui/Component.hpp"
-#include "../core/ui/Button.hpp"
-#include "../core/ui/Text.hpp"
 #include "../core/feature/Scene.hpp"
-#include "../utils/WindowManager.hpp"
-#include "../core/objects/Cube.hpp"
-#include "../core/objects/Sphere.hpp"
+#include "editor-menu/MenuManager.hpp"
 
 class EditorView : public View {
 public:
@@ -18,10 +12,10 @@ public:
     void clearComponents();
     void onActivate() override;
     void onDeactivate() override;
+    void handleEvent(const sf::Event &event, sf::RenderWindow &window) override;
 private:
     std::shared_ptr<Scene> scene;
-
-    void initializeScene();
+    std::shared_ptr<MenuManager> editorMenu;
     void createUI();
 };
 

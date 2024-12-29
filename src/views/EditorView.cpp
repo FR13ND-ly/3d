@@ -1,82 +1,44 @@
 #include "EditorView.hpp"
 #include <memory>
 #include "ViewsManager.hpp"
+#include "../core/feature/ProjectsManager.hpp"
 #include "./editor-menu/MenuManager.hpp"
+#include "../utils/WindowManager.hpp"
 
 EditorView::EditorView() {
-    initializeScene();
+    editorMenu = std::make_shared<MenuManager>();
 }
 
 void EditorView::clearComponents() {
     components.clear();
 }
-void EditorView::onActivate() {
 
+void EditorView::onActivate() {
     createUI();
 }
+
 void EditorView::onDeactivate() {
-
+    editorMenu->onDeactivate();
 }
 
-void EditorView::initializeScene() {
-    sf::RenderWindow& window = WindowManager::getInstance().getWindow();
-    Scene& sceneInst = Scene::getInstance(window);
-    // auto scene = std::make_shared<Scene>(window);
-    this->addComponent(std::shared_ptr<Component>(&sceneInst, [](Component*){}));
+void EditorView::handleEvent(const sf::Event &event, sf::RenderWindow &window) {
+    for (const auto& component : components) {
+            component->handleEvent(event, window);
+    }
+    if (event.type == sf::Event::KeyPressed && event.key.control && event.key.code == sf::Keyboard::S) {
+        sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+        Scene& scene = Scene::getInstance(window);
+        ProjectsManager& projectsManager = ProjectsManager::getInstance();
+        projectsManager.updateProject(scene);
+    }
 }
+
 
 void EditorView::createUI() {
-    auto myButton = std::make_shared<Button>(
-        sf::Vector2f(50, 100),
-        sf::Vector2f(200, 50),
-        "Home"
-    );
-
-    auto Reset = std::make_shared<Button>(
-        sf::Vector2f(50, 400),
-        sf::Vector2f(200, 50),
-        "Reset"
-    );
-
-    auto sphereButton = std::make_shared<Button>(
-        sf::Vector2f(50, 300),
-        sf::Vector2f(200, 50),
-        "Sphere"
-    );
-
-    auto cubeButton = std::make_shared<Button>(
-        sf::Vector2f(50, 200),
-        sf::Vector2f(200, 50),
-        "Cube"
-    );
-
-    cubeButton->setOnClick([this]() {
-        // this->scene->addObject(std::make_shared<Cube>(1.f));
-        this->scene->addObject("cube");
-    });
-
-    sphereButton->setOnClick([this]() {
-        this->scene->addObject("sphere");
-    });
-
-    myButton->setOnClick([this]() {
-        this->clearComponents();
-        initializeScene();
-        createUI();
-        ViewsManager::getInstance().switchTo("home");
-    });
-
-    Reset->setOnClick([this]() {
-        this->clearComponents();
-        initializeScene();
-        createUI();
-    });
-
-    auto editorMenu = std::make_shared<MenuManager>();
-
-    // this->addComponent(myButton);
-    // this->addComponent(Reset);
-    // this->addComponent(sphereButton);
-    // this->addComponent(cubeButton);
+    components.clear();
+    editorMenu->onActivate();
+    sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+    Scene& sceneInst = Scene::getInstance(window);
+    this->addComponent(std::shared_ptr<Component>(&sceneInst, [](Component*){}));
     this->addComponent(editorMenu);
 }

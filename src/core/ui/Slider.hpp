@@ -6,14 +6,11 @@
 
 class Slider : public Component {
 public:
-    // Constructor
-    Slider(const sf::Vector2f& position, const sf::Vector2f& size, float minValue, float maxValue, float currentValue, const sf::Color& trackColor = sf::Color::White, const sf::Color& handleColor = sf::Color::Red);
+    Slider(const sf::Vector2f& position, const sf::Vector2f& size, float minValue, float maxValue, float currentValue, const sf::Color& trackColor = sf::Color::White, const sf::Color& handleColor = sf::Color::Yellow);
 
-    // Draw and handle event functions
     void draw(sf::RenderWindow& window) override;
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
 
-    // Getter and Setter for value
     float getValue() const;
     void setValue(float value);
 

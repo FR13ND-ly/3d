@@ -28,6 +28,8 @@ public:
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
 
+    void onActivate();
+    void onDeactivate();
 protected:
     sf::Vector2f parentSize = {350.f, 1180.f};
     sf::Vector2f parentPosition = {1920.f - parentSize.x, 0.f};
@@ -41,6 +43,7 @@ private:
     MenuManager& operator=(const MenuManager&) = delete;
 
     std::vector<std::shared_ptr<Component>> components;
+    std::queue<std::function<void()>> pendingOperations;
 };
 
 #endif

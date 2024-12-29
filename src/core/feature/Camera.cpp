@@ -6,6 +6,7 @@
 Camera::Camera(float windowWidth, float windowHeight, float fov, float nearClip, float farClip)
     : position(-1.5f, 2.0f, -15.0f),
       rotation(Vector4::eulerToQuaternion(0, 0, 0)),
+      orbitCenter(0.0f, 0.0f, 0.0f),
       windowWidth(windowWidth),
       windowHeight(windowHeight),
       fov(fov),
@@ -46,6 +47,8 @@ void Camera::move(const Vector3& direction) {
     Vector3 up = getUpVector();
 
     position = position + (forward * direction.z) + (right * direction.x) + (up * direction.y);
+    Vector3 deltaMove = (forward * direction.z) + (right * direction.x) + (up * direction.y);
+    orbitCenter = orbitCenter + deltaMove;
 }
 
 Vector3 Camera::getForwardVector() const {
@@ -83,6 +86,13 @@ void Camera::setPosition(const Vector3& newPosition) {
     position = newPosition;
 }
 
+void Camera::rotate(float deltaYaw, float deltaPitch) {
+    yaw += deltaYaw;
+    pitch += deltaPitch;
+    pitch = std::clamp(pitch, -89.0f, 89.0f);
+    updateRotation();
+}
+
 void Camera::rotateYaw(float deltaYaw) {
     yaw += deltaYaw;
     updateRotation();
@@ -111,32 +121,52 @@ void Camera::orbitYaw(const Vector3& center, float deltaYaw, float deltaPitch) {
     rotateYaw(deltaYaw);
 }
 
-void Camera::orbit(const Vector3& center, float deltaYaw, float deltaPitch) {
+void Camera::orbit(float deltaYaw, float deltaPitch) {
     Vector3 positionXZ(position.x, 0.0f, position.z);
-    float radius = positionXZ.length();
+    float radius = (positionXZ - Vector3(orbitCenter.x, 0.0f, orbitCenter.z)).length();
 
-    float currentYaw = std::atan2(position.z - center.z, position.x - center.x);
-
+    float currentYaw = std::atan2(position.z - orbitCenter.z, position.x - orbitCenter.x);
     float newYaw = currentYaw + deltaYaw * DEG_TO_RAD;
 
-    float newX = center.x + radius * std::cos(newYaw);
-    float newZ = center.z + radius * std::sin(newYaw);
+    float newX = orbitCenter.x + radius * std::cos(newYaw);
+    float newZ = orbitCenter.z + radius * std::sin(newYaw);
 
-    float currentPitch = std::atan2(position.y - center.y, radius);
-
+    float currentPitch = std::atan2(position.y - orbitCenter.y, radius);
     float newPitch = currentPitch + deltaPitch * DEG_TO_RAD;
 
-    float newY = center.y + radius * std::tan(newPitch);
+    float newY = orbitCenter.y + radius * std::tan(newPitch);
 
     position.x = newX;
     position.z = newZ;
 
     rotateYaw(deltaYaw);
 
-    if (newPitch > -.9 && newPitch < .9) {
+    if (newPitch > -0.9 && newPitch < 0.9) {
         position.y = newY;
         rotatePitch(-deltaPitch);
     }
+}
+
+float Camera::getYaw() const {
+    return yaw;
+}
+
+float Camera::getPitch() const {
+    return pitch;
+}
+
+void Camera::setYawAndPitch(float yaw, float pitch) {
+    this->yaw = yaw;
+    this->pitch = pitch;
+    updateRotation();
+}
+
+Vector3 Camera::getOrbitCenter() const {
+    return orbitCenter;
+}
+
+void Camera::setOrbitCenter(const Vector3& center) {
+    orbitCenter = center;
 }
 
 Vector4 Camera::toQuaternion(const Matrix4& mat) {

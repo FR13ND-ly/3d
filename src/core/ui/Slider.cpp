@@ -3,7 +3,6 @@
 Slider::Slider(const sf::Vector2f& position, const sf::Vector2f& size, float minValue, float maxValue, float currentValue, const sf::Color& trackColor, const sf::Color& handleColor)
     : minValue(minValue), maxValue(maxValue), currentValue(currentValue), isDragging(false), size(size), position(position) {
 
-    // Initialize track
     track.setSize(size);
     track.setPosition(position);
     track.setFillColor(trackColor);

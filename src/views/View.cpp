@@ -5,7 +5,7 @@ void View::onActivate() {
 }
 
 void View::onDeactivate() {
-    // Default implementation: does nothing. Can be overridden by subclasses.
+
 }
 
 void View::addComponent(std::shared_ptr<Component> component) {

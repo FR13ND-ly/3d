@@ -48,7 +48,7 @@ void LanguageManager::setLanguageByIndex(int index) {
     Config::getInstance().updateLanguage(indexLanguageMap.at(index));
 }
 
-nlohmann::json LanguageManager::getSelectedPack() const {
+const nlohmann::json& LanguageManager::getSelectedPack() const {
     int index = getLanguageIndex();
     return languagePacks.at(index)["words"];
 }

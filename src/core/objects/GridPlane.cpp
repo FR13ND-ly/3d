@@ -76,10 +76,22 @@ void GridPlane::addLineFace(int startIndex, int endIndex, char axis) {
     vertices.push_back(end - offset);
     vertices.push_back(end + offset);
 
-    faces.push_back({v0, v0 + 2, v0 + 1, 128, 128, 128, 155}); // Front face
-    faces.push_back({v0 + 1, v0 + 2, v0 + 3, 128, 128, 128, 155}); // Front face
+    // Check if the line is on the x-axis or z-axis
+    bool isXAxisLine = (start.z == 0.0f && end.z == 0.0f);
+    bool isZAxisLine = (start.x == 0.0f && end.x == 0.0f);
 
-    faces.push_back({v0 + 1, v0 + 2, v0, 128, 128, 128, 155}); // Back face
-    faces.push_back({v0 + 3, v0 + 2, v0 + 1, 128, 128, 128, 155}); // Back face
+    // Set the color based on the axis
+    int r = 128, g = 128, b = 128;
+    if (isXAxisLine) {
+        r = 0; g = 255; b = 0; // Green for x-axis
+    } else if (isZAxisLine) {
+        r = 255; g = 0; b = 0; // Red for z-axis
+    }
+
+    faces.push_back({v0, v0 + 2, v0 + 1, r, g, b, 155}); // Front face
+    faces.push_back({v0 + 1, v0 + 2, v0 + 3, r, g, b, 155}); // Front face
+
+    faces.push_back({v0 + 1, v0 + 2, v0, r, g, b, 155}); // Back face
+    faces.push_back({v0 + 3, v0 + 2, v0 + 1, r, g, b, 155}); // Back face
 }
 

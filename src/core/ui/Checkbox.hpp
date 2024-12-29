@@ -7,9 +7,8 @@
 
 class CheckBox : public Component {
 public:
-    // Updated constructor with isChecked parameter
     CheckBox(const sf::Vector2f& position, float size, bool isChecked = false,
-             const sf::Color& boxColor = sf::Color::White, const sf::Color& checkColor = sf::Color::Red);
+             const sf::Color& boxColor = sf::Color::White, const sf::Color& checkColor = sf::Color::Yellow);
 
     void draw(sf::RenderWindow& window) override;
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;

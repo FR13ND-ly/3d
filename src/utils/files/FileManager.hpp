@@ -3,38 +3,58 @@
 
 #include <string>
 #include <memory>
+#include <vector>
+#include <sstream>
+#include <iomanip>
+#include <filesystem>
 #include <windows.h>
 #include <shobjidl.h>
+#include <codecvt>
+#include <ctime>
+#include <stdexcept>
+#include <iostream>
+#include <nlohmann/json.hpp>
+#include <cpptoml.h>
 #include "./FileType.hpp"
 #include "./JsonFile.hpp"
 #include "./TomlFile.hpp"
+#include "Config.hpp"
 
 enum class FileFormat {
     JSON,
-    TOML
+    TOML,
+    OBJ,
+    PRJ
+};
+
+struct FileInfo {
+    std::string fileName;
+    std::string filePath;
+    std::string lastUpdateDate;
+    std::time_t lastModifiedTime;
 };
 
 class FileManager {
 public:
-    // Singleton instance
     static FileManager& getInstance();
 
-    // Delete copy constructor and assignment operator
     FileManager(const FileManager&) = delete;
     FileManager& operator=(const FileManager&) = delete;
 
-    // Factory method to create file type objects
     std::unique_ptr<FileType> createFile(FileFormat format);
-
-    // Factory method to create file type objects with initial data
     std::unique_ptr<FileType> createFile(FileFormat format, const void* data);
-
-    // Method to open folder selection dialog
     std::string selectFolder();
+    std::string selectFile();
+    std::string saveAs();
+    std::vector<FileInfo> getFolderFiles(const std::string& folderPath);
+    bool deleteFile(const std::string& filePath);
+    bool createCopy(const std::string& sourceFilePath, const std::string& destinationFolderPath);
+    std::string getExportObjPath();
+    bool exportToObj(const std::string& filePath, const std::vector<std::string>& vertices,
+                    const std::vector<std::string>& faces);
 
 private:
-    // Private constructor for singleton pattern
     FileManager() = default;
 };
 
-#endif // FILE_MANAGER_HPP
+#endif

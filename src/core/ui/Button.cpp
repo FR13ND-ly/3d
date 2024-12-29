@@ -18,16 +18,19 @@ Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const std
     this->color = color;
 
     sf::FloatRect textBounds = buttonText.getLocalBounds();
-    buttonText.setOrigin(textBounds.width / 2, textBounds.height / 2);
+    buttonText.setOrigin(textBounds.width / 2, textBounds.height / 2 + textBounds.top);
     buttonText.setPosition(
         position.x + size.x / 2,
-        position.y + size.y / 2 - textBounds.height / 2
+        position.y + size.y / 2
     );
 }
 
 void Button::draw(sf::RenderWindow &window) {
     window.draw(buttonRect);
     window.draw(buttonText);
+    if (hasIcon) {
+        window.draw(icon);
+    }
 }
 
 void Button::handleEvent(const sf::Event &event, const sf::RenderWindow &window) {
@@ -44,12 +47,12 @@ void Button::handleEvent(const sf::Event &event, const sf::RenderWindow &window)
     if (isHovered) {
         buttonRect.setFillColor(darkenColor(color, 40));
         if (onHover) {
-            onHover(true);
+            onHover();
         }
     } else {
         buttonRect.setFillColor(color);
-        if (onHover) {
-            onHover(false);
+        if (onHoverOut) {
+            onHoverOut();
         }
     }
 
@@ -61,12 +64,38 @@ void Button::handleEvent(const sf::Event &event, const sf::RenderWindow &window)
     }
 }
 
+void Button::setIcon(std::string iconName) {
+    if (!texture.loadFromFile("../src/assets/images/icons/" + iconName + ".png")) {
+        throw std::runtime_error("Failed to load icon: " + iconName);
+    }
+    icon.setTexture(texture);
+    hasIcon = true;
+    icon.setScale(buttonRect.getSize().y / texture.getSize().y / 2.f, buttonRect.getSize().y / texture.getSize().y / 2.f);
+    icon.setPosition(
+        buttonRect.getPosition().x + (buttonRect.getSize().y - icon.getGlobalBounds().height) / 2.f,
+        buttonRect.getPosition().y + (buttonRect.getSize().y - icon.getGlobalBounds().height) / 2.f
+    );
+    sf::FloatRect textBounds = buttonText.getLocalBounds();
+    buttonText.setOrigin(0, textBounds.height / 2 + textBounds.top);
+    buttonText.setPosition(
+        buttonRect.getPosition().x + buttonRect.getSize().y,
+        buttonText.getPosition().y
+    );
+    if (buttonRect.getSize().x < buttonRect.getSize().y * 1.5f + buttonText.getLocalBounds().width && buttonText.getString() != "") {
+        buttonRect.setSize({buttonRect.getSize().y * 1.5f + buttonText.getLocalBounds().width, buttonRect.getSize().y});
+    }
+}
+
 bool Button::inBounds(const sf::Vector2i &mousePos) const {
     return buttonRect.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 }
 
 float Button::getHeight() const {
     return buttonRect.getSize().y;
+}
+
+float Button::getWidth() const {
+    return buttonRect.getSize().x;
 }
 
 void Button::setColor(sf::Color color) {
@@ -87,13 +116,37 @@ sf::Vector2f Button::getPosition() const {
     return buttonRect.getPosition();
 }
 
-void Button::setPosition(const sf::Vector2f &position)   {
+void Button::setPosition(const sf::Vector2f &position) {
+    // Update button rectangle position
     buttonRect.setPosition(position);
 
-    // Adjust the text position to keep it centered on the button
     sf::FloatRect textBounds = buttonText.getLocalBounds();
-    buttonText.setPosition(
-        position.x + buttonRect.getSize().x / 2,
-        position.y + buttonRect.getSize().y / 2 - textBounds.height / 2
-    );
+
+    if (hasIcon) {
+        // Align the icon relative to the button rectangle
+        icon.setPosition(
+            buttonRect.getPosition().x + (buttonRect.getSize().y - icon.getGlobalBounds().height) / 2.f,
+            buttonRect.getPosition().y + (buttonRect.getSize().y - icon.getGlobalBounds().height) / 2.f
+        );
+
+        // Align the text relative to the icon
+        buttonText.setOrigin(0, textBounds.height / 2 + textBounds.top);
+        buttonText.setPosition(
+            buttonRect.getPosition().x + buttonRect.getSize().y,
+            buttonRect.getPosition().y + buttonRect.getSize().y / 2
+        );
+
+        // Adjust button size if necessary to fit the icon and text
+        if (buttonRect.getSize().x < buttonRect.getSize().y * 1.5f + textBounds.width) {
+            buttonRect.setSize({buttonRect.getSize().y * 1.5f + textBounds.width, buttonRect.getSize().y});
+        }
+    } else {
+        // Align text in the center of the button rectangle
+        buttonText.setOrigin(textBounds.width / 2, textBounds.height / 2 + textBounds.top);
+        buttonText.setPosition(
+            position.x + buttonRect.getSize().x / 2,
+            position.y + buttonRect.getSize().y / 2
+        );
+    }
 }
+

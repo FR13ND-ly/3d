@@ -17,6 +17,7 @@ public:
     // Add a component to the scroll view
     void addComponent(std::shared_ptr<Component> component);
 
+    std::vector<std::shared_ptr<Component>> getComponents() const;
     // Clear all components
     void clearComponents();
 

@@ -24,6 +24,7 @@ set(SOURCE_FILES
         src/main.cpp
         src/core/feature/App.cpp
         src/core/feature/Camera.cpp
+        src/core/feature/ProjectsManager.cpp
         src/core/feature/Renderer.cpp
         src/core/feature/Scene.cpp
         src/core/objects/CustomShape.cpp
@@ -33,22 +34,27 @@ set(SOURCE_FILES
         src/core/ui/Button.cpp
         src/core/ui/Checkbox.cpp
         src/core/ui/Component.cpp
+        src/core/ui/Container.cpp
         src/core/ui/Expandable.cpp
         src/core/ui/Input.cpp
         src/core/ui/NumberInput.cpp
         src/core/ui/Select.cpp
         src/core/ui/Slider.cpp
         src/core/ui/ScrollView.cpp
+        src/core/ui/Snackbar.cpp
         src/core/ui/Surface.cpp
         src/core/ui/Text.cpp
         src/utils/FontManager.cpp
         src/utils/Frustum.cpp
         src/utils/LanguageManager.cpp
         src/utils/WindowManager.cpp
+        src/utils/ZBuffer.cpp
         src/utils/files/Config.cpp
         src/utils/files/FileManager.cpp
         src/utils/files/FileType.cpp
         src/utils/files/JsonFile.cpp
+        src/utils/files/ObjFile.cpp
+        src/utils/files/PrjFile.cpp
         src/utils/files/TomlFile.cpp
         src/utils/math/Matrix4.cpp
         src/utils/math/Vector3.cpp
@@ -64,6 +70,7 @@ set(SOURCE_FILES
         src/views/editor-menu/MenuManager.cpp
         src/views/editor-menu/Menu.cpp
         src/views/editor-menu/ObjectsMenu.cpp
+        src/views/editor-menu/ProjectSettings.cpp
         src/views/editor-menu/VerticesMenu.cpp
 )
 

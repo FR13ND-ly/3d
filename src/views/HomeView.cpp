@@ -1,74 +1,80 @@
 #include "HomeView.hpp"
 #include "ViewsManager.hpp"
 #include "../utils/LanguageManager.hpp"
-#include "../core/ui/Input.hpp"
-#include "../core/ui/NumberInput.hpp"
-#include "../core/ui/Expandable.hpp"
+#include "../utils/WindowManager.hpp"
 
-HomeView::HomeView() {}
+HomeView::HomeView() {
+    if (!bgTexture.loadFromFile("../src/assets/images/bg.jpg")) {
+        std::cerr << "Error loading image.png" << std::endl;
+    }
+
+    bgSprite.setTexture(bgTexture);
+
+    bgSprite.setPosition(0.f, 0.f);
+    sf::Vector2u windowSize = WindowManager::getInstance().getWindow().getSize();
+
+    sf::Vector2u textureSize = bgTexture.getSize();
+
+    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+
+    bgSprite.setScale(scaleX, scaleY);
+}
 
 void HomeView::onActivate() {
     createUI();
 }
 
-
 void HomeView::createUI() {
+    components.clear();
     auto languagePack = LanguageManager::getInstance().getSelectedPack();
-    auto myButton = std::make_shared<Button>(
-        sf::Vector2f(100, 100),
+    auto projectsButton = std::make_shared<Button>(
+        sf::Vector2f(100, 700),
         sf::Vector2f(200, 50),
         languagePack["projects"]
     );
 
-    auto settings = std::make_shared<Button>(
-        sf::Vector2f(100, 200),
-        sf::Vector2f(200, 50),
-        languagePack["settings"]
-    );
-
-    myButton->setOnClick([this]() {
+    projectsButton->setOnClick([this]() {
         ViewsManager::getInstance().switchTo("projects");
     });
 
-    settings->setOnClick([this]() {
+    projectsButton->setIcon("projects");
+
+    auto settingsButton = std::make_shared<Button>(
+        sf::Vector2f(100, 770),
+        sf::Vector2f(200, 50),
+        languagePack["settings"]
+    );
+
+
+    settingsButton->setOnClick([this]() {
         ViewsManager::getInstance().switchTo("settings");
     });
 
-    auto myText = std::make_shared<Text>(
-        sf::Vector2f(400, 100),
-        20,
-        "Home Page"
-    );
-    auto expandable = std::make_shared<Expandable>(
-        sf::Vector2f(1000, 100),
+    settingsButton->setIcon("settings");
+
+    auto exitButton = std::make_shared<Button>(
+        sf::Vector2f(100, 840),
         sf::Vector2f(200, 50),
-        "Expandable"
+        languagePack["exit"]
     );
 
-    expandable->addContent(std::make_shared<Button>(
-        sf::Vector2f(1000, 200),
-        sf::Vector2f(200, 50),
-        languagePack["settings"]
-    ));
-    expandable->addContent(std::make_shared<Button>(
-    sf::Vector2f(1000, 200),
-    sf::Vector2f(200, 50),
-    languagePack["settings"]
-));
-    expandable->addContent(std::make_shared<Button>(
-    sf::Vector2f(1000, 200),
-    sf::Vector2f(200, 50),
-    languagePack["settings"]
-));
+    exitButton->setOnClick([this]() {
+        sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+        window.close();
+    });
 
+    exitButton->setIcon("exit");
 
-    // expandable.setOnClick([](bool isExpanded) {
-    //     std::cout << "Expanded state: " << (isExpanded ? "Opened" : "Closed") << std::endl;
-    // });
-
-
-    this->addComponent(myText);
-    this->addComponent(myButton);
-    this->addComponent(settings);
-    // this->addComponent(expandable);
+    this->addComponent(projectsButton);
+    this->addComponent(settingsButton);
+    this->addComponent(exitButton);
 }
+
+void HomeView::draw(sf::RenderWindow &window) {
+    window.draw(bgSprite);
+    for (auto& component : components) {
+        component->draw(window);
+    }
+}
+

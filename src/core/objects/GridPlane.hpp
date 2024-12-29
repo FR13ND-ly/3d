@@ -8,7 +8,6 @@
 class GridPlane : public Object3d {
 public:
     GridPlane();
-
 private:
     const float gridSize = 20.0f;
     const float cellSize = .5f;

@@ -33,7 +33,7 @@ public:
 
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
-
+    float lastUpdatedValue = 0.0f;
 protected:
     sf::RectangleShape inputBox;
     sf::Text inputText;
@@ -44,7 +44,7 @@ protected:
 
     std::string placeholderText;
 
-    std::string displayValue;
+    std::string displayValue = "0.00";
     float numericValue = 0.0f;
 
     float step = 1.0f;

@@ -16,11 +16,12 @@ public:
     CustomShape(const std::vector<Vector3>& vertices,
                 const std::vector<std::array<int, 7>>& faces);
 
+    std::shared_ptr<Object3d> clone();
+
     void setVertices(const std::vector<Vector3>& vertices);
     void setFaces(const std::vector<std::array<int, 7>>& faces);
 
     const std::vector<std::pair<int, int>>& getEdges() const { return edges; }
-
 private:
     void calculateEdges();
 };

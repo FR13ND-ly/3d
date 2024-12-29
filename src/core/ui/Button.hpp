@@ -21,16 +21,24 @@ public:
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window);
 
     float getHeight() const override;
+    float getWidth() const;
 
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
 
     void setColor(sf::Color color);
 
+    void setIcon(std::string iconName);
+
 protected:
     sf::RectangleShape buttonRect;
     sf::Text buttonText;
+
+    sf::Sprite icon;
+    sf::Texture texture;
+
     sf::Color color;
+    bool hasIcon;
 
     bool inBounds(const sf::Vector2i &mousePos) const;
     sf::Color darkenColor(const sf::Color &color, int amount);

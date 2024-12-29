@@ -1,24 +1,20 @@
 #ifndef PROJECTS_VIEW_HPP
 #define PROJECTS_VIEW_HPP
 
-#include <SFML/Graphics.hpp>
-#include <memory>
-#include <vector>
-#include "../core/ui/Component.hpp"
-#include "../core/ui/Text.hpp"
-#include "../core/ui/Button.hpp"
+#include <queue>
+
 #include "View.hpp"
 
 class ProjectsView: public View {
 public:
     ProjectsView();
 
-     void onActivate() override;
-     void onDeactivate() override;
-
+    void onActivate() override;
+    void handleEvent(const sf::Event& event, sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window);
 private:
     void createUI();
-    std::vector<std::shared_ptr<Component>> components;
+    std::queue<std::function<void()>> pendingOperations;
 };
 
 #endif

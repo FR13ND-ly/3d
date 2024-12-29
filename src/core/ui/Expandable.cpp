@@ -11,13 +11,13 @@ Expandable::Expandable (
     const std::string& text,
     const sf::Color& color,
     const sf::Color& textColor
-) : isCurrentlyExpanded(false), maxContentHeight(std::numeric_limits<float>::max()), headerColor(color) {
-
+) : isCurrentlyExpanded(false), maxContentHeight(std::numeric_limits<float>::max()),
+    headerColor(color) {
     headerRect.setSize(size);
     headerRect.setPosition(position);
     headerRect.setFillColor(color);
 
-    const sf::Font& font = FontManager::getInstance().getFont();
+    const sf::Font &font = FontManager::getInstance().getFont();
     headerText.setFont(font);
     headerText.setString(text);
     headerText.setCharacterSize(static_cast<unsigned int>(size.y * 0.5f));
@@ -47,19 +47,20 @@ void Expandable::handleEvent(const sf::Event& event, const sf::RenderWindow& win
     if (isHovered) {
         headerRect.setFillColor(darkenColor(headerColor, 20));
         if (onHover) {
-            onHover(true);
+            onHover();
         }
     } else {
         headerRect.setFillColor(headerColor);
         if (onHover) {
-            onHover(false);
+            onHover();
         }
     }
 
     if (isHovered && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         headerRect.setFillColor(darkenColor(headerColor, 60));
-        setExpanded(!isCurrentlyExpanded);
-
+        // if (!isCurrentlyExpanded) {
+            setExpanded(!isCurrentlyExpanded);
+        // }
         if (onClick) {
             onClick();
         }
@@ -92,27 +93,20 @@ void Expandable::updateContentPositions() {
     if (contentComponents.empty()) return;
 
     float currentY = headerRect.getPosition().y + headerRect.getSize().y;
-    float maxWidth = headerRect.getSize().x;
-
     for (auto& component : contentComponents) {
-        if (currentY + component->getHeight() > headerRect.getPosition().y + maxContentHeight) {
-            break;
-        }
-
         sf::Vector2f position(
             component->getPosition().x,
             // headerRect.getPosition().x + (maxWidth - component->getHeight()) / 2,
             currentY
         );
         component->setPosition(position);
-
         currentY += component->getHeight();
     }
 }
 
 void Expandable::setExpanded(bool expanded) {
     isCurrentlyExpanded = expanded;
-
+    updateContentPositions();
     if (onClickWithBool) {
         onClickWithBool(expanded);
     }
@@ -181,4 +175,17 @@ sf::Color Expandable::darkenColor(const sf::Color& color, int amount) {
         std::max(0, color.g - amount),
         std::max(0, color.b - amount)
     );
+}
+
+void Expandable::setColor(sf::Color color) {
+    headerRect.setFillColor(color);
+}
+
+void Expandable::setTextColor(sf::Color color) {
+    headerText.setFillColor(color);
+}
+
+
+std::vector<std::shared_ptr<Component>> Expandable::getContent() const {
+    return contentComponents;
 }

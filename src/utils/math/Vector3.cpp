@@ -3,6 +3,10 @@
 
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
+bool Vector3::operator<(const Vector3& other) const {
+    return std::tie(x, y, z) < std::tie(other.x, other.y, other.z);
+}
+
 Vector3 Vector3::operator+(const Vector3& other) const {
     return Vector3(x + other.x, y + other.y, z + other.z);
 }
@@ -22,6 +26,8 @@ Vector3 Vector3::operator/(float scalar) const {
     }
     return Vector3(x / scalar, y / scalar, z / scalar);
 }
+
+
 
 Vector3 Vector3::normalized() const {
     float length = magnitude();
@@ -74,4 +80,8 @@ bool Vector3::operator==(const Vector3& other) const {
 
 bool Vector3::operator!=(const Vector3& other) const {
     return !(*this == other);
+}
+
+float Vector3::lengthSquared() const {
+    return x * x + y * y + z * z;
 }

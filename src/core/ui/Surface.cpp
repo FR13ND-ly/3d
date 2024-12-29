@@ -18,11 +18,15 @@ void Surface::handleEvent(const sf::Event& event, const sf::RenderWindow& window
         if (onClick) onClick();
         if (onClickWithBool) onClickWithBool(true);
     } else if (event.type == sf::Event::MouseMoved) {
-        if (onHover) onHover(inBounds(sf::Mouse::getPosition(window)));
+        if (inBounds(sf::Mouse::getPosition(window))) {
+            if (onHover) onHover();
+        }
+        else {
+            if (onHoverOut) onHoverOut();
+        }
     }
 }
 
-// Setters
 void Surface::setColor(const sf::Color& color) {
     rectangle.setFillColor(color);
 }

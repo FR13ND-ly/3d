@@ -41,7 +41,6 @@ void ScrollView::addComponent(std::shared_ptr<Component> component) {
     component->setPosition({position.x, currentY});
     components.push_back(component);
 
-    // Update the scrollbar to reflect the new total content height
     updateScrollBar();
 }
 
@@ -103,7 +102,6 @@ void ScrollView::draw(sf::RenderWindow& window) {
         return;
     }
 
-    // Apply a clipping view for the scroll area
     sf::View originalView = window.getView();
 
     sf::View clippingView = originalView;
@@ -122,7 +120,6 @@ void ScrollView::draw(sf::RenderWindow& window) {
     clippingView.setSize(size);
     window.setView(clippingView);
 
-    // Draw visible components only
     float currentY = position.y - scrollOffset;
     for (const auto& component : components) {
         sf::Vector2f componentPosition = component->getPosition();
@@ -134,10 +131,8 @@ void ScrollView::draw(sf::RenderWindow& window) {
         currentY += componentHeight;
     }
 
-    // Reset to the original view
     window.setView(originalView);
 
-    // Draw the scrollbar if needed
     if (totalHeight > maxHeight) {
         window.draw(scrollBar);
         window.draw(scrollHandle);
@@ -263,4 +258,8 @@ void ScrollView::setPosition(const sf::Vector2f &newPosition) {
     }
 
     updateScrollBar();  // Ensure the scroll bar is updated after repositioning
+}
+
+std::vector<std::shared_ptr<Component> > ScrollView::getComponents() const {
+    return components;
 }

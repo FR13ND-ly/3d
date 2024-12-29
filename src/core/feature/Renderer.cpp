@@ -17,23 +17,18 @@ bool Renderer::isFaceCulled(const Vector3& v1, const Vector3& v2, const Vector3&
     Vector3 edge1 = v2 - v1;
     Vector3 edge2 = v3 - v1;
 
-    // Calculate the face normal
     Vector3 normal = edge1.cross(edge2);
     if (normal.length() < 1e-6f) {
-        // Degenerate face, don't cull
         return false;
     }
     normal.normalized();
 
-    // Get the camera position from the view matrix
     Vector3 cameraPosition(-viewMatrix(0, 3), -viewMatrix(1, 3), -viewMatrix(2, 3));
     Vector3 viewDirection = (v1 - cameraPosition).normalized();
 
-    // Check the dot product
     float dotProduct = normal.dot(viewDirection);
 
-    // Cull if the face is facing away from the camera
-    return dotProduct > 0.0f; // Invert the condition
+    return dotProduct > 0.0f;
 }
 
 
@@ -87,10 +82,39 @@ void Renderer::render(const std::vector<std::shared_ptr<Object3d>>& objects, Cam
         processObject(object, camera, facesToRender);
     }
 
-    std::stable_sort(facesToRender.begin(), facesToRender.end(), [](const FaceData& a, const FaceData& b) {
-        if (a.depth != b.depth) return a.depth > b.depth;
-        return a.object < b.object;
-    });
+    // Improved sorting algorithm considering camera direction
+    std::sort(facesToRender.begin(), facesToRender.end(),
+        [](const FaceData& a, const FaceData& b) {
+            // Calculate centers of faces in view space
+            Vector3 aCenterView = (a.v1 + a.v2 + a.v3) * (1.0f / 3.0f);
+            Vector3 bCenterView = (b.v1 + b.v2 + b.v3) * (1.0f / 3.0f);
+
+            // Calculate actual distances from camera (squared distance to avoid sqrt)
+            float aDistSq = aCenterView.lengthSquared();
+            float bDistSq = bDistSq = bCenterView.lengthSquared();
+
+            const float DIST_THRESHOLD_SQ = 0.01f * 0.01f;
+            if (std::abs(aDistSq - bDistSq) > DIST_THRESHOLD_SQ) {
+                return aDistSq < bDistSq;
+            }
+
+            Vector3 aEdge1 = a.v2 - a.v1;
+            Vector3 aEdge2 = a.v3 - a.v1;
+            Vector3 aNormal = aEdge1.cross(aEdge2).normalized();
+
+            Vector3 bEdge1 = b.v2 - b.v1;
+            Vector3 bEdge2 = b.v3 - b.v1;
+            Vector3 bNormal = bEdge1.cross(bEdge2).normalized();
+
+            float aDot = aNormal.dot(Vector3(0, 0, 1));
+            float bDot = bNormal.dot(Vector3(0, 0, 1));
+
+            if (std::abs(aDot - bDot) > 0.001f) {
+                return aDot < bDot;
+            }
+
+            return std::less<const Object3d*>()(a.object.get(), b.object.get());
+        });
 
     renderFaces(facesToRender);
     renderEdges(objects, camera);
@@ -112,10 +136,8 @@ void Renderer::processObject(const std::shared_ptr<Object3d>& object, Camera& ca
     if (!isObjectInFrustum(cameraSpaceVertices)) return;
 
     std::vector<Vector3> projectedVertices = projectVertices(cameraSpaceVertices, projectionMatrix);
-
-    auto sortedFaces = object->getSortedFaces(cameraSpaceVertices);
-
-    for (const auto& triangle : sortedFaces) {
+    int i = 0;
+    for (const auto& triangle : object->getFaces()) {
         float zAvg = (
             cameraSpaceVertices[triangle[0]].z +
             cameraSpaceVertices[triangle[1]].z +
@@ -126,6 +148,7 @@ void Renderer::processObject(const std::shared_ptr<Object3d>& object, Camera& ca
                          projectedVertices[triangle[1]],
                          projectedVertices[triangle[2]],
                          viewMatrix)) {
+            i++;
             continue;
         }
 
@@ -135,15 +158,18 @@ void Renderer::processObject(const std::shared_ptr<Object3d>& object, Camera& ca
             projectedVertices[triangle[2]],
             sf::Color(triangle[3], triangle[4], triangle[5], triangle[6]),
             zAvg,
-            object
+            object,
+            object->isFaceSelected(i),
+            object->isFaceHovered(i)
         });
+        i++;
     }
 }
 
 void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
     sf::RenderWindow& window = WindowManager::getInstance().getWindow();
     Scene& scene = Scene::getInstance(window);
-
+    int i = 0;
     for (const auto& face : facesToRender) {
         if (face.v1.z < NEAR_PLANE || face.v2.z < NEAR_PLANE || face.v3.z < NEAR_PLANE ||
             face.v1.z > FAR_PLANE || face.v2.z > FAR_PLANE || face.v3.z > FAR_PLANE) {
@@ -155,7 +181,32 @@ void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
         sf::Vector2f screenPos3 = screenPosition(face.v3);
 
         sf::Color color = scene.getVerticesEditMode() ? sf::Color(255, 255, 255, 32) : face.color;
-
+        if (scene.getFacesEditMode()) {
+            if (face.isHovered) {
+                color = sf::Color(
+                    std::min(face.color.r + 10, 255),
+                    std::min(face.color.g + 10, 255),
+                    std::max(face.color.b - 5, 0),
+                    face.color.a
+                );
+            }
+            if (face.isSelected) {
+                color = sf::Color(
+                    std::min(face.color.r + 20, 255),
+                    std::min(face.color.g + 20, 255),
+                    std::max(face.color.b - 10, 0),
+                    face.color.a
+                );
+            }
+            if (face.isSelected && face.isHovered) {
+                color = sf::Color(
+                    std::min(face.color.r + 30, 255),
+                    std::min(face.color.g + 30, 255),
+                    std::max(face.color.b - 15, 0),
+                    face.color.a
+                );
+            }
+        }
         sf::Vertex triangle[] = {
             sf::Vertex(screenPos1, color),
             sf::Vertex(screenPos2, color),
@@ -163,6 +214,7 @@ void Renderer::renderFaces(const std::vector<FaceData>& facesToRender) {
         };
 
         window.draw(triangle, 3, sf::Triangles);
+        i++;
     }
 }
 
@@ -171,7 +223,6 @@ void Renderer::renderEdges(const std::vector<std::shared_ptr<Object3d>>& objects
     Scene& scene = Scene::getInstance(window);
 
     for (const auto& object : objects) {
-        if (!object->isSelected && !scene.getVerticesEditMode()) continue;
 
         Matrix4 modelMatrix = object->getTransformation();
         Matrix4 viewMatrix = camera.getViewMatrix();
@@ -197,8 +248,16 @@ void Renderer::renderEdges(const std::vector<std::shared_ptr<Object3d>>& objects
 
             sf::Vector2f screenPos1 = screenPosition(v1);
             sf::Vector2f screenPos2 = screenPosition(v2);
-
-            sf::Color color = scene.getVerticesEditMode() ? (object->isSelected ? sf::Color::Yellow : sf::Color::White) : sf::Color(255, 255, 255, 64);
+            sf::Color color = sf::Color(255, 255, 255, 255);
+            if (object->isHovered) {
+                color = sf::Color(255, 255, 205, 255);
+            }
+            if (object->isSelected) {
+                color = sf::Color(255, 255, 100, 255);
+            }
+            if (object->isHovered && object->isSelected) {
+                color = sf::Color(255, 255, 0, 255);
+            }
             if (scene.getVerticesEditMode()) {
                 int j = 0;
                 for (const auto& vertex : projectedVertices) {
@@ -207,7 +266,16 @@ void Renderer::renderEdges(const std::vector<std::shared_ptr<Object3d>>& objects
                         (vertex.x + 1.0f) * 0.5f * window.getSize().x,
                         (1.0f - vertex.y) * 0.5f * window.getSize().y
                     };
-                    sf::Color vertexColor = object->isVertexSelected(j) ? sf::Color::Yellow : sf::Color(150, 150, 150, 230);
+                    sf::Color vertexColor = sf::Color(sf::Color(150, 150, 150, 230));
+                    if (object->isVertexHovered(j)) {
+                        vertexColor = sf::Color(255, 255, 205);
+                    }
+                    if (object->isVertexSelected(j)) {
+                        vertexColor = sf::Color(255, 255, 125);
+                    }
+                    if (object->isVertexHovered(j) && object->isVertexSelected(j)) {
+                        vertexColor = sf::Color(255, 255, 0);
+                    }
                     sf::CircleShape vertexCircle(10.0f);
                     vertexCircle.setFillColor(vertexColor);
                     vertexCircle.setPosition(screenPos.x - vertexCircle.getRadius(),

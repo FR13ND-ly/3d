@@ -8,10 +8,8 @@
 
 class Text : public Component {
 public:
-    // Constructor
     Text(const sf::Vector2f &position, const int size, const std::string &text, const sf::Color &color = sf::Color::White);
 
-    // Draw function
     void draw(sf::RenderWindow &window) override;
 
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
@@ -19,9 +17,11 @@ public:
     void setText(const std::string &text);
 
     float getHeight() const override;
+    float getWidth() const;
 
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
+    void setBold();
 
 protected:
     sf::Text content;         // SFML Text object

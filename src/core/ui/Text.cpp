@@ -19,6 +19,11 @@ void Text::draw(sf::RenderWindow &window) {
 // Handle event (currently not doing anything)
 void Text::handleEvent(const sf::Event &event, const sf::RenderWindow &window) {}
 
+
+void Text::setBold() {
+    content.setStyle(sf::Text::Bold);
+}
+
 // Set new text content
 void Text::setText(const std::string &text) {
     content.setString(text);
@@ -31,6 +36,10 @@ bool Text::inBounds(const sf::Vector2i &mousePos) const {
 
 float Text::getHeight() const {
     return content.getGlobalBounds().height;
+}
+
+float Text::getWidth() const {
+    return content.getGlobalBounds().width;
 }
 
 sf::Vector2f Text::getPosition() const {

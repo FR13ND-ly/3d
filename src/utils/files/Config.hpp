@@ -12,7 +12,6 @@ class Config {
 public:
     static Config& getInstance(); // Singleton getter
 
-    // Deleted copy constructor and assignment operator
     Config(const Config&) = delete;
     Config& operator=(const Config&) = delete;
 

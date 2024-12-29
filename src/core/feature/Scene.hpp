@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include "../../utils/files/Config.hpp"
+#include "../../utils/ZBuffer.hpp"
 
 class Scene : public Component {
 public:
@@ -19,7 +20,7 @@ public:
     void addObject(const std::string& objectType, float param1 = 1.0f, int param2 = 16);
     const std::vector<std::shared_ptr<Object3d>>& getObjects() const;
 
-    void setCamera(const Camera &camera);
+    void setCamera(Camera &camera);
     const Camera& getCamera() const;
     Camera& getCamera();
 
@@ -39,17 +40,36 @@ public:
     void setVerticesEditMode(bool value);
     bool getFacesEditMode();
     void setFacesEditMode(bool value);
+    bool getObjectsEditMode();
+    void setObjectsEditMode(bool value);
 
+    void setCameraPosition(Vector3 position);
+    void setCameraYawAndPitch(float yaw, float pitch);
+    void setOrbitCenter(const Vector3& center);
+
+    void copyObjectByIndex(int index);
+    void deleteObjectByIndex(int index);
+    void createCombination();
+
+    void resetObjects();
+    Renderer renderer;
+    std::vector<unsigned int> selectedObjects;
+
+    bool isObjectSelected(unsigned int i) const;
+    void toggleObjectSelected(unsigned int i);
 private:
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
+    ZBuffer zBuffer;
 
     std::vector<std::shared_ptr<Object3d>> objects;
     Camera camera;
-    Renderer renderer;
     sf::RenderWindow &window;
+
     int selectedObjectIndex = 0;
+
     bool verticesEditMode = false;
+    bool objectsEditMode = false;
     bool facesEditMode = false;
 
     float yawVelocity;

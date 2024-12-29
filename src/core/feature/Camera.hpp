@@ -23,12 +23,19 @@ public:
     Vector3 getPosition() const;
     void setPosition(const Vector3& newPosition);
 
+    void rotate(float deltaYaw, float deltaPitch);
     void rotateYaw(float deltaYaw);
     void rotatePitch(float deltaPitch);
 
     void orbitYaw(const Vector3& center, float deltaYaw, float deltaPitch);
-    void orbit(const Vector3& center, float deltaYaw, float deltaPitch);
+    void orbit(float deltaYaw, float deltaPitch);
 
+    float getYaw() const;
+    float getPitch() const;
+
+    void setYawAndPitch(float yaw, float pitch);
+    Vector3 getOrbitCenter() const;
+    void setOrbitCenter(const Vector3& center);
 private:
     static Vector4 toQuaternion(const Matrix4& mat);
     Matrix4 quatToMatrix(const Vector4& q) const;
@@ -36,12 +43,13 @@ private:
 
     Vector3 position;
     Vector4 rotation;
+    Vector3 orbitCenter;
 
     float windowWidth, windowHeight;
     float fov, nearClip, farClip;
 
-    float yaw;   // Rotation around the Y-axis
-    float pitch; // Rotation around the X-axis
+    float yaw;
+    float pitch;
 
     static constexpr float DEG_TO_RAD = 3.14159265359f / 180.0f;
     const float RAD_TO_DEG = 180.0f / 3.14159265359f;

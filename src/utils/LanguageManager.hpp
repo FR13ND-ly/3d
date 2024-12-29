@@ -17,7 +17,7 @@ public:
 
     void setLanguageByIndex(int index);
 
-    nlohmann::json getSelectedPack() const;
+    const nlohmann::json& getSelectedPack() const;
 
     std::vector<std::string> getAllLanguages() const;
 

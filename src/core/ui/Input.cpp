@@ -1,6 +1,7 @@
 #include "Input.hpp"
 #include <iostream>
 #include <algorithm>
+#include <windows.h>
 
 Input::Input(const sf::Vector2f& position, const sf::Vector2f& size,
              const std::string& titleText, const std::string& placeholder,
@@ -45,26 +46,61 @@ void Input::draw(sf::RenderWindow& window) {
 
 void Input::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
     if (event.type == sf::Event::MouseButtonPressed) {
+        bool wasAlreadyFocused = isFocused;
         isFocused = inBounds(sf::Mouse::getPosition(window));
+        if (wasAlreadyFocused && !isFocused) {
+            if (onClickWithString) {
+                lastUpdatedValue = currentText;
+                onClickWithString(currentText);
+            }
+        }
     }
     if (isFocused) {
         inputText.setFillColor(sf::Color::Black);
     }
-
+    if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Enter) {
+            if (onClickWithString) {
+                lastUpdatedValue = currentText;
+                onClickWithString(currentText);
+                isFocused = false;
+            }
+        } else if (event.key.control && event.key.code == sf::Keyboard::V) {
+            std::string clipboardText = getClipboardText();
+            currentText += clipboardText;
+        }
+    }
     if (isFocused && event.type == sf::Event::TextEntered) {
         char enteredChar = static_cast<char>(event.text.unicode);
 
-        if (enteredChar == 8) { // Backspace
+        if (enteredChar == 8) {
             if (!currentText.empty()) {
                 currentText.pop_back();
             }
-        } else if (enteredChar >= 32 && enteredChar <= 126) { // Printable characters
+        } else if (enteredChar >= 32 && enteredChar <= 126) {
             currentText += enteredChar;
         }
-        if (onClickWithString) {
-            onClickWithString(currentText);
-        }
     }
+}
+
+std::string Input::getClipboardText() const {
+    if (!OpenClipboard(nullptr)) {
+        return "";
+    }
+    HANDLE hData = GetClipboardData(CF_TEXT);
+    if (!hData) {
+        CloseClipboard();
+        return "";
+    }
+    char* pszText = static_cast<char*>(GlobalLock(hData));
+    if (!pszText) {
+        CloseClipboard();
+        return "";
+    }
+    std::string text(pszText);
+    GlobalUnlock(hData);
+    CloseClipboard();
+    return text;
 }
 
 std::string Input::getValue() const {
@@ -73,6 +109,7 @@ std::string Input::getValue() const {
 
 void Input::setValue(const std::string& value) {
     currentText = value;
+    lastUpdatedValue = value;
 }
 
 sf::Vector2f Input::getPosition() const {

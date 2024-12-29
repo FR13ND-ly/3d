@@ -101,3 +101,7 @@ void Select::setPosition(const sf::Vector2f &newPosition) {
         optionTexts[i]->setPosition({position.x, position.y + (i + 1) * 30 + 10});
     }
 }
+
+void Select::setOpen(bool open) {
+    isOpen = open;
+}

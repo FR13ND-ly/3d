@@ -8,7 +8,8 @@ Scene::Scene(sf::RenderWindow &window)
       window(window),
       yawVelocity(0.0f),
       pitchVelocity(0.0f),
-      dampingFactor(0.95f) {
+      dampingFactor(0.95f),
+      zBuffer(window) {
     addObject(std::shared_ptr<Object3d>(new GridPlane()));
 }
 
@@ -19,12 +20,46 @@ Scene& Scene::getInstance(sf::RenderWindow& window) {
 
 void Scene::addObject(std::shared_ptr<Object3d> object) {
     objects.push_back(object);
-    onChangeSelectedObjectIndex(objects.size() - 1);
+    if (!getObjectsEditMode()) {
+        for (int i = 0; i < objects.size(); i++) {
+            objects[i]->isSelected = false;
+            auto it = std::find(selectedObjects.begin(), selectedObjects.end(), i);
+            if (it != selectedObjects.end()) {
+                selectedObjects.erase(it);
+            }
+        }
+    }
+    toggleObjectSelected(objects.size() - 1);
+}
+
+void Scene::createCombination() {
+    if (selectedObjects.size() < 2) {
+        return;
+    }
+
+    std::vector<std::shared_ptr<Object3d>> selectedObjectsVector;
+    for (unsigned int index : selectedObjects) {
+        selectedObjectsVector.push_back(objects[index]);
+    }
+
+    std::shared_ptr<Object3d> result = ObjectsFactory::combineObjects(selectedObjectsVector);
+
+    std::vector<unsigned int> indicesToDelete = selectedObjects;
+    std::sort(indicesToDelete.begin(), indicesToDelete.end(), std::greater<unsigned int>());
+
+    for (unsigned int index : indicesToDelete) {
+        deleteObjectByIndex(index);
+    }
+    for (int i = 0; i < objects.size(); i++) {
+        objects[i]->isSelected = false;
+    }
+    selectedObjects.clear();
+    result->isSelected = false;
+    addObject(result);
 }
 
 void Scene::addObject(const std::string& objectType, float param1, int param2) {
     ObjectsFactory factory;
-
     std::shared_ptr<Object3d> object = factory.createObject(objectType, param1, param2);
     addObject(object);
 }
@@ -33,8 +68,12 @@ const std::vector<std::shared_ptr<Object3d>>& Scene::getObjects() const {
     return objects;
 }
 
-void Scene::setCamera(const Camera &camera) {
-    // this->camera = camera; // Optional if you wish to set the camera manually
+void Scene::setCameraPosition(Vector3 position) {
+    this->camera.setPosition(position);
+}
+
+void Scene::setCameraYawAndPitch(float yaw, float pitch) {
+    this->camera.setYawAndPitch(yaw, pitch);
 }
 
 const Camera& Scene::getCamera() const {
@@ -52,10 +91,14 @@ void Scene::handleEvent(const sf::Event &event, const sf::RenderWindow &window) 
     if (!inBounds(sf::Mouse::getPosition(window))) return;
     if (event.type == sf::Event::MouseMoved) {
         handleMouseMoved();
+        zBuffer.handleHover(sf::Mouse::getPosition(window), *this, camera);
     }
 
     if (event.type == sf::Event::MouseWheelScrolled) {
         handleScroll(event.mouseWheelScroll);
+    }
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+        zBuffer.handleClick(sf::Mouse::getPosition(window), *this, camera);
     }
 }
 
@@ -69,11 +112,7 @@ void Scene::draw(sf::RenderWindow &window) {
 }
 
 void Scene::onChangeSelectedObjectIndex(int selectedObjectIndex) {
-    for (int i = 0; i < objects.size(); i++) {
-        objects[i]->isSelected = false;
-    }
     this->selectedObjectIndex = selectedObjectIndex;
-    objects[selectedObjectIndex]->isSelected = true;
 }
 
 void Scene::handleScroll(sf::Event::MouseWheelScrollEvent event) {
@@ -88,24 +127,6 @@ void Scene::handleKeyPressed(sf::Keyboard::Key key) {
 
     auto &object = getObjects()[selectedObjectIndex];
     switch (key) {
-        case sf::Keyboard::Num1:
-            onChangeSelectedObjectIndex(0);
-            break;
-        case sf::Keyboard::Num2:
-            onChangeSelectedObjectIndex(1);
-            break;
-        case sf::Keyboard::W:
-            camera.rotatePitch(Config::getInstance().getSensitivity() * 1.5f);
-            break;
-        case sf::Keyboard::S:
-            camera.rotatePitch(Config::getInstance().getSensitivity() * -1.5f);
-            break;
-        case sf::Keyboard::A:
-            camera.rotateYaw(Config::getInstance().getSensitivity() * -1.5f);
-            break;
-        case sf::Keyboard::D:
-            camera.rotateYaw(Config::getInstance().getSensitivity() * 1.5f);
-            break;
         case sf::Keyboard::Q:
             getCamera().move(Vector3(0.0f, Config::getInstance().getSensitivity() * 0.1f, 0.0f));
         break;
@@ -124,23 +145,17 @@ void Scene::handleKeyPressed(sf::Keyboard::Key key) {
         case sf::Keyboard::L:
             object->rotate(0.05f, 'y');
             break;
-        case sf::Keyboard::Z:
-            object->rotate(0.05f, 'z');
-            break;
-        case sf::Keyboard::X:
-            object->rotate(-0.05f, 'z');
-            break;
         case sf::Keyboard::Left:
-            object->translate(Vector3(-0.05f, 0.0f, 0.0f));  // Translate left
+            object->translate(Vector3(-0.05f, 0.0f, 0.0f));
             break;
         case sf::Keyboard::Right:
-            object->translate(Vector3(0.05f, 0.0f, 0.0f));  // Translate right
+            object->translate(Vector3(0.05f, 0.0f, 0.0f));
             break;
         case sf::Keyboard::Up:
-            object->translate(Vector3(0.0f, -0.05f, 0.0f));  // Translate up
+            object->translate(Vector3(0.0f, -0.05f, 0.0f));
             break;
         case sf::Keyboard::Down:
-            object->translate(Vector3(0.0f, 0.05f, 0.0f));  // Translate down
+            object->translate(Vector3(0.0f, 0.05f, 0.0f));
             break;
         default:
             break;
@@ -176,14 +191,22 @@ void Scene::handleMouseMoved() {
                     sensitivity * static_cast<float>(mouseDelta.y / 2),
                     0.0f
                 ));
-            } else {
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
+                float sensitivity = Config::getInstance().getSensitivity() * 0.01f;
+                getCamera().rotate(
+                    sensitivity * static_cast<float>(mouseDelta.x),
+                    -sensitivity * static_cast<float>(mouseDelta.y)
+                );
+            }
+            else {
                 float sensitivity = Config::getInstance().getSensitivity() * 0.5f;
                 if (Config::getInstance().getInertia()) {
                     yawVelocity += sensitivity * static_cast<float>(mouseDelta.x);
                     pitchVelocity += sensitivity * static_cast<float>(mouseDelta.y);
                 }
                 else {
-                    camera.orbit(Vector3(0, 0, 0), 0.1 * sensitivity * static_cast<float>(mouseDelta.x), 0.1 * sensitivity * static_cast<float>(mouseDelta.y));
+                    camera.orbit(0.1 * sensitivity * static_cast<float>(mouseDelta.x), 0.1 * sensitivity * static_cast<float>(mouseDelta.y));
                 }
             }
 
@@ -204,8 +227,12 @@ void Scene::update(float deltaTime) {
     pitchVelocity *= dampingFactor;
 
     if (std::abs(yawVelocity) > 0.01f || std::abs(pitchVelocity) > 0.01f) {
-        camera.orbit(Vector3(0, 0, 0), yawVelocity * deltaTime, pitchVelocity * deltaTime);
+        camera.orbit(yawVelocity * deltaTime, pitchVelocity * deltaTime);
     }
+}
+
+void Scene::setOrbitCenter(const Vector3& center) {
+    camera.setOrbitCenter(center);
 }
 
 int Scene::getSelectedObjectIndex() const {
@@ -238,6 +265,83 @@ bool Scene::getFacesEditMode() {
     return facesEditMode;
 }
 
+void Scene::copyObjectByIndex(int index) {
+    if (index < 0 || index >= objects.size()) {
+        throw std::out_of_range("Index out of range");
+    }
+    std::shared_ptr<Object3d> clonedObject = objects[index]->clone();
+    clonedObject->isSelected = false;
+    addObject(clonedObject);
+}
+
+void Scene::deleteObjectByIndex(int index) {
+    if (index < 0 || index >= objects.size()) {
+        throw std::out_of_range("Index out of range");
+    }
+    objects.erase(objects.begin() + index);
+    auto it = std::find(selectedObjects.begin(), selectedObjects.end(), index);
+    if (it != selectedObjects.end()) {
+        selectedObjects.erase(it);
+    }
+    if (selectedObjectIndex >= index) {
+        selectedObjectIndex = std::max(0, selectedObjectIndex - 1);
+
+    }
+    if (!objects.empty()) {
+        onChangeSelectedObjectIndex(selectedObjectIndex);
+    }
+}
+
+
 void Scene::setFacesEditMode(bool value) {
     facesEditMode = value;
+}
+
+void Scene::resetObjects() {
+    objects.clear();
+    selectedObjects.clear();
+    addObject(std::shared_ptr<Object3d>(new GridPlane()));
+}
+
+bool Scene::getObjectsEditMode() {
+    return objectsEditMode;
+}
+
+void Scene::setObjectsEditMode(bool value) {
+    objectsEditMode = value;
+    if (!value) {
+        for (int i = 0; i < objects.size(); i++) {
+            objects[i]->isSelected = false;
+            auto it = std::find(selectedObjects.begin(), selectedObjects.end(), i);
+            if (it != selectedObjects.end()) {
+                selectedObjects.erase(it);
+            }
+        }
+        toggleObjectSelected(selectedObjectIndex);
+    }
+}
+
+bool Scene::isObjectSelected(unsigned int i) const {
+    return std::find(selectedObjects.begin(), selectedObjects.end(), i) != selectedObjects.end();
+}
+
+
+void Scene::toggleObjectSelected(unsigned int i) {
+    if (i < 1) return;
+    objects[i]->isSelected = !objects[i]->isSelected;
+    auto it = std::find(selectedObjects.begin(), selectedObjects.end(), i);
+    if (it != selectedObjects.end()) {
+        selectedObjects.erase(it);
+        if (!selectedObjects.empty()) {
+            selectedObjectIndex = selectedObjects.back();
+        } else {
+            selectedObjectIndex = objects.size() - 1;
+        };
+    } else {
+        selectedObjects.push_back(i);
+        selectedObjectIndex = i;
+        objects[selectedObjectIndex]->isSelected = true;
+
+    }
+    onChangeSelectedObjectIndex(selectedObjectIndex);
 }

@@ -24,6 +24,7 @@ public:
 private:
     std::map<std::string, std::shared_ptr<View>> views;
     std::shared_ptr<View> currentView = nullptr;
+    std::queue<std::function<void()>> pendingOperations;
 
     ViewsManager(const ViewsManager&) = delete;
     ViewsManager& operator=(const ViewsManager&) = delete;

@@ -25,6 +25,11 @@ public:
     void setExpanded(bool expanded);
     bool isExpanded() const;
 
+    void setColor(sf::Color color);
+    void setTextColor(sf::Color color);
+
+    std::vector<std::shared_ptr<Component>> getContent() const;
+
     void setMaxContentHeight(float maxHeight);
 
 protected:
@@ -38,7 +43,6 @@ private:
     float maxContentHeight;
     sf::Color headerColor;
 
-    // Helper methods
     void updateContentPositions();
     sf::Color darkenColor(const sf::Color& color, int amount);
 };

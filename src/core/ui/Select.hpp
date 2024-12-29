@@ -16,7 +16,6 @@ public:
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
     void draw(sf::RenderWindow& window) override;
 
-    // Getter functions
     std::string getSelectedOption() const;
     int getSelectedIndex() const;
 
@@ -30,6 +29,7 @@ public:
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
 
+    void setOpen(bool open);
 protected:
     sf::Vector2f position;
     sf::Vector2f size;

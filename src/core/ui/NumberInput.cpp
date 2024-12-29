@@ -3,7 +3,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
-#include <iostream>
+#include <windows.h>
 
 NumberInput::NumberInput(const sf::Vector2f& position, const sf::Vector2f& size,const std::string& titleText,
                          float step, const sf::Color& boxColor, const sf::Color& textColor,
@@ -55,6 +55,10 @@ void NumberInput::handleEvent(const sf::Event& event, const sf::RenderWindow& wi
 
         if (wasAlreadyFocused && !isFocused) {
             validateAndUpdateValue();
+            if (onClickWithFloat) {
+                lastUpdatedValue = numericValue;
+                onClickWithFloat(numericValue);
+            }
         }
 
     }
@@ -68,14 +72,12 @@ void NumberInput::handleEvent(const sf::Event& event, const sf::RenderWindow& wi
             if (!displayValue.empty()) {
                 numericValue = std::stof(displayValue);
                 if (onClickWithFloat) {
+                    lastUpdatedValue = numericValue;
                     onClickWithFloat(numericValue);
                 }
             }
-        } catch (...) {
-            // If conversion fails, use current numeric value
-        }
+        } catch (...) {}
 
-        // Increment or decrement value by step
         if (event.mouseWheelScroll.delta > 0) {
             numericValue += step;
         } else {
@@ -86,6 +88,7 @@ void NumberInput::handleEvent(const sf::Event& event, const sf::RenderWindow& wi
 
         updateDisplayValue();
         if (onClickWithFloat) {
+            lastUpdatedValue = numericValue;
             onClickWithFloat(numericValue);
         }
     }
@@ -102,16 +105,22 @@ void NumberInput::handleEvent(const sf::Event& event, const sf::RenderWindow& wi
                         } catch (...) {
                             numericValue = 0.0f;
                         }
-                        if (onClickWithFloat) {
-                            onClickWithFloat(numericValue);
-                        }
                     }
+                }
+            }
+            else if (event.key.code == sf::Keyboard::Enter) {
+                if (onClickWithFloat) {
+                    validateAndUpdateValue();
+                    lastUpdatedValue = numericValue;
+                    onClickWithFloat(numericValue);
+                    isFocused = false;
                 }
             }
             else if (event.key.code == sf::Keyboard::Delete) {
                 displayValue.clear();
                 numericValue = 0.0f;
                 if (onClickWithFloat) {
+                    lastUpdatedValue = numericValue;
                     onClickWithFloat(numericValue);
                 }
             }
@@ -130,9 +139,6 @@ void NumberInput::handleEvent(const sf::Event& event, const sf::RenderWindow& wi
                     std::isdigit(enteredChar)) {
                     displayValue += enteredChar;
                 }
-            }
-            if (onClickWithFloat) {
-                onClickWithFloat(numericValue);
             }
         }
     }
@@ -167,6 +173,7 @@ float NumberInput::getValue() const {
 void NumberInput::setValue(float newValue) {
     numericValue = std::max(minValue, std::min(newValue, maxValue));
     updateDisplayValue();
+    lastUpdatedValue = numericValue;
 }
 
 void NumberInput::setPlaceholder(const std::string& placeholder) {

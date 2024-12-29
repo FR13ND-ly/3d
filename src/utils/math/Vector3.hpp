@@ -11,10 +11,12 @@ public:
     Vector3(float x = 0, float y = 0, float z = 0);
 
     // Vector operations
+    bool operator<(const Vector3& other) const;
     Vector3 operator+(const Vector3& other) const;
     Vector3 operator-(const Vector3& other) const;
     Vector3 operator*(float scalar) const;
     Vector3 operator/(float scalar) const;
+    float lengthSquared() const;
 
     // Vector utility functions
     Vector3 normalized() const;
