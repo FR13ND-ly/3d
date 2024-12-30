@@ -12,6 +12,8 @@
 #include "../../utils/files/Config.hpp"
 #include "../../utils/ZBuffer.hpp"
 
+
+
 class Scene : public Component {
 public:
     static Scene& getInstance(sf::RenderWindow& window);

@@ -278,16 +278,16 @@ CustomShape ObjectsFactory::createSphere(float radius, int segments) {
             int first = lat * (segments + 1) + lon;
             int second = first + segments + 1;
 
-            // Side faces with greyish colors
+            // Reverse the order of vertices for each face
             faces.push_back({
-                first, second, first + 1,
+                first + 1, second, first, // Reverse winding order
                 static_cast<int>(150 + 50 * (lon % 2)),  // Alternate between shades of grey
                 static_cast<int>(150 + 50 * (lon % 2)),
                 static_cast<int>(150 + 50 * (lon % 2)),
                 255
             });
             faces.push_back({
-                second, second + 1, first + 1,
+                first + 1, second + 1, second, // Reverse winding order
                 static_cast<int>(130 + 70 * (lat % 2)),  // Alternate between shades of grey
                 static_cast<int>(130 + 70 * (lat % 2)),
                 static_cast<int>(130 + 70 * (lat % 2)),
@@ -398,14 +398,14 @@ CustomShape ObjectsFactory::import() {
     for (const auto& faceLine : objFaces) {
         std::istringstream stream(faceLine);
         std::string prefix;
-        int v1, v2, v3, r = 128, g = 128, b = 255, a = 255;
+        int v1, v2, v3, r = 128, g = 128, b = 128, a = 255;
 
         stream >> prefix >> v1 >> v2 >> v3;
 
         if (stream >> r >> g >> b >> a) {
-            faces.push_back({v1 - 1, v2 - 1, v3 - 1, 128, 128, 255, 0});
+            faces.push_back({v1 - 1, v2 - 1, v3 - 1, r, g, b, a});
         } else {
-            faces.push_back({v1 - 1, v2 - 1, v3 - 1, 128, 128, 255, 0});
+            faces.push_back({v1 - 1, v2 - 1, v3 - 1, 128, 128, 128, 255});
         }
     }
 

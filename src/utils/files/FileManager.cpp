@@ -1,8 +1,15 @@
 #include "FileManager.hpp"
-
 #include "ObjFile.hpp"
 #include "../LanguageManager.hpp"
 #include "../../core/ui/Snackbar.hpp"
+#include <shobjidl.h>
+#include <filesystem>
+#include <iostream>
+#include <stdexcept>
+#include <codecvt>
+#include <comdef.h>
+
+namespace fs = std::filesystem;
 
 FileManager& FileManager::getInstance() {
     static FileManager instance;
@@ -154,7 +161,6 @@ std::vector<FileInfo> FileManager::getFolderFiles(const std::string& folderPath)
     return files;
 }
 
-
 std::string FileManager::saveAs() {
     std::string projectsPath = Config::getInstance().getProjectsPath();
 
@@ -291,14 +297,36 @@ std::string FileManager::getExportObjPath() {
     return filePath;
 }
 
-bool FileManager::exportToObj(const std::string& filePath,
+bool FileManager::exportToObj(const std::string& objPath,
                             const std::vector<std::string>& vertices,
-                            const std::vector<std::string>& faces) {
+                            const std::vector<std::string>& faces,
+                            const nlohmann::json& projectData) {
     try {
+        // Create materials map from project data
+        std::unordered_map<std::string, RgbaColor> materials;
+        if (projectData.contains("materials")) {
+            for (const auto& [name, color] : projectData["materials"].items()) {
+                materials[name] = RgbaColor{
+                    color["r"].get<float>(),
+                    color["g"].get<float>(),
+                    color["b"].get<float>(),
+                    color["a"].get<float>()
+                };
+            }
+        }
+
+        // Create MTL file with the same base name as the OBJ file
+        std::string mtlPath = objPath.substr(0, objPath.length() - 4) + ".mtl";
+        MtlFile mtlFile;
+        mtlFile.setMaterials(materials);
+        mtlFile.write(mtlPath);
+
+        // Create OBJ file
         ObjFile objFile;
         objFile.setVertices(vertices);
         objFile.setFaces(faces);
-        objFile.write(filePath);
+        objFile.write(objPath, fs::path(mtlPath).filename().string());
+
         return true;
     } catch (const std::exception& e) {
         auto languagePack = LanguageManager::getInstance().getSelectedPack();
@@ -307,3 +335,4 @@ bool FileManager::exportToObj(const std::string& filePath,
         return false;
     }
 }
+

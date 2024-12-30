@@ -19,6 +19,7 @@
 #include "./JsonFile.hpp"
 #include "./TomlFile.hpp"
 #include "Config.hpp"
+#include "MtlFile.hpp"
 
 enum class FileFormat {
     JSON,
@@ -34,27 +35,30 @@ struct FileInfo {
     std::time_t lastModifiedTime;
 };
 
+
 class FileManager {
 public:
     static FileManager& getInstance();
 
-    FileManager(const FileManager&) = delete;
-    FileManager& operator=(const FileManager&) = delete;
-
     std::unique_ptr<FileType> createFile(FileFormat format);
     std::unique_ptr<FileType> createFile(FileFormat format, const void* data);
+
     std::string selectFolder();
     std::string selectFile();
-    std::string saveAs();
     std::vector<FileInfo> getFolderFiles(const std::string& folderPath);
+    std::string saveAs();
     bool deleteFile(const std::string& filePath);
     bool createCopy(const std::string& sourceFilePath, const std::string& destinationFolderPath);
     std::string getExportObjPath();
-    bool exportToObj(const std::string& filePath, const std::vector<std::string>& vertices,
-                    const std::vector<std::string>& faces);
+    bool exportToObj(const std::string& objPath,
+                     const std::vector<std::string>& vertices,
+                     const std::vector<std::string>& faces,
+                     const nlohmann::json& projectData);
 
 private:
     FileManager() = default;
+    FileManager(const FileManager&) = delete;
+    FileManager& operator=(const FileManager&) = delete;
 };
 
 #endif

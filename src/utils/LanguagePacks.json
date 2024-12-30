@@ -70,7 +70,8 @@
       "project_exported": "Project Exported",
       "object_added": "Object Added",
       "file_imported": "File Imported",
-      "vertex_added": "Vertex Added"
+      "vertex_added": "Vertex Added",
+      "project_created": "Project Created"
     }
   },
   {
@@ -144,7 +145,8 @@
       "project_exported": "Proiectul a fost exportat",
       "object_added": "Obiectul a fost adaugat",
       "file_imported": "Fisierul a fost importat",
-      "vertex_added": "Varf Adaugat"
+      "vertex_added": "Varf Adaugat",
+      "project_created": "Proiect Creat"
     }
   }
 ]

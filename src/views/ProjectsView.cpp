@@ -55,9 +55,17 @@ void ProjectsView::createUI() {
     addProjectButton->setPosition({1900 - addProjectButton->getWidth(), addProjectButton->getPosition().y});
     addProjectButton->setOnClick([]() {
         ProjectsManager& projectsManager = ProjectsManager::getInstance();
-        projectsManager.createProject();
-        ViewsManager::getInstance().switchTo("editor");
-        Snackbar::getInstance().addMessage("Project created!");
+        try {
+            projectsManager.createProject();
+            ViewsManager::getInstance().switchTo("editor");
+            auto languagePack = LanguageManager::getInstance().getSelectedPack();
+            Snackbar::getInstance().addMessage(languagePack["project_created"]);
+
+        }
+        catch (...) {
+            auto languagePack = LanguageManager::getInstance().getSelectedPack();
+            Snackbar::getInstance().addMessage(languagePack["no_file_selected"]);
+        }
     });
 
     auto scrollView = std::make_shared<ScrollView>(

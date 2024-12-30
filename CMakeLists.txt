@@ -53,6 +53,7 @@ set(SOURCE_FILES
         src/utils/files/FileManager.cpp
         src/utils/files/FileType.cpp
         src/utils/files/JsonFile.cpp
+        src/utils/files/MtlFile.cpp
         src/utils/files/ObjFile.cpp
         src/utils/files/PrjFile.cpp
         src/utils/files/TomlFile.cpp

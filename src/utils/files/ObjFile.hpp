@@ -1,29 +1,30 @@
 #ifndef OBJFILE_HPP
 #define OBJFILE_HPP
 
-#include "FileType.hpp"
-#include <vector>
 #include <string>
-#include <stdexcept>
-#include <fstream>
-#include <sstream>
+#include <vector>
+#include <unordered_map>
+#include "../RgbaColor.hpp"
 
-class ObjFile : public FileType {
+class ObjFile {
 public:
-    ObjFile() = default;
-
-    void read(const std::string& filename) override;
-    void write(const std::string& filename) override;
+    void read(const std::string& filename);
+    void write(const std::string& filename, const std::string& mtlFilename);
 
     const std::vector<std::string>& getVertices() const;
     const std::vector<std::string>& getFaces() const;
+    const std::unordered_map<std::string, RgbaColor>& getMaterials() const;
 
     void setVertices(const std::vector<std::string>& vertices);
     void setFaces(const std::vector<std::string>& faces);
+    void setMaterials(const std::unordered_map<std::string, RgbaColor>& materials);
 
 private:
     std::vector<std::string> vertices;
     std::vector<std::string> faces;
+    std::unordered_map<std::string, RgbaColor> materials;
+    std::string mtlFilename;
 };
 
-#endif
+
+#endif // OBJFILE_HPP

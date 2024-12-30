@@ -38,8 +38,7 @@ Vector3 calculateNormal(const std::vector<Vector3>& vertices, const std::array<i
     Vector3 normal = edge1.cross(edge2);
 
     if (normal.length() == 0) {
-        // Handle the case where the normal is zero-length
-        return Vector3(0, 0, 0); // or some default normal
+        return Vector3(0, 0, 0);
     }
 
     return normal.normalized();

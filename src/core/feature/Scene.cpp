@@ -2,6 +2,7 @@
 #include <memory>
 #include "../objects/ObjectsFactory.hpp"
 
+
 Scene::Scene(sf::RenderWindow &window)
     : camera(window.getSize().x, window.getSize().y, 90.0f, 0.1f, 100.0f),
       renderer(window),

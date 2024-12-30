@@ -1,8 +1,12 @@
 #include "ObjFile.hpp"
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <filesystem>
 
-struct Color {
-    float r{1.0f}, g{1.0f}, b{1.0f}, a{255.f};
-};
+#include "MtlFile.hpp"
+
+namespace fs = std::filesystem;
 
 void ObjFile::read(const std::string& filename) {
     std::ifstream file(filename);
@@ -11,8 +15,6 @@ void ObjFile::read(const std::string& filename) {
     }
 
     std::string line;
-    Color currentColor;
-
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
 
@@ -21,42 +23,31 @@ void ObjFile::read(const std::string& filename) {
         stream >> prefix;
 
         if (prefix == "v") {
-            std::string vertexLine = line;
-            float x, y, z;
-            stream >> x >> y >> z;
-
-            // Check for vertex colors
-            if (!stream.eof()) {
-                stream >> currentColor.r >> currentColor.g >> currentColor.b;
-                vertexLine += " " + std::to_string(currentColor.r) + " "
-                           + std::to_string(currentColor.g) + " "
-                           + std::to_string(currentColor.b);
-            }
-            vertices.push_back(vertexLine);
-        }
-        else if (prefix == "f") {
+            vertices.push_back(line);
+        } else if (prefix == "f") {
             faces.push_back(line);
-        }
-        else if (prefix == "usemtl") {
-            std::string materialName;
-            stream >> materialName;
-            if (!faces.empty()) {
-                faces.back() += " # " + materialName;
-            }
+        } else if (prefix == "mtllib") {
+            stream >> mtlFilename;
         }
     }
 }
 
-void ObjFile::write(const std::string& filename) {
+void ObjFile::write(const std::string& filename, const std::string& mtlFilename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open OBJ file for writing: " + filename);
     }
 
+    // Write material library reference
+    file << "mtllib " << mtlFilename << "\n";
+
+    // Write vertices
     for (const auto& vertex : vertices) {
         file << vertex << "\n";
     }
+    file << "\n";
 
+    // Write faces with material references
     for (const auto& face : faces) {
         file << face << "\n";
     }

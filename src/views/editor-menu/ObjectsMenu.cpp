@@ -327,7 +327,6 @@ void ObjectsMenu::createObjectsPropertiesMenu() {
             Vector3 currentRotation = scene.getObjects()[scene.getSelectedObjectIndex()]->getRotation();
             currentSelectedObject->setRotation(Vector3(value, currentRotation.y, currentRotation.z));
         } else {
-            std::cout << scene.selectedObjects.size() << std::endl;
             for (int i = 0; i < scene.selectedObjects.size(); ++i) {
                 scene.getObjects()[scene.selectedObjects[i]]->rotate(value, 'x');
                 rotationX->setValue(0);

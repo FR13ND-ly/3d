@@ -12,29 +12,26 @@ class ProjectsManager {
 public:
     static ProjectsManager& getInstance();
 
-    ProjectsManager(const ProjectsManager&) = delete;
-    ProjectsManager& operator=(const ProjectsManager&) = delete;
-
     std::vector<FileInfo> getProjects();
+    void setProject(std::string projectPath);
     void createProject();
     void updateProject(const Scene& scene);
-    void deleteProject(const std::string& projectName);
+    void deleteProject(const std::string& filePath);
     void deleteCurrentProject();
-    void setProject(std::string projectName);
+    std::string getProjectFilePath(const std::string& projectName) const;
     bool exportAsObj();
 
 private:
     ProjectsManager() = default;
-    ~ProjectsManager() = default;
+    ProjectsManager(const ProjectsManager&) = delete;
+    ProjectsManager& operator=(const ProjectsManager&) = delete;
+
+    void setSelectedProject(const std::string& projectPath);
+    nlohmann::json sceneToJson(const Scene& scene);
+    std::pair<std::vector<std::string>, std::vector<std::string>> prepareObjData(const Scene& scene);
 
     std::string selectedProjectPath;
-    void setSelectedProject(const std::string& projectPath);
-
-    nlohmann::json sceneToJson(const Scene& scene);
-    std::string getProjectFilePath(const std::string& projectName) const;
-
-    std::pair<std::vector<std::string>, std::vector<std::string>>
-    prepareObjData(const nlohmann::json& projectData);
 };
+
 
 #endif

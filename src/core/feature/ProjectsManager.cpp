@@ -2,12 +2,14 @@
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
+#include <bits/random.h>
 
 #include "../../utils/LanguageManager.hpp"
 #include "../../utils/files/FileManager.hpp"
 #include "../../utils/WindowManager.hpp"
 #include "../objects/CustomShape.hpp"
 #include "../ui/Snackbar.hpp"
+#include <sstream>
 
 namespace fs = std::filesystem;
 
@@ -75,6 +77,7 @@ void ProjectsManager::createProject() {
     PrjFile prjFile;
     prjFile.write(projectPath);
     setSelectedProject(projectPath);
+    setProject(projectPath);
 }
 
 void ProjectsManager::updateProject(const Scene& scene) {
@@ -120,7 +123,6 @@ void ProjectsManager::deleteProject(const std::string& filePath) {
 
     fs::remove(filePath);
 }
-
 
 void ProjectsManager::deleteCurrentProject() {
     if (selectedProjectPath.empty()) {
@@ -178,15 +180,16 @@ bool ProjectsManager::exportAsObj() {
     try {
         PrjFile prjFile;
         prjFile.read(selectedProjectPath);
+        sf::RenderWindow& window = WindowManager::getInstance().getWindow();
+        Scene& scene = Scene::getInstance(window);
+        auto [vertices, faces] = prepareObjData(scene);
 
-        auto [vertices, faces] = prepareObjData(prjFile.projectData);
-
-        std::string exportPath = FileManager::getInstance().getExportObjPath();
-        if (exportPath.empty()) {
+        std::string objPath = FileManager::getInstance().getExportObjPath();
+        if (objPath.empty()) {
             return false;
         }
 
-        if (FileManager::getInstance().exportToObj(exportPath, vertices, faces)) {
+        if (FileManager::getInstance().exportToObj(objPath, vertices, faces, prjFile.projectData)) {
             return true;
         } else {
             auto languagePack = LanguageManager::getInstance().getSelectedPack();
@@ -203,42 +206,49 @@ bool ProjectsManager::exportAsObj() {
 }
 
 std::pair<std::vector<std::string>, std::vector<std::string>>
-ProjectsManager::prepareObjData(const nlohmann::json& projectData) {
+ProjectsManager::prepareObjData(const Scene& scene) {
     std::vector<std::string> vertices;
     std::vector<std::string> faces;
-    int vertexOffset = 1;
+    int vertexOffset = 1;  // OBJ indices start at 1
+    int materialCounter = 1;  // Counter for material names
 
-    for (const auto& object : projectData["objects"]) {
-        const auto& objVertices = object["vertices"];
+    int i = 0;
+    for (const auto& object : scene.getObjects()) {
+        if (i == 0) {
+            i++;
+            continue;
+        }
+        const auto& objVertices = object->getVerticesForJson();
+        const auto& position = object->getPosition();
+        const auto& scale = object->getScale();
+
+        std::ostringstream materialNameStream;
+        materialNameStream << "material_" << materialCounter++;
+        std::string materialName = materialNameStream.str();
+
+        // Add vertices
         for (const auto& vertex : objVertices) {
-            const auto& position = object["position"];
-            const auto& rotation = object["rotation"];
-            const auto& scale = object["scale"];
-
-            // Transform vertex (simplified - you might want to add proper rotation)
-            float x = vertex[0].get<float>() * scale[0].get<float>() + position[0].get<float>();
-            float y = vertex[1].get<float>() * scale[1].get<float>() + position[1].get<float>();
-            float z = vertex[2].get<float>() * scale[2].get<float>() + position[2].get<float>();
+            // Transform vertex (you might want to add proper rotation)
+            float x = vertex[0] * (scale.x) + position.x;
+            float y = vertex[1] * (scale.y) + position.y;
+            float z = vertex[2] * (scale.z) + position.z;
 
             std::ostringstream vertexStr;
             vertexStr << "v " << x << " " << y << " " << z;
-
-            // Add color if available
-            if (vertex.size() > 3) {
-                vertexStr << " " << vertex[3].get<float>()
-                         << " " << vertex[4].get<float>()
-                         << " " << vertex[5].get<float>();
-            }
-
             vertices.push_back(vertexStr.str());
         }
 
-        const auto& objFaces = object["faces"];
+        // Add material assignment before faces
+        faces.push_back("usemtl " + materialName);
+
+        // Add faces
+        const auto& objFaces = object->getFaces();
         for (const auto& face : objFaces) {
             std::ostringstream faceStr;
             faceStr << "f";
-            for (const auto& index : face) {
-                faceStr << " " << (index.get<int>() + vertexOffset);
+            // Only use the first 3 indices for triangular faces
+            for (int i = 0; i < 3; ++i) {
+                faceStr << " " << (face[i] + vertexOffset);
             }
             faces.push_back(faceStr.str());
         }
