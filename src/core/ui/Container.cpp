@@ -7,7 +7,7 @@ Container::Container(const sf::Vector2f& position, const sf::Vector2f& size)
     : position(position), size(size) {
     background.setSize(size);
     background.setPosition(position);
-    background.setFillColor(sf::Color(50, 50, 50)); // Default background color
+    background.setFillColor(sf::Color(50, 50, 50));
 }
 
 void Container::addComponent(std::shared_ptr<Component> component) {
@@ -27,12 +27,10 @@ void Container::updateComponentPositions() {
     float currentY = position.y;
 
     for (auto& component : components) {
-        // If the component's Y position is unchanged, stack it vertically
         if (component->getPosition().y == 0) {
             component->setPosition({component->getPosition().x, currentY});
-            currentY += component->getHeight(); // Move to the next position
+            currentY += component->getHeight();
         } else {
-            // Otherwise, respect the manually set Y position
             currentY = component->getPosition().y + component->getHeight();
         }
     }

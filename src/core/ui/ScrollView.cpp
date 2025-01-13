@@ -27,11 +27,10 @@ void ScrollView::updateComponentPositions() {
         currentY += component->getHeight();
     }
 
-    updateScrollBar(); // Ensure the scrollbar reflects the updated total height
+    updateScrollBar();
 }
 
 void ScrollView::addComponent(std::shared_ptr<Component> component) {
-    // Set the position of the new component below the existing ones
     float currentY = position.y;
 
     for (const auto& existingComponent : components) {
@@ -94,7 +93,6 @@ void ScrollView::draw(sf::RenderWindow& window) {
     updateComponentPositions();
     float totalHeight = getTotalContentHeight();
 
-    // If content fits within the visible area, draw all components
     if (totalHeight <= maxHeight) {
         for (const auto& component : components) {
             component->draw(window);
@@ -122,7 +120,6 @@ void ScrollView::draw(sf::RenderWindow& window) {
 
     float currentY = position.y - scrollOffset;
     for (const auto& component : components) {
-        sf::Vector2f componentPosition = component->getPosition();
         float componentHeight = component->getHeight();
 
         if (currentY + componentHeight >= position.y && currentY <= position.y + maxHeight) {
@@ -182,15 +179,14 @@ void ScrollView::updateScrollBar() {
     float totalHeight = getTotalContentHeight();
 
     if (totalHeight <= maxHeight) {
-        scrollHandle.setSize(sf::Vector2f(0, 0)); // Hide scrollbar
+        scrollHandle.setSize(sf::Vector2f(0, 0));
         return;
     }
 
     float scrollRatio = maxHeight / totalHeight;
-    float handleHeight = std::max(30.f, scrollRatio * scrollBar.getSize().y); // Minimum height for usability
+    float handleHeight = std::max(30.f, scrollRatio * scrollBar.getSize().y);
     scrollHandle.setSize(sf::Vector2f(scrollBar.getSize().x, handleHeight));
 
-    // Calculate the scroll handle position
     float handlePositionRatio = scrollOffset / (totalHeight - maxHeight);
     float handleY = scrollBar.getPosition().y +
                     handlePositionRatio * (scrollBar.getSize().y - handleHeight);
@@ -242,14 +238,11 @@ sf::Vector2f ScrollView::getPosition() const {
 void ScrollView::setPosition(const sf::Vector2f &newPosition) {
     position = newPosition;
 
-    // Update the position of the background
     background.setPosition(newPosition);
 
-    // Update the position of the scroll bar and its handle
     scrollBar.setPosition(newPosition.x + size.x - 10.f, newPosition.y);
     scrollHandle.setPosition(scrollBar.getPosition().x, newPosition.y);
 
-    // Optionally, update the positions of the components inside the scroll view
     float currentY = newPosition.y;
     for (auto& component : components) {
         sf::Vector2f originalPos = component->getPosition();
@@ -257,7 +250,7 @@ void ScrollView::setPosition(const sf::Vector2f &newPosition) {
         currentY += component->getHeight();
     }
 
-    updateScrollBar();  // Ensure the scroll bar is updated after repositioning
+    updateScrollBar();
 }
 
 std::vector<std::shared_ptr<Component> > ScrollView::getComponents() const {

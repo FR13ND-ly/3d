@@ -10,11 +10,10 @@
 class Snackbar : public Component {
 public:
     static Snackbar& getInstance() {
-        static Snackbar instance({50, 950}, {300, 50}); // Default position near bottom of screen
+        static Snackbar instance({50, 950}, {300, 50});
         return instance;
     }
 
-    // Delete copy constructor and assignment operator
     Snackbar(const Snackbar&) = delete;
     Snackbar& operator=(const Snackbar&) = delete;
 
@@ -47,7 +46,7 @@ private:
     bool isDisplaying = false;
 
     void showNextMessage();
-    void updateShadowPosition();  // New helper method
+    void updateShadowPosition();
     bool inBounds(const sf::Vector2i& mousePos) const override;
 };
 

@@ -27,4 +27,4 @@ private:
 };
 
 
-#endif // OBJFILE_HPP
+#endif

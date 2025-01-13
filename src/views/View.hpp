@@ -12,12 +12,12 @@ public:
 
     virtual ~View() = default;
 
-    virtual void onActivate();    // Called when the view is activated
-    virtual void onDeactivate();  // Called when the view is deactivated
+    virtual void onActivate();
+    virtual void onDeactivate();
 
-    virtual void addComponent(std::shared_ptr<Component> component);  // Add a component to the view
-    virtual void draw(sf::RenderWindow& window);  // Draw all components in the view
-    virtual void handleEvent(const sf::Event& event, sf::RenderWindow& window);  // Handle events for all components
+    virtual void addComponent(std::shared_ptr<Component> component);
+    virtual void draw(sf::RenderWindow& window);
+    virtual void handleEvent(const sf::Event& event, sf::RenderWindow& window);
 };
 
 #endif

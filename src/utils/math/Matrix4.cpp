@@ -89,7 +89,6 @@ Matrix4 Matrix4::lookAt(const Vector3& eye, const Vector3& center, const Vector3
     Vector3 right = forward.cross(up).normalized();
     Vector3 newUp = right.cross(forward);
 
-    // Construct the view matrix
     Matrix4 viewMatrix = identity();
 
     viewMatrix.data[0][0] = right.x;

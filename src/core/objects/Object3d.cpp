@@ -66,7 +66,7 @@ void Object3d::setRotation(const Vector3& newRotation) {
     Matrix4 rotationY = Matrix4::rotationY(newRotation.y);
     Matrix4 rotationZ = Matrix4::rotationZ(newRotation.z);
 
-    Matrix4 rotationMatrix = rotationZ * rotationY * rotationX; // Assuming ZYX rotation order
+    Matrix4 rotationMatrix = rotationZ * rotationY * rotationX;
 
     Matrix4 translationMatrix = Matrix4::translation(position.x, position.y, position.z);
     Matrix4 scaleMatrix = Matrix4::scale(scale.x, scale.y, scale.z);
@@ -127,13 +127,11 @@ std::vector<std::array<int, 7>> Object3d::getFaces() {
 
 void Object3d::setFaceColor(int faceIndex, const std::string& hexColor) {
     if (faceIndex < 0 || faceIndex >= faces.size()) {
-        // throw std::out_of_range("Invalid face index");
         return;
     }
 
     if (hexColor.length() != 7 && hexColor.length() != 9 || hexColor[0] != '#') {
         return;
-        // throw std::invalid_argument("Invalid hex color string");
     }
 
     int r, g, b, a = 255;
@@ -196,10 +194,10 @@ void Object3d::setFacesColor(const std::string& hexColor) {
     }
 
     for (auto& face : faces) {
-        face[3] = r;  // Red
-        face[4] = g;  // Green
-        face[5] = b;  // Blue
-        face[6] = a;  // Alpha
+        face[3] = r;
+        face[4] = g;
+        face[5] = b;
+        face[6] = a;
     }
 }
 
@@ -224,7 +222,6 @@ void Object3d::updateFaceVertex(int faceIndex, int vertexPosition, const Vector3
     const auto& face = faces[faceIndex];
     int vertexIndex = face[vertexPosition];
 
-    // Update the vertex in the main vertices array
     vertices[vertexIndex] = newVertexPosition;
 }
 
@@ -292,25 +289,20 @@ void Object3d::setVertices(const std::vector<Vector3> &vector) {
 
 BoundingBox Object3d::getBoundingBox() const {
     if (vertices.empty()) {
-        // Return an invalid bounding box if there are no vertices
         return BoundingBox{
             Vector3(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()),
             Vector3(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest())
         };
     }
 
-    // Initialize the bounding box with the first transformed vertex
     Vector3 firstTransformedVertex = transform * vertices[0];
     BoundingBox bbox;
     bbox.min = firstTransformedVertex;
     bbox.max = firstTransformedVertex;
 
-    // Loop through all vertices and find the min/max points
     for (const Vector3& vertex : vertices) {
-        // Transform each vertex by the object's transform matrix
         Vector3 transformedVertex = transform * vertex;
 
-        // Update the bounding box min and max coordinates
         bbox.min.x = std::min(bbox.min.x, transformedVertex.x);
         bbox.min.y = std::min(bbox.min.y, transformedVertex.y);
         bbox.min.z = std::min(bbox.min.z, transformedVertex.z);
@@ -376,7 +368,7 @@ void Object3d::createEdge() {
 }
 
 void Object3d::moveFaces(const Vector3& translation) {
-    std::unordered_set<int> updatedVertices; // Track updated vertices by their indices
+    std::unordered_set<int> updatedVertices;
 
     for (unsigned int faceIndex : selectedFaces) {
         if (faceIndex >= faces.size()) {
@@ -439,16 +431,13 @@ void Object3d::rotateFaces(float angle, char axis) {
             int vertexIndex = face[i];
 
             if (updatedVertices.find(vertexIndex) == updatedVertices.end()) {
-                // Translate vertex to origin relative to centroid
                 Vector3 relativePosition = vertices[vertexIndex] - centroid;
 
-                // Apply rotation
                 Vector3 rotatedPosition = rotationMatrix * relativePosition;
 
-                // Translate back to original position
                 vertices[vertexIndex] = rotatedPosition + centroid;
 
-                updatedVertices.insert(vertexIndex); // Mark as updated
+                updatedVertices.insert(vertexIndex);
             }
         }
     }
@@ -478,7 +467,7 @@ void Object3d::scaleFaces(float delta) {
 
     centroid = centroid / static_cast<float>(totalVertices);
 
-    std::unordered_set<int> updatedVertices; // Track updated vertices
+    std::unordered_set<int> updatedVertices;
 
     for (unsigned int faceIndex : selectedFaces) {
         const auto& face = faces[faceIndex];
@@ -554,7 +543,6 @@ void Object3d::deleteFaceByIndex(int faceIndex) {
 
     faces.erase(faces.begin() + faceIndex);
 
-    // Update face selections to reflect the removal
     auto updateIndex = [faceIndex](unsigned int& index) {
         if (index > faceIndex) {
             index--;

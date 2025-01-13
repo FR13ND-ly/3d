@@ -22,4 +22,4 @@ private:
     nlohmann::json jsonData;
 };
 
-#endif // JSON_HPP
+#endif

@@ -117,31 +117,26 @@ sf::Vector2f Button::getPosition() const {
 }
 
 void Button::setPosition(const sf::Vector2f &position) {
-    // Update button rectangle position
     buttonRect.setPosition(position);
 
     sf::FloatRect textBounds = buttonText.getLocalBounds();
 
     if (hasIcon) {
-        // Align the icon relative to the button rectangle
         icon.setPosition(
             buttonRect.getPosition().x + (buttonRect.getSize().y - icon.getGlobalBounds().height) / 2.f,
             buttonRect.getPosition().y + (buttonRect.getSize().y - icon.getGlobalBounds().height) / 2.f
         );
 
-        // Align the text relative to the icon
         buttonText.setOrigin(0, textBounds.height / 2 + textBounds.top);
         buttonText.setPosition(
             buttonRect.getPosition().x + buttonRect.getSize().y,
             buttonRect.getPosition().y + buttonRect.getSize().y / 2
         );
 
-        // Adjust button size if necessary to fit the icon and text
         if (buttonRect.getSize().x < buttonRect.getSize().y * 1.5f + textBounds.width) {
             buttonRect.setSize({buttonRect.getSize().y * 1.5f + textBounds.width, buttonRect.getSize().y});
         }
     } else {
-        // Align text in the center of the button rectangle
         buttonText.setOrigin(textBounds.width / 2, textBounds.height / 2 + textBounds.top);
         buttonText.setPosition(
             position.x + buttonRect.getSize().x / 2,

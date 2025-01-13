@@ -24,10 +24,10 @@ public:
     void setBold();
 
 protected:
-    sf::Text content;         // SFML Text object
-    sf::Color color;          // Color of the text
+    sf::Text content;
+    sf::Color color;
 
     bool inBounds(const sf::Vector2i &mousePos) const override;
 };
 
-#endif // TEXT_HPP
+#endif

@@ -216,13 +216,10 @@ sf::Vector2f NumberInput::getPosition() const {
 void NumberInput::setPosition(const sf::Vector2f &position) {
     inputBox.setPosition(position);
 
-    // Reposition the input text inside the box, considering padding
     inputText.setPosition(position.x + 5, position.y + (inputBox.getSize().y * 0.25f));
 
-    // Reposition the title above the input box
     title.setPosition(position.x + 5, position.y - title.getCharacterSize() * 0.5f);
 
-    // Reposition the placeholder text within the box
     placeholderTextDisplay.setPosition(position.x + 5, position.y + (inputBox.getSize().y * 0.2f));
 }
 

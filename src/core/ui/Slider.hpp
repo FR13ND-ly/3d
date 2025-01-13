@@ -20,7 +20,6 @@ public:
     void setPosition(const sf::Vector2f& position) override;
 
 protected:
-    // Member variables
     sf::RectangleShape track;
     sf::RectangleShape handle;
     float minValue;
@@ -31,4 +30,4 @@ protected:
     sf::Vector2f size;
 };
 
-#endif // SLIDER_HPP
+#endif

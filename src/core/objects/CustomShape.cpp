@@ -45,7 +45,7 @@ Vector3 calculateNormal(const std::vector<Vector3>& vertices, const std::array<i
 }
 
 bool areNormalsParallel(const Vector3& n1, const Vector3& n2) {
-    return std::abs(n1.dot(n2)) > 0.999f; // Threshold for floating-point precision
+    return std::abs(n1.dot(n2)) > 0.999f;
 }
 
 bool areFacesConnected(const std::array<int, 7>& f1, const std::array<int, 7>& f2) {
@@ -73,7 +73,6 @@ void CustomShape::calculateEdges() {
 
         Vector3 normalI = calculateNormal(vertices, faces[i]);
         if (normalI.length() == 0) {
-            // Handle the case where the normal is zero-length
             continue;
         }
 

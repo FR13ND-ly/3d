@@ -11,16 +11,13 @@ class Container : public Component {
 public:
     Container(const sf::Vector2f& position, const sf::Vector2f& size);
 
-    // Inherited from Component
     void handleEvent(const sf::Event &event, const sf::RenderWindow &window) override;
     void draw(sf::RenderWindow& window) override;
 
-    // Component management
     void addComponent(std::shared_ptr<Component> component);
     void clearComponents();
     std::vector<std::shared_ptr<Component>> getComponents() const;
 
-    // Getters and Setters
     float getHeight() const override;
     sf::Vector2f getPosition() const override;
     void setPosition(const sf::Vector2f& position) override;
@@ -37,4 +34,4 @@ private:
     void updateComponentPositions();
 };
 
-#endif // CONTAINER_HPP
+#endif

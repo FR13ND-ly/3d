@@ -1,6 +1,5 @@
 #include "Component.hpp"
 
-// Setters for click event callbacks with different parameter types
 void Component::setOnClick(const std::function<void()>& callback) {
     onClick = callback;
 }

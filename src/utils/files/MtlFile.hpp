@@ -17,4 +17,4 @@ private:
     std::unordered_map<std::string, RgbaColor> materials;
 };
 
-#endif // MTLFILE_HPP
+#endif

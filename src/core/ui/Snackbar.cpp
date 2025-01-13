@@ -1,12 +1,10 @@
 #include "Snackbar.hpp"
 
 Snackbar::Snackbar(const sf::Vector2f& position, const sf::Vector2f& size) {
-    // Setup shadow
     shadowBox.setSize(size);
-    shadowBox.setFillColor(sf::Color(0, 0, 0, 100));  // Semi-transparent black
+    shadowBox.setFillColor(sf::Color(0, 0, 0, 100));
     shadowBox.setPosition(position.x + SHADOW_OFFSET, position.y + SHADOW_OFFSET);
 
-    // Setup main message box
     messageBox.setSize(size);
     messageBox.setPosition(position);
 
@@ -21,13 +19,12 @@ void Snackbar::draw(sf::RenderWindow& window) {
         return;
     }
 
-    window.draw(shadowBox);  // Draw shadow first
+    window.draw(shadowBox);
     window.draw(messageBox);
     window.draw(messageText);
 }
 
 void Snackbar::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
-    // Could add click-to-dismiss functionality here if desired
 }
 
 void Snackbar::addMessage(const std::string& message, const sf::Color& bgColor) {
@@ -66,7 +63,6 @@ void Snackbar::showNextMessage() {
     messageBox.setFillColor(currentMessage.backgroundColor);
     messageText.setString(currentMessage.text);
 
-    // Center the text in the message box
     sf::FloatRect textBounds = messageText.getLocalBounds();
     messageText.setOrigin(textBounds.width / 2, textBounds.height / 2 + textBounds.top);
     messageText.setPosition(

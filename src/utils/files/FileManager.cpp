@@ -315,13 +315,11 @@ bool FileManager::exportToObj(const std::string& objPath,
             }
         }
 
-        // Create MTL file with the same base name as the OBJ file
         std::string mtlPath = objPath.substr(0, objPath.length() - 4) + ".mtl";
         MtlFile mtlFile;
         mtlFile.setMaterials(materials);
         mtlFile.write(mtlPath);
 
-        // Create OBJ file
         ObjFile objFile;
         objFile.setVertices(vertices);
         objFile.setFaces(faces);

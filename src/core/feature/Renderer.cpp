@@ -82,14 +82,12 @@ void Renderer::render(const std::vector<std::shared_ptr<Object3d>>& objects, Cam
         processObject(object, camera, facesToRender);
     }
 
-    // Improved sorting algorithm considering camera direction
     std::sort(facesToRender.begin(), facesToRender.end(),
         [](const FaceData& a, const FaceData& b) {
             // Calculate centers of faces in view space
             Vector3 aCenterView = (a.v1 + a.v2 + a.v3) * (1.0f / 3.0f);
             Vector3 bCenterView = (b.v1 + b.v2 + b.v3) * (1.0f / 3.0f);
 
-            // Calculate actual distances from camera (squared distance to avoid sqrt)
             float aDistSq = aCenterView.lengthSquared();
             float bDistSq = bDistSq = bCenterView.lengthSquared();
 

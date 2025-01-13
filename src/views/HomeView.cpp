@@ -5,7 +5,7 @@
 
 HomeView::HomeView() {
     if (!bgTexture.loadFromFile("../src/assets/images/bg.jpg")) {
-        std::cerr << "Error loading image.png" << std::endl;
+        std::cerr << "Error loading bg.jpg" << std::endl;
     }
 
     bgSprite.setTexture(bgTexture);

@@ -65,9 +65,9 @@ void GridPlane::addLineFace(int startIndex, int endIndex, char axis) {
     Vector3 offset;
 
     if (axis == 'x') {
-        offset = Vector3(0.0f, lineThickness / 2.0f, 0.0f); // Y-axis offset for vertical lines
+        offset = Vector3(0.0f, lineThickness / 2.0f, 0.0f);
     } else if (axis == 'z') {
-        offset = Vector3(lineThickness / 2.0f, 0.0f, 0.0f); // X-axis offset for horizontal lines
+        offset = Vector3(lineThickness / 2.0f, 0.0f, 0.0f);
     }
 
     int v0 = vertices.size();
@@ -76,22 +76,19 @@ void GridPlane::addLineFace(int startIndex, int endIndex, char axis) {
     vertices.push_back(end - offset);
     vertices.push_back(end + offset);
 
-    // Check if the line is on the x-axis or z-axis
     bool isXAxisLine = (start.z == 0.0f && end.z == 0.0f);
     bool isZAxisLine = (start.x == 0.0f && end.x == 0.0f);
 
-    // Set the color based on the axis
     int r = 128, g = 128, b = 128;
     if (isXAxisLine) {
-        r = 0; g = 255; b = 0; // Green for x-axis
+        r = 0; g = 255; b = 0;
     } else if (isZAxisLine) {
-        r = 255; g = 0; b = 0; // Red for z-axis
+        r = 255; g = 0; b = 0;
     }
 
-    faces.push_back({v0, v0 + 2, v0 + 1, r, g, b, 155}); // Front face
-    faces.push_back({v0 + 1, v0 + 2, v0 + 3, r, g, b, 155}); // Front face
+    faces.push_back({v0, v0 + 2, v0 + 1, r, g, b, 155});
+    faces.push_back({v0 + 1, v0 + 2, v0 + 3, r, g, b, 155});
 
-    faces.push_back({v0 + 1, v0 + 2, v0, r, g, b, 155}); // Back face
-    faces.push_back({v0 + 3, v0 + 2, v0 + 1, r, g, b, 155}); // Back face
+    faces.push_back({v0 + 1, v0 + 2, v0, r, g, b, 155});
+    faces.push_back({v0 + 3, v0 + 2, v0 + 1, r, g, b, 155});
 }
-

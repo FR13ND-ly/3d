@@ -40,4 +40,4 @@ private:
         const Plane& plane, const Vector3& min, const Vector3& max) const;
 };
 
-#endif // FRUSTUM_HPP
+#endif

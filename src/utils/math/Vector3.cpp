@@ -32,7 +32,7 @@ Vector3 Vector3::operator/(float scalar) const {
 Vector3 Vector3::normalized() const {
     float length = magnitude();
     if (length < 1e-6f) {
-        std::cerr << "Warning: Normalizing a zero-length vector!" << std::endl;
+        // std::cerr << "Warning: Normalizing a zero-length vector!" << std::endl;
         return Vector3(0, 0, 0);
     }
     return *this / length;

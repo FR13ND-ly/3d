@@ -1,7 +1,6 @@
 #include "View.hpp"
 
 void View::onActivate() {
-    // Default implementation: does nothing. Can be overridden by subclasses.
 }
 
 void View::onDeactivate() {

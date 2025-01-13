@@ -7,7 +7,7 @@ class WindowManager {
 public:
     static WindowManager& getInstance();
 
-    sf::RenderWindow& getWindow();  // Return a non-const reference
+    sf::RenderWindow& getWindow();
 
 private:
     sf::RenderWindow window;
@@ -16,4 +16,4 @@ private:
     WindowManager& operator=(const WindowManager&) = delete;
 };
 
-#endif // WINDOW_MANAGER_HPP
+#endif

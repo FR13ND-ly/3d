@@ -209,8 +209,8 @@ std::pair<std::vector<std::string>, std::vector<std::string>>
 ProjectsManager::prepareObjData(const Scene& scene) {
     std::vector<std::string> vertices;
     std::vector<std::string> faces;
-    int vertexOffset = 1;  // OBJ indices start at 1
-    int materialCounter = 1;  // Counter for material names
+    int vertexOffset = 1;
+    int materialCounter = 1;
 
     int i = 0;
     for (const auto& object : scene.getObjects()) {
@@ -226,9 +226,7 @@ ProjectsManager::prepareObjData(const Scene& scene) {
         materialNameStream << "material_" << materialCounter++;
         std::string materialName = materialNameStream.str();
 
-        // Add vertices
         for (const auto& vertex : objVertices) {
-            // Transform vertex (you might want to add proper rotation)
             float x = vertex[0] * (scale.x) + position.x;
             float y = vertex[1] * (scale.y) + position.y;
             float z = vertex[2] * (scale.z) + position.z;
@@ -238,15 +236,12 @@ ProjectsManager::prepareObjData(const Scene& scene) {
             vertices.push_back(vertexStr.str());
         }
 
-        // Add material assignment before faces
         faces.push_back("usemtl " + materialName);
 
-        // Add faces
         const auto& objFaces = object->getFaces();
         for (const auto& face : objFaces) {
             std::ostringstream faceStr;
             faceStr << "f";
-            // Only use the first 3 indices for triangular faces
             for (int i = 0; i < 3; ++i) {
                 faceStr << " " << (face[i] + vertexOffset);
             }

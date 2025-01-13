@@ -146,12 +146,10 @@ void ZBuffer::handleObjectHover(const sf::Vector2i& mousePos, Scene& scene, cons
                 Vector3 v2View = viewSpaceVertices[face[1]];
                 Vector3 v3View = viewSpaceVertices[face[2]];
 
-                // Calculate face normal in view space
                 Vector3 edge1 = v2View - v1View;
                 Vector3 edge2 = v3View - v1View;
                 Vector3 normal = edge1.cross(edge2).normalized();
 
-                // Skip back-facing triangles
                 if (normal.z > 0) continue;
 
                 float alpha = calculateBarycentric(mousePos2f, v1Screen, v2Screen, v3Screen);
@@ -192,10 +190,8 @@ void ZBuffer::handleVertexSelection(const sf::Vector2i& mousePos, Scene& scene, 
             sf::Vector2f screenPos = screenPosition(projectedVertices[i]);
 
             if (getDistance(mousePos2f, screenPos) <= VERTEX_SELECTION_RADIUS) {
-                // Update the selected object index
                 scene.onChangeSelectedObjectIndex(objectIndex);
 
-                // Toggle vertex selection
                 auto& selectedVertices = object->selectedVertices;
                 auto it = std::find(selectedVertices.begin(), selectedVertices.end(), i);
 
@@ -214,7 +210,6 @@ void ZBuffer::handleFaceSelection(const sf::Vector2i& mousePos, Scene& scene, co
     auto& objects = scene.getObjects();
     sf::Vector2f mousePos2f(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 
-    // Structure to store face candidates that contain the clicked point
     struct FaceCandidate {
         size_t objectIndex;
         size_t faceIndex;
@@ -229,7 +224,6 @@ void ZBuffer::handleFaceSelection(const sf::Vector2i& mousePos, Scene& scene, co
         auto viewMatrix = camera.getViewMatrix();
         auto projectionMatrix = camera.getProjectionMatrix();
 
-        // Transform vertices to view space for depth checking
         auto vertices = object->getVertices();
         auto viewSpaceVertices = transformVertices(vertices, modelMatrix, viewMatrix);
         auto projectedVertices = projectVertices(viewSpaceVertices, projectionMatrix);
@@ -242,25 +236,20 @@ void ZBuffer::handleFaceSelection(const sf::Vector2i& mousePos, Scene& scene, co
             sf::Vector2f v3Screen = screenPosition(projectedVertices[face[2]]);
 
             if (isPointInTriangle(mousePos2f, v1Screen, v2Screen, v3Screen)) {
-                // Get the actual view space positions for precise depth calculation
                 Vector3 v1View = viewSpaceVertices[face[0]];
                 Vector3 v2View = viewSpaceVertices[face[1]];
                 Vector3 v3View = viewSpaceVertices[face[2]];
 
-                // Calculate the face normal in view space
                 Vector3 edge1 = v2View - v1View;
                 Vector3 edge2 = v3View - v1View;
                 Vector3 normal = edge1.cross(edge2).normalized();
 
-                // Skip back-facing triangles
                 if (normal.z > 0) continue;
 
-                // Calculate barycentric coordinates for interpolation
                 float alpha = calculateBarycentric(mousePos2f, v1Screen, v2Screen, v3Screen);
                 float beta = calculateBarycentric(mousePos2f, v2Screen, v3Screen, v1Screen);
                 float gamma = 1.0f - alpha - beta;
 
-                // Interpolate Z value at click point
                 float depth = alpha * v1View.z + beta * v2View.z + gamma * v3View.z;
 
                 candidates.push_back({objectIndex, faceIndex, depth});
@@ -268,13 +257,11 @@ void ZBuffer::handleFaceSelection(const sf::Vector2i& mousePos, Scene& scene, co
         }
     }
 
-    // Sort candidates by depth (closest to camera first)
     std::sort(candidates.begin(), candidates.end(),
         [](const FaceCandidate& a, const FaceCandidate& b) {
             return a.depth < b.depth;
         });
 
-    // Select the front-most face
     if (!candidates.empty()) {
         auto& object = objects[candidates[0].objectIndex];
         scene.onChangeSelectedObjectIndex(candidates[0].objectIndex);
@@ -404,7 +391,6 @@ bool ZBuffer::isPointInTriangle(const sf::Vector2f& p, const sf::Vector2f& a,
     float beta = calculateBarycentric(p, b, c, a);
     float gamma = calculateBarycentric(p, c, a, b);
 
-    // Point is inside if all barycentric coordinates are positive
     return alpha >= 0.0f && beta >= 0.0f && gamma >= 0.0f;
 }
 

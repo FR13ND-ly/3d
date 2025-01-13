@@ -38,16 +38,13 @@ void ObjFile::write(const std::string& filename, const std::string& mtlFilename)
         throw std::runtime_error("Could not open OBJ file for writing: " + filename);
     }
 
-    // Write material library reference
     file << "mtllib " << mtlFilename << "\n";
 
-    // Write vertices
     for (const auto& vertex : vertices) {
         file << vertex << "\n";
     }
     file << "\n";
 
-    // Write faces with material references
     for (const auto& face : faces) {
         file << face << "\n";
     }

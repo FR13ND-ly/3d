@@ -23,7 +23,6 @@ Expandable::Expandable (
     headerText.setCharacterSize(static_cast<unsigned int>(size.y * 0.5f));
     headerText.setFillColor(textColor);
 
-    // Center the text
     sf::FloatRect textBounds = headerText.getLocalBounds();
     headerText.setOrigin(textBounds.width / 2, textBounds.height / 2);
     headerText.setPosition(
@@ -133,7 +132,6 @@ float Expandable::getHeight() const {
         return headerRect.getSize().y;
     }
 
-    // Calculate total height including header and content
     float totalHeight = headerRect.getSize().y;
     for (const auto& component : contentComponents) {
         totalHeight += component->getHeight();
@@ -146,21 +144,17 @@ sf::Vector2f Expandable::getPosition() const {
 }
 
 void Expandable::setPosition(const sf::Vector2f& position) {
-    // Store the original position difference
     sf::Vector2f originalPos = headerRect.getPosition();
     sf::Vector2f positionDelta = position - originalPos;
 
-    // Move header
     headerRect.setPosition(position);
 
-    // Adjust text position to remain centered
     sf::FloatRect textBounds = headerText.getLocalBounds();
     headerText.setPosition(
         position.x + headerRect.getSize().x / 2,
         position.y + headerRect.getSize().y / 2 - textBounds.height / 2
     );
 
-    // Move content components relative to the header
     if (isCurrentlyExpanded) {
         for (auto& component : contentComponents) {
             sf::Vector2f currentCompPos = component->getPosition();

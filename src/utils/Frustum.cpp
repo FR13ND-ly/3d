@@ -30,7 +30,6 @@ bool Frustum::isBoxInside(const Vector3& min, const Vector3& max) const {
 }
 
 void Frustum::extractPlanes(const Matrix4& combinedMatrix) {
-    // Define plane extraction using offsets
     static const std::array<std::pair<int, int>, 6> indices = {
         std::make_pair(0, 0), std::make_pair(0, 1), std::make_pair(1, 0),
         std::make_pair(1, 1), std::make_pair(2, 0), std::make_pair(2, 1)

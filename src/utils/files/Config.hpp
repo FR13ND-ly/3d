@@ -10,27 +10,25 @@
 
 class Config {
 public:
-    static Config& getInstance(); // Singleton getter
+    static Config& getInstance();
 
     Config(const Config&) = delete;
     Config& operator=(const Config&) = delete;
 
-    // Getter methods
     std::string getProjectsPath() const;
     bool getInertia() const;
     float getSensitivity() const;
     std::string getFormattedSensitivity() const;
     std::string getLanguage() const;
 
-    // Update methods
     void updateProjectsPath(const std::string& newPath);
     void updateInertia(bool newInertia);
     void updateSensitivity(float newSensitivity);
     void updateLanguage(const std::string& newLanguage);
 
 private:
-    Config();  // Constructor
-    ~Config(); // Destructor
+    Config();
+    ~Config();
 
     void updateConfigFile();
     void createDefaultConfig(const std::string& filename);
@@ -41,4 +39,4 @@ private:
     std::string language;
 };
 
-#endif // CONFIG_HPP
+#endif

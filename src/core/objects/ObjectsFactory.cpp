@@ -37,12 +37,11 @@ namespace {
 
         std::vector<Vector3> worldVertices(vertices.size());
         for (size_t i = 0; i < vertices.size(); ++i) {
-            worldVertices[i] = modelMatrix * vertices[i]; // Apply transformation
+            worldVertices[i] = modelMatrix * vertices[i];
         }
 
-        // Create triangles from world-space vertices
         for (const auto& face : faces) {
-            if (face.size() >= 7) { // Ensure face has enough data
+            if (face.size() >= 7) {
                 triangles.push_back({
                     worldVertices[face[0]],
                     worldVertices[face[1]],
@@ -147,8 +146,7 @@ CustomShape ObjectsFactory::createCylinder(float radius, int segments) {
     std::vector<Vector3> vertices;
     std::vector<std::array<int, 7>> faces;
 
-    // Generate vertices for bottom and top layers
-    for (int i = 0; i <= 1; ++i) { // Two layers: bottom and top
+    for (int i = 0; i <= 1; ++i) {
         float z = i == 0 ? -radius : radius;
         for (int j = 0; j < segments; ++j) {
             float angle = 2 * M_PI * j / segments;
@@ -176,12 +174,12 @@ CustomShape ObjectsFactory::createCylinder(float radius, int segments) {
 
     int centerBottom = vertices.size();
     int centerTop = vertices.size() + 1;
-    vertices.push_back({0, 0, -radius}); // Bottom center
-    vertices.push_back({0, 0, radius});  // Top center
+    vertices.push_back({0, 0, -radius});
+    vertices.push_back({0, 0, radius});
     for (int i = 0; i < segments; ++i) {
         int next = (i + 1) % segments;
-        faces.push_back({centerBottom, bottomStart + i, bottomStart + next, 100, 100, 100, 255}); // Dark grey
-        faces.push_back({centerTop, topStart + i, topStart + next, 200, 200, 200, 255});         // Light grey
+        faces.push_back({centerBottom, bottomStart + i, bottomStart + next, 100, 100, 100, 255});
+        faces.push_back({centerTop, topStart + i, topStart + next, 200, 200, 200, 255});
     }
 
     return CustomShape(vertices, faces);
@@ -234,23 +232,23 @@ CustomShape ObjectsFactory::createCube(float size) {
     };
 
     std::vector<std::array<int, 7>> faces = {
-        {0, 1, 2, 128, 128, 128, 255}, // Grey
-        {0, 2, 3, 128, 128, 128, 255}, // Grey
+        {0, 1, 2, 128, 128, 128, 255},
+        {0, 2, 3, 128, 128, 128, 255},
 
-        {4, 6, 5, 160, 160, 160, 255}, // Lighter grey
-        {4, 7, 6, 160, 160, 160, 255}, // Lighter grey
+        {4, 6, 5, 160, 160, 160, 255},
+        {4, 7, 6, 160, 160, 160, 255},
 
-        {1, 5, 2, 100, 100, 100, 255}, // Dark grey
-        {5, 6, 2, 100, 100, 100, 255}, // Dark grey
+        {1, 5, 2, 100, 100, 100, 255},
+        {5, 6, 2, 100, 100, 100, 255},
 
-        {0, 3, 4, 200, 200, 200, 255}, // Light grey
-        {3, 7, 4, 200, 200, 200, 255}, // Light grey
+        {0, 3, 4, 200, 200, 200, 255},
+        {3, 7, 4, 200, 200, 200, 255},
 
-        {0, 4, 1, 140, 140, 140, 255}, // Medium grey
-        {4, 5, 1, 140, 140, 140, 255}, // Medium grey
+        {0, 4, 1, 140, 140, 140, 255},
+        {4, 5, 1, 140, 140, 140, 255},
 
-        {3, 2, 7, 120, 120, 120, 255}, // Medium-dark grey
-        {2, 6, 7, 120, 120, 120, 255}  // Medium-dark grey
+        {3, 2, 7, 120, 120, 120, 255},
+        {2, 6, 7, 120, 120, 120, 255}
     };
     return CustomShape(vertices, faces);
 }
@@ -259,10 +257,9 @@ CustomShape ObjectsFactory::createSphere(float radius, int segments) {
     std::vector<Vector3> vertices;
     std::vector<std::array<int, 7>> faces;
 
-    // Generate vertices
     for (int i = 0; i <= segments; ++i) {
         float theta = M_PI * i / segments;
-        for (int j = 0; j <= segments; ++j) { // Note: Changed to <= segments to include the last vertex
+        for (int j = 0; j <= segments; ++j) {
             float phi = 2 * M_PI * j / segments;
             vertices.push_back({
                 static_cast<float>(radius * sin(theta) * cos(phi)),
@@ -272,23 +269,21 @@ CustomShape ObjectsFactory::createSphere(float radius, int segments) {
         }
     }
 
-    // Calculate faces
     for (int lat = 0; lat < segments; ++lat) {
         for (int lon = 0; lon < segments; ++lon) {
             int first = lat * (segments + 1) + lon;
             int second = first + segments + 1;
 
-            // Reverse the order of vertices for each face
             faces.push_back({
-                first + 1, second, first, // Reverse winding order
-                static_cast<int>(150 + 50 * (lon % 2)),  // Alternate between shades of grey
+                first + 1, second, first,
+                static_cast<int>(150 + 50 * (lon % 2)),
                 static_cast<int>(150 + 50 * (lon % 2)),
                 static_cast<int>(150 + 50 * (lon % 2)),
                 255
             });
             faces.push_back({
-                first + 1, second + 1, second, // Reverse winding order
-                static_cast<int>(130 + 70 * (lat % 2)),  // Alternate between shades of grey
+                first + 1, second + 1, second,
+                static_cast<int>(130 + 70 * (lat % 2)),
                 static_cast<int>(130 + 70 * (lat % 2)),
                 static_cast<int>(130 + 70 * (lat % 2)),
                 255
@@ -300,15 +295,13 @@ CustomShape ObjectsFactory::createSphere(float radius, int segments) {
 }
 
 CustomShape ObjectsFactory::createTriangle() {
-    // Predefined vertices for the triangle
     Vector3 v1(0.0f, 1.0f, 0.0f);
     Vector3 v2(-1.0f, -1.0f, 0.0f);
     Vector3 v3(1.0f, -1.0f, 0.0f);
 
-    // Faces definition with red color
     std::vector<Vector3> vertices = {v1, v2, v3};
     std::vector<std::array<int, 7>> faces = {
-        {0, 1, 2, 100, 100, 100, 255} // Red color
+        {0, 1, 2, 100, 100, 100, 255}
     };
 
     return CustomShape(vertices, faces);
@@ -316,7 +309,6 @@ CustomShape ObjectsFactory::createTriangle() {
 
 
 CustomShape ObjectsFactory::createTorus() {
-    // Default parameters for the torus
     float majorRadius = 1.0f;
     float minorRadius = 0.3f;
     int majorSegments = 16;
@@ -325,7 +317,6 @@ CustomShape ObjectsFactory::createTorus() {
     std::vector<Vector3> vertices;
     std::vector<std::array<int, 7>> faces;
 
-    // Generate vertices for the torus
     for (int i = 0; i < majorSegments; ++i) {
         for (int j = 0; j < minorSegments; ++j) {
             float theta = 2.0f * M_PI * i / majorSegments;
@@ -339,7 +330,6 @@ CustomShape ObjectsFactory::createTorus() {
         }
     }
 
-    // Generate faces for the torus
     for (int i = 0; i < majorSegments; ++i) {
         for (int j = 0; j < minorSegments; ++j) {
             int v0 = i * minorSegments + j;
@@ -347,16 +337,15 @@ CustomShape ObjectsFactory::createTorus() {
             int v2 = ((i + 1) % majorSegments) * minorSegments + j;
             int v3 = ((i + 1) % majorSegments) * minorSegments + (j + 1) % minorSegments;
 
-            // Generate a greyish pattern
-            int patternIndex = (i + j) % 4; // Cycles through 4 different greys
+            int patternIndex = (i + j) % 4;
             int grey;
             switch (patternIndex) {
-                case 0: grey = 100; break; // Dark grey
-                case 1: grey = 150; break; // Medium grey
-                case 2: grey = 200; break; // Light grey
-                case 3: grey = 255; break; // White
+                case 0: grey = 100; break;
+                case 1: grey = 150; break;
+                case 2: grey = 200; break;
+                case 3: grey = 255; break;
             }
-            int alpha = 255; // Full opacity
+            int alpha = 255;
 
             faces.push_back({v0, v1, v2, grey, grey, grey, alpha});
             faces.push_back({v2, v1, v3, grey, grey, grey, alpha});
@@ -365,9 +354,6 @@ CustomShape ObjectsFactory::createTorus() {
 
     return CustomShape(vertices, faces);
 }
-
-
-
 
 CustomShape ObjectsFactory::createCustomShape(const std::vector<Vector3>& vertices,
                                              const std::vector<std::array<int, 7>>& faces) {

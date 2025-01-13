@@ -40,4 +40,4 @@ public:
     static Vector4 quaternionConjugate(const Vector4& q);
 };
 
-#endif // VECTOR4_HPP
+#endif

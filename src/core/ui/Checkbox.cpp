@@ -66,6 +66,5 @@ sf::Vector2f CheckBox::getPosition() const {
 void CheckBox::setPosition(const sf::Vector2f &position) {
     box.setPosition(position);
 
-    // Reposition the check mark to stay centered inside the box
     check.setPosition(position.x + size * 0.2f, position.y + size * 0.2f);
 }
