@@ -454,7 +454,6 @@ void ObjectsMenu::updateObjectsPropertiesMenu() {
         }
     }
     else {
-        std::cout << scene.selectedObjects.size() << std::endl;
         if (scaleX->lastUpdatedValue != 0.0f) {
             scaleX->setValue(0);
         }
